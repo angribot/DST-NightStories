@@ -32,7 +32,6 @@ local postinit = {
 	"components/skilltreeupdater",
 	"components/spellcaster",
 	"components/trader",
-	"components/wagpunk_arena_manager",
 	-- prefabs
 	"prefabs/alterguardianhat",
 	"prefabs/antlion",

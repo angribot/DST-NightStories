@@ -191,13 +191,8 @@ AddRecipe("skilltree_respec_tool", { Ingredient("moonglass", 1), Ingredient("nig
 SortBefore("skilltree_respec_tool", "transmute_log")
 
 -- 月影 --
-AddRecipe(
-	"lunarshadow",
-	{ Ingredient("security_pulse_cage_full", 1), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1) },
-	TECH.WAGPUNK_WORKSTATION_TWO,
-	{ nounlock = true }
-)
-SortAfter("lunarshadow", "wagpunk_workstation_security_pulse_cage")
+AddRecipe("lunarshadow", {Ingredient("security_pulse_cage_full", 1), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1)}, TECH.LUNARFORGING_TWO, {nounlock=true, station_tag="lunar_forge"})
+SortAfter("lunarshadow", "houndstooth_blowpipe")
 
 -- 亮茄尖刺球棒 --
 -- AddRecipe("bat_lunarplant", {Ingredient("purebrilliance", 2), Ingredient("lunarplant_husk", 1), Ingredient("plantmeat", 2)}, TECH.LUNARFORGING_TWO, {nounlock=true, station_tag="lunar_forge"})
