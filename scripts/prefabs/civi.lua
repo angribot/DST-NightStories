@@ -64,7 +64,7 @@ local function on_level_change(inst)
 
 	inst.components.combat.damagemultiplier = (1 + inst.level * 0.25) -- max_level = 1.5
 	inst.components.sanity.night_drain_mult = (TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25)
-	inst.components.sanity.neg_aura_mult = (TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25)
+	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25, "civi")
 
 	if inst.components.eater ~= nil then
 		inst.components.eater:SetAbsorptionModifiers((1 - 0.25 * inst.level), (1 - 0.25 * inst.level), (1 - 0.25 * inst.level))

@@ -290,7 +290,7 @@ local master_postinit = function(inst)
 
 	inst.components.sanity.dapperness = TUNING.MIOTAN_SANITY_DAPPERNESS
 	inst.components.sanity.night_drain_mult = TUNING.MIOTAN_SANITY_NIGHT_MULT
-	inst.components.sanity.neg_aura_mult = TUNING.MIOTAN_SANITY_MULT
+	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.MIOTAN_SANITY_MULT, "miotan")
 
 	inst:ListenForEvent("sanitydelta", set_sanity_dapperness)
 	inst:ListenForEvent("isinsanitymodedirty", set_sanity_dapperness)

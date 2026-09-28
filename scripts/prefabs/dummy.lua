@@ -236,7 +236,7 @@ local master_postinit = function(inst)
 
 	inst.components.sanity.dapperness = TUNING.DAPPERNESS_MED
 	inst.components.sanity.night_drain_mult = TUNING.DUMMY_NIGHT_SANITY_MULT
-	inst.components.sanity.neg_aura_mult = TUNING.DUMMY_SANITY_MULT
+	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.DUMMY_SANITY_MULT, "dummy")
 	inst.components.sanity.redirect = redirect_to_health
 	inst.components.sanity.get_equippable_dappernessfn = get_equippable_dapperness
 
