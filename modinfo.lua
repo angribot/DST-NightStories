@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.58.6.3"
+version = "1.58.7"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 -- stylua: ignore
 changelog = zheng([[
-- 修复月影配方未出现的问题。
+- 修复精神光环计算，适配游戏更新。
 
 最近更新：
+- 修复月影配方未出现的问题。
 - 修复一处数据错误。
 - 【极地熊獾桶】永鲜。
 - 调整了【月影】的配方要求。
@@ -23,9 +24,10 @@ changelog = zheng([[
 - 移除了【暗影破碎枪】。
 - 新增【梦魇之力】。
 ]], [[
-- Fix issue that the recipe of Lunar Shadow disappears.
+- Fix sanity aura calculations and update game compatibility.
 
 Recent Changes:
+- Fix issue that the recipe of Lunar Shadow disappears.
 - Fix some data error
 - Polar Bearger Bin keeps freshness forerver.
 - Tweak requirement of the recipe of Lunar Shadow.
