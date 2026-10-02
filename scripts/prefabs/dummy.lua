@@ -244,10 +244,6 @@ local master_postinit = function(inst)
 
 	inst.components.combat.damagemultiplier = TUNING.DUMMY_DAMAGE_MULT
 
-	inst.spawnlandshadow_fn = function(inst)
-		return "terrorbeak"
-	end
-
 	if inst.components.eater then
 		inst.components.eater:SetAbsorptionModifiers(0.5, 1, 0) -- Health, Hunger, Sanity
 	end

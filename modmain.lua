@@ -59,7 +59,7 @@ local postinit = {
 	"widgets/statusdisplays",
 	"widgets/templates",
 	-- root
-	-- "only_dazui", -- Temp diabled.
+	"only_dazui",
 	"tools_mutable",
 }
 for i = 1, #postinit do
