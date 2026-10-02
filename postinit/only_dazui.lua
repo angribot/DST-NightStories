@@ -2,63 +2,51 @@ local UpvalueUtil = GlassicAPI.UpvalueUtil
 local AddComponentPostInit = AddComponentPostInit
 local AddPrefabPostInit = AddPrefabPostInit
 GLOBAL.setfenv(1, GLOBAL)
-AddComponentPostInit("shadowcreaturespawner", function(self, inst)
-	for _, fn in ipairs(inst.event_listeners["ms_playerjoined"][inst]) do
-		local path = "Start.UpdatePopulation.StartSpawn.UpdateSpawn.SpawnLandShadowCreature"
-		local SpawnLandShadowCreature = UpvalueUtil.GetUpvalue(fn, path)
-		if SpawnLandShadowCreature then
-			-- print("setting SpawnLandShadowCreature")
-			UpvalueUtil.SetUpvalue(fn, path, function(player, ...)
-				return SpawnPrefab(
-					player.spawnlandshadow_fn ~= nil and player.spawnlandshadow_fn(player, ...)
-						or player.components.sanity:GetPercent() < 0.1 and math.random() < TUNING.TERRORBEAK_SPAWN_CHANCE and "terrorbeak"
-						or "crawlinghorror"
-				)
-			end)
-			break
+
+local DUMMY_TAG = "ns_builder_dummy"
+local SPAWNER_RADIUS = 120
+local STATUE_RADIUS = 30
+
+AddComponentPostInit("shadowcreaturespawner", function(self)
+	local spawn_land = UpvalueUtil.GetUpvalue(self.SpawnShadowCreature, "SpawnLandShadowCreature")
+	assert(spawn_land, "Could not find SpawnLandShadowCreature")
+	UpvalueUtil.SetUpvalue(self.SpawnShadowCreature, "SpawnLandShadowCreature", function(player, ...)
+		if player:HasTag(DUMMY_TAG) then
+			return SpawnPrefab("terrorbeak")
 		end
-	end
+		return spawn_land(player, ...)
+	end)
 end)
 
-local function get_nearby_dummy(inst, disq)
-	if not inst or type(disq) ~= "number" then
-		return
-	end
-	for _, v in ipairs(AllPlayers) do
-		if inst:GetDistanceSqToInst(v) < (disq * disq) and v:HasTag("ns_builder_dummy") then
+local function has_nearby_dummy(inst, radius)
+	for _, player in ipairs(AllPlayers) do
+		if player:HasTag(DUMMY_TAG) and inst:GetDistanceSqToInst(player) < radius * radius then
 			return true
 		end
 	end
-	return
+	return false
 end
 
-local function check_dummy_spawn_beak(inst)
-	if get_nearby_dummy(inst, 120) then
-		return "nightmarebeak"
-	else
-		return "crawlingnightmare"
+AddComponentPostInit("childspawner", function(self)
+	local get_child_prefab = self.GetChildPrefab
+	function self:GetChildPrefab(...)
+		-- Choose before the rare-child roll, without changing the spawning lifecycle.
+		if self.childname == "crawlingnightmare" and has_nearby_dummy(self.inst, SPAWNER_RADIUS) then
+			return "ruinsnightmare"
+		end
+		return get_child_prefab(self, ...)
 	end
-end
+end)
 
-local ChildSpawner = require("components/childspawner")
-local do_spawn_child = ChildSpawner.DoSpawnChild
-function ChildSpawner:DoSpawnChild(target, prefab, ...)
-	if self.childname == "crawlingnightmare" then
-		return do_spawn_child(self, target, check_dummy_spawn_beak(self.inst), ...)
-	end
-	return do_spawn_child(self, target, prefab, ...)
-end
-
-local function on_work_finished(inst)
+local function on_work_finished(inst, worker)
 	inst.components.lootdropper:DropLoot(inst:GetPosition())
 
 	local fx = SpawnAt("collapse_small", inst)
 	fx:SetMaterial("rock")
 
-	if TheWorld.state.isnightmarewild and math.random() <= 0.3 then
-		-- Changed Part Start --
-		SpawnAt((get_nearby_dummy(inst, 30) or math.random() < 0.5) and "nightmarebeak" or "crawlingnightmare", inst)
-		-- Changed Part End --
+	-- Keep the upstream spawn chance and worker luck; only upgrade the species.
+	if TheWorld.state.isnightmarewild and TryLuckRoll(worker, TUNING.STATUERUINS_SPAWN_NIGHTMARE_CHANCE, LuckFormulas.StatueSpawnNightmare) then
+		SpawnAt("ruinsnightmare", inst)
 	end
 
 	inst:Remove()
@@ -75,7 +63,13 @@ local function statueruins_postinit(inst)
 		return
 	end
 	if inst.components.workable then
-		inst.components.workable:SetOnFinishCallback(on_work_finished)
+		local on_finish = inst.components.workable.onfinish
+		inst.components.workable:SetOnFinishCallback(function(inst, worker, ...)
+			if has_nearby_dummy(inst, STATUE_RADIUS) then
+				return on_work_finished(inst, worker)
+			end
+			return on_finish(inst, worker, ...)
+		end)
 	end
 end
 for _, prefab in ipairs(STATUERUINS) do
