@@ -6,37 +6,15 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.58.8"
+version = "1.59.0"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 -- stylua: ignore
 changelog = zheng([[
-- 恢复 Dummy 的梦魇强化：自身引发的陆地理智生物固定为恐怖尖喙，附近遗迹生成的梦魇固定为潜伏梦魇，保留原版生成时机。
-
-最近更新：
-- 修复精神光环计算，适配游戏更新。
-- 修复月影配方未出现的问题。
-- 修复一处数据错误。
-- 【极地熊獾桶】永鲜。
-- 调整了【月影】的配方要求。
-- 调整了入侵溯源表的动作。
-- 【注能光明图腾】也能作用于装备对精神的影响了。
-- 移除了【暗影破碎枪】。
-- 新增【梦魇之力】。
+- 【启迪之冠】隐藏彩蛋移除虚影生成
 ]], [[
-- Restore Dummy's nightmare upgrades: personal land sanity spawns become Terrorbeaks, and nearby ruins nightmare spawns become Lurking Nightmares, preserving upstream spawn timing.
-
-Recent Changes:
-- Fix sanity aura calculations and update game compatibility.
-- Fix issue that the recipe of Lunar Shadow disappears.
-- Fix some data error
-- Polar Bearger Bin keeps freshness forerver.
-- Tweak requirement of the recipe of Lunar Shadow.
-- Tweak action for hacking Backtrek Watch.
-- Infused Light Totem now buffs equipment dapperness.
-- Remove Nightmare Spear.
-- Add Power of Nightmare.
+- Enlightened Crown prevents new ambient Gestalts from spawning under certain conditions
 ]])
 description = zheng("版本: ", "Version: ")
 	.. version
