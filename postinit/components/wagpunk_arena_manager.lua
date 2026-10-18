@@ -2,7 +2,7 @@
 local AddComponentPostInit = AddComponentPostInit
 ---@diagnostic disable-next-line
 GLOBAL.setfenv(1, GLOBAL)
-AddComponentPostInit("components/wagpunk_arena_manager", function(self)
+AddComponentPostInit("wagpunk_arena_manager", function(self)
 	local add_wagboss_defeated_recipes = self.AddWagbossDefeatedRecipes
 	function self:AddWagbossDefeatedRecipes()
 		add_wagboss_defeated_recipes(self)
