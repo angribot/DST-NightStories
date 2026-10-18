@@ -55,6 +55,7 @@ local postinit = {
 	"prefabs/punchingbag",
 	"prefabs/raincoat",
 	"prefabs/sculptingtable",
+	"prefabs/shadow_container",
 	"prefabs/voidcloth_boomerang",
 	"prefabs/world",
 	-- widgets
