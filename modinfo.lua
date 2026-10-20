@@ -6,25 +6,27 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.60.1"
+version = "1.60.2"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 -- stylua: ignore
 changelog = zheng([[
-- 修复月影配方解锁，改为击败天体后裔后在概念制造器制作，材料不变
-- 月影配方排序调整至火花柜之后
+- 修复雨衣和月光玻璃斧重复触发装备皮肤事件的问题
+- 月光玻璃镐和月光玻璃锤卸下时补齐皮肤卸下事件
+- 简化配方过滤器配置，适配 Glassic API 的默认规则
 
 最近更新：
-- 暗影魔术箱共享空间内的书籍可像书架一样缓慢恢复耐久
-- 任一有效魔术箱、魔术帽或暗影切斯特附近有图书管理员时加速恢复，效果不叠加
+- 修复月影配方解锁，改为击败天体后裔后在概念制造器制作，材料不变
+- 月影配方排序调整至火花柜之后
 ]], [[
-- Fix Lunar Shadow's recipe unlock: craft it at the Notional Fabricator after defeating the Celestial Scion, with unchanged ingredients
-- Sort Lunar Shadow's recipe immediately after the Spark Ark
+- Fix duplicate equip-skin events for the raincoat and moon glass axe
+- Emit the unequip-skin event when the moon glass pickaxe or hammer is unequipped
+- Simplify recipe filter configuration to match Glassic API defaults
 
 Recent Changes:
-- Books in shared shadow storage slowly recover durability as on a bookshelf
-- A librarian near any eligible Magician's Chest, magician's top hat, or Shadow Chester speeds up recovery without stacking
+- Fix Lunar Shadow's recipe unlock: craft it at the Notional Fabricator after defeating the Celestial Scion, with unchanged ingredients
+- Sort Lunar Shadow's recipe immediately after the Spark Ark
 ]])
 description = zheng("版本: ", "Version: ")
 	.. version
