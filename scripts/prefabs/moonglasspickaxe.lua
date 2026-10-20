@@ -25,6 +25,9 @@ end
 local function onunequip(inst, owner)
 	owner.AnimState:Hide("ARM_carry")
 	owner.AnimState:Show("ARM_normal")
+	if inst:GetSkinBuild() ~= nil then
+		owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+	end
 end
 
 local function fn()

@@ -33,7 +33,6 @@ if not rawget(_G, "raincoat_clear_fn") then
 	raincoat_clear_fn = function(inst)
 		basic_clear_fn(inst, "torso_rain")
 	end
-	GlassicAPI.SetOnequipSkinItem("raincoat", { "swap_body", "swap_body", "torso_rain" })
 end
 
 -- Meat Rack --
@@ -98,7 +97,6 @@ if not rawget(_G, "moonglassaxe_clear_fn") then
 	moonglassaxe_clear_fn = function(inst)
 		basic_clear_fn(inst, "glassaxe")
 	end
-	GlassicAPI.SetOnequipSkinItem("moonglassaxe", { "swap_object", "swap_glassaxe", "swap_glassaxe" })
 end
 
 -- Moon Glass Hammer
