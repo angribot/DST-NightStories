@@ -23,18 +23,21 @@ AddPrefabPostInit("alterguardianhat", function(inst)
 	if inst.components.equippable then
 		local onequip = inst.components.equippable.onequipfn
 		local onunequip = inst.components.equippable.onunequipfn
+		local spawn_gestalt
 
 		inst.components.equippable:SetOnEquip(function(_inst, _owner)
 			onequip(_inst, _owner)
-			inst:RemoveEventCallback("onattackother", inst.alterguardian_spawngestalt_fn, _owner)
-			local prev_spawn_fn = inst.alterguardian_spawngestalt_fn
-
-			inst.alterguardian_spawngestalt_fn = function(__owner, __data)
-				if not (__owner.components.debuffable and __owner.components.debuffable:HasDebuff("buff_glash")) then
-					prev_spawn_fn(__owner, __data)
+			if spawn_gestalt == nil then
+				spawn_gestalt = inst.alterguardian_spawngestalt_fn
+				inst:RemoveEventCallback("onhitother", spawn_gestalt, _owner)
+				-- Vanilla reuses this callback on equip and removes it on unequip.
+				inst.alterguardian_spawngestalt_fn = function(__owner, __data)
+					if not (__owner.components.debuffable and __owner.components.debuffable:HasDebuff("buff_glash")) then
+						return spawn_gestalt(__owner, __data)
+					end
 				end
+				inst:ListenForEvent("onhitother", inst.alterguardian_spawngestalt_fn, _owner)
 			end
-			inst:ListenForEvent("onattackother", inst.alterguardian_spawngestalt_fn, _owner)
 			inst:ListenForEvent("sanitydelta", OnUpdateDapperness, _owner)
 		end)
 

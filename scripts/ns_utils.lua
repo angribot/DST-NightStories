@@ -101,10 +101,25 @@ local function do_glash_attack(attacker, target, glash_prefab, enhanced)
 	attacker.components.combat.damagemultiplier = damagemultiplier
 end
 
-local function launching_projectile(data)
-	return data.weapon ~= nil
-		and data.projectile == nil
-		and (data.weapon.components.projectile ~= nil or data.weapon.components.complexprojectile ~= nil or data.weapon.components.weapon:CanRangedAttack())
+local attack_source
+
+local function restore_attack_source(previous, ok, ...)
+	attack_source = previous
+	if not ok then
+		error((...), 0)
+	end
+	return ...
+end
+
+local function with_attack_source(source, fn, ...)
+	local previous = attack_source
+	attack_source = source
+	-- Restore the outer attack even when a nested attack fails.
+	return restore_attack_source(previous, pcall(fn, ...))
+end
+
+local function is_attack_source(attacker)
+	return attacker ~= nil and attack_source == attacker
 end
 
 return {
@@ -114,5 +129,6 @@ return {
 	OwnerTestFn = owner_testfn,
 	TargetTestFn = target_testfn,
 	DoGlashAttack = do_glash_attack,
-	LaunchingProjectile = launching_projectile,
+	WithAttackSource = with_attack_source,
+	IsAttackSource = is_attack_source,
 }

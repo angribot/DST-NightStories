@@ -10,7 +10,17 @@ local DISABLED_ENTITIES = {
 }
 
 local Combat = require("components/combat")
+local Utils = require("ns_utils")
 local do_attack = Combat.DoAttack
+local do_area_attack = Combat.DoAreaAttack
+
+local function do_attack_with_context(self, ...)
+	return Utils.WithAttackSource(self.inst, do_attack, self, ...)
+end
+
+function Combat:DoAreaAttack(...)
+	return Utils.WithAttackSource(self.inst, do_area_attack, self, ...)
+end
 
 local function ranged_weapon_testfn(weapon, projectile)
 	return weapon ~= nil and projectile == nil and (weapon.components.projectile ~= nil or weapon.components.complexprojectile ~= nil or weapon.components.weapon:CanRangedAttack())
@@ -25,11 +35,11 @@ local function do_attack_with_check(self, target, weapon, projectile, ...)
 		if projectile and weapon and weapon.components.finiteuses then
 			local prev = weapon.components.finiteuses.ignorecombatdurabilityloss
 			weapon.components.finiteuses.ignorecombatdurabilityloss = true
-			local result = do_attack(self, target, weapon, projectile, ...)
+			local result = do_attack_with_context(self, target, weapon, projectile, ...)
 			weapon.components.finiteuses.ignorecombatdurabilityloss = prev
 			return result
 		end
-		return do_attack(self, target, weapon, projectile, ...)
+		return do_attack_with_context(self, target, weapon, projectile, ...)
 	end
 end
 
@@ -38,7 +48,7 @@ function Combat:DoAttack(target, weapon, projectile, ...)
 		target = self.target
 	end
 
-	do_attack(self, target, weapon, projectile, ...)
+	do_attack_with_context(self, target, weapon, projectile, ...)
 
 	if weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
 		return

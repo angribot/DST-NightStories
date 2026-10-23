@@ -6,44 +6,40 @@ local Utils = require("ns_utils")
 
 local target_testfn = Utils.TargetTestFn
 local owner_testfn = Utils.OwnerTestFn
-local launching_projectile = Utils.LaunchingProjectile
 local do_glash_attack = Utils.DoGlashAttack
 
-local function base_onattackother(owner, data, glash_prefab, enhanced)
-	local target = data and data.target
-	local weapon = data and data.weapon
-	local projectile = data and data.projectile
-	if weapon and weapon:HasTag("glash") then
+local function base_onhitother(owner, data, glash_prefab, enhanced)
+	-- Reflected hits also set from_doattack, but are emitted by the defender.
+	if not (data and data.from_doattack) or data.redirected or not Utils.IsAttackSource(owner) then
 		return
-	elseif projectile and projectile:HasTag("glash") then
+	end
+	local target = data.target
+	local weapon = data.weapon
+	if weapon and weapon:HasTag("glash") then
 		return
 	end
 	if owner_testfn(owner) and target and target ~= owner and target_testfn(target) then
-		-- In combat, this is when we're just launching a projectile, so don't spawn yet
-		if launching_projectile(data) then
-			return
-		end
 		do_glash_attack(owner, target, glash_prefab, enhanced)
 	end
 end
 
-local function onattackother(owner, data)
-	base_onattackother(owner, data, "glash")
+local function onhitother(owner, data)
+	base_onhitother(owner, data, "glash")
 end
 
-local function onattackother_shadow(owner, data)
+local function onhitother_shadow(owner, data)
 	local buff = owner:GetDebuff("buff_shadowglash")
-	base_onattackother(owner, data, "shadowglash", buff ~= nil and buff.enhanced)
+	base_onhitother(owner, data, "shadowglash", buff ~= nil and buff.enhanced)
 end
 
 local function attack_attach(inst, target)
 	if target.components.combat then
-		inst:ListenForEvent("onattackother", onattackother, target)
+		inst:ListenForEvent("onhitother", onhitother, target)
 	end
 end
 
 local function attack_detach(inst, target)
-	inst:RemoveEventCallback("onattackother", onattackother, target)
+	inst:RemoveEventCallback("onhitother", onhitother, target)
 end
 
 local function extend_shadow(inst, target, data)
@@ -55,12 +51,12 @@ end
 local function attack_attach_shadow(inst, target, data)
 	extend_shadow(inst, target, data)
 	if target.components.combat then
-		inst:ListenForEvent("onattackother", onattackother_shadow, target)
+		inst:ListenForEvent("onhitother", onhitother_shadow, target)
 	end
 end
 
 local function attack_detach_shadow(inst, target)
-	inst:RemoveEventCallback("onattackother", onattackother_shadow, target)
+	inst:RemoveEventCallback("onhitother", onhitother_shadow, target)
 end
 
 -------------------------------------------------------------------------
