@@ -6,30 +6,24 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.60.3"
+version = "1.60.4"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 优化了所有动画材质
+- 适配新版战斗逻辑
+- 修复达米的暗影之力多次触发锁链传播的问题
 
 最近更新：
-- 修复雨衣和月光玻璃斧重复触发装备皮肤事件的问题
-- 月光玻璃镐和月光玻璃锤卸下时补齐皮肤卸下事件
-- 简化配方过滤器配置，适配 Glassic API 的默认规则
-- 修复月影配方解锁，改为击败天体后裔后在概念制造器制作，材料不变
-- 月影配方排序调整至火花柜之后
+- 优化了所有动画材质
 ]],
 	[[
-- Optimize all anim packs
+- Adapt to the updated combat mechanics
+- Fix repeated chain propagation from Dummy's Power of Nightmare
 
 Recent Changes:
-- Fix duplicate equip-skin events for the raincoat and moon glass axe
-- Emit the unequip-skin event when the moon glass pickaxe or hammer is unequipped
-- Simplify recipe filter configuration to match Glassic API defaults
-- Fix Lunar Shadow's recipe unlock: craft it at the Notional Fabricator after defeating the Celestial Scion, with unchanged ingredients
-- Sort Lunar Shadow's recipe immediately after the Spark Ark
+- Optimize all anim packs
 ]]
 )
 description = zheng("版本: ", "Version: ")
