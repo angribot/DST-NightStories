@@ -2,6 +2,7 @@ GLOBAL.setfenv(1, GLOBAL)
 
 local DISABLED_WEAPONS = {
 	glash = true,
+	shadowglash = true,
 	alterguardianhat = true,
 }
 

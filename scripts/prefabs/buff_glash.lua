@@ -4,9 +4,13 @@ local Utils = require("ns_utils")
 -------------------------- moonlight functions --------------------------
 -------------------------------------------------------------------------
 
-local target_testfn = Utils.TargetTestFn
+local TARGET_NOT_TAGS = { "balloon", "smashable", "deck_of_cards" }
 local owner_testfn = Utils.OwnerTestFn
 local do_glash_attack = Utils.DoGlashAttack
+
+local function target_testfn(target)
+	return Utils.TargetTestFn(target) and not target:HasAnyTag(TARGET_NOT_TAGS)
+end
 
 local function base_onhitother(owner, data, glash_prefab, enhanced)
 	-- Reflected hits also set from_doattack, but are emitted by the defender.
