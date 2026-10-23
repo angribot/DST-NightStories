@@ -40,7 +40,7 @@ local function OnHit(inst, attacker, target)
 				break
 			end
 			if ent ~= target and ent ~= attacker and CanSplash(inst, ent, attacker) then
-				-- Each direct hit independently uses the existing, non-recursive chain path.
+				-- Already-hit splash targets still propagate their chains to new targets.
 				combat:DoAttack(ent, weapon, inst)
 			end
 		end
@@ -70,6 +70,7 @@ local function ProjectileFn()
 	end
 
 	inst.persists = false
+	inst._ns_queen_torch_hits = {}
 	inst:AddComponent("projectile")
 	local projectile = inst.components.projectile
 	projectile:SetSpeed(50)

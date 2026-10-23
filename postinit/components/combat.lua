@@ -20,8 +20,18 @@ function Combat:GetAttacked(...)
 	return Utils.WithAttackSource(nil, get_attacked, self, ...)
 end
 
-local function do_attack_with_context(self, ...)
-	return Utils.WithAttackSource(self.inst, do_attack, self, ...)
+local function do_attack_with_context(self, target, weapon, projectile, ...)
+	local hit_targets = projectile and projectile._ns_queen_torch_hits
+	if hit_targets ~= nil and target ~= nil then
+		if hit_targets[target] then
+			return
+		end
+		if self:CanHitTarget(target, weapon) then
+			-- Claim before damage callbacks, which may trigger nested attacks.
+			hit_targets[target] = true
+		end
+	end
+	return Utils.WithAttackSource(self.inst, do_attack, self, target, weapon, projectile, ...)
 end
 
 function Combat:DoAreaAttack(...)
