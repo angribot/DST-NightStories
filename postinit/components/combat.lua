@@ -15,9 +15,17 @@ local Utils = require("ns_utils")
 local do_attack = Combat.DoAttack
 local do_area_attack = Combat.DoAreaAttack
 local get_attacked = Combat.GetAttacked
+local calc_reflected_damage = Combat.CalcReflectedDamage
 
 function Combat:GetAttacked(...)
 	return Utils.WithAttackSource(nil, get_attacked, self, ...)
+end
+
+function Combat:CalcReflectedDamage(target, damage, weapon, ...)
+	if weapon ~= nil and weapon.prefab == "queen_torch" then
+		return 0, nil
+	end
+	return calc_reflected_damage(self, target, damage, weapon, ...)
 end
 
 local function do_attack_with_context(self, ...)
@@ -56,7 +64,10 @@ function Combat:DoAttack(target, weapon, projectile, ...)
 
 	do_attack_with_context(self, target, weapon, projectile, ...)
 
-	if weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
+	-- Explicit torch launches must not launch additional shots through the chain.
+	if weapon ~= nil and weapon.prefab == "queen_torch" and projectile == nil then
+		return
+	elseif weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
 		return
 	elseif weapon and DISABLED_WEAPONS[weapon.prefab] then
 		return
