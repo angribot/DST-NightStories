@@ -14,6 +14,11 @@ local Combat = require("components/combat")
 local Utils = require("ns_utils")
 local do_attack = Combat.DoAttack
 local do_area_attack = Combat.DoAreaAttack
+local get_attacked = Combat.GetAttacked
+
+function Combat:GetAttacked(...)
+	return Utils.WithAttackSource(nil, get_attacked, self, ...)
+end
 
 local function do_attack_with_context(self, ...)
 	return Utils.WithAttackSource(self.inst, do_attack, self, ...)
