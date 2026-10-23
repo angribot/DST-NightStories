@@ -181,8 +181,16 @@ local function set_sanity_dapperness(inst)
 	end
 end
 
+local function has_queen_torch_equipped(inst)
+	local inventory = inst.components.inventory
+	local item = inventory and inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+	return item ~= nil and item.prefab == "queen_torch"
+end
+
 local function on_update(inst, dt)
-	inst.boost_time = inst.boost_time - dt
+	if not has_queen_torch_equipped(inst) then
+		inst.boost_time = inst.boost_time - dt
+	end
 	if inst.boost_time <= 0 then
 		inst.boost_time = 0
 		if inst.boosted_task then
@@ -212,7 +220,9 @@ local function on_update(inst, dt)
 end
 
 local function on_long_update(inst, dt)
-	inst.boost_time = math.max(0, inst.boost_time - dt)
+	if not has_queen_torch_equipped(inst) then
+		inst.boost_time = math.max(0, inst.boost_time - dt)
+	end
 end
 
 local function start_boost(inst, duration)
@@ -226,10 +236,23 @@ local function start_boost(inst, duration)
 	end
 end
 
+local function refresh_queen_torch_boost(inst)
+	if inst.boost_time <= 0 and not inst:HasTag("playerghost") and not inst.components.health:IsDead() and has_queen_torch_equipped(inst) then
+		start_boost(inst, 3 * FRAMES)
+	end
+end
+
+local function on_equip(inst, data)
+	if data and data.eslot == EQUIPSLOTS.HANDS then
+		refresh_queen_torch_boost(inst)
+	end
+end
+
 local function on_load(inst, data)
 	if data and data.boost_time then
 		start_boost(inst, data.boost_time)
 	end
+	refresh_queen_torch_boost(inst)
 	set_sanity_dapperness(inst)
 end
 
@@ -302,6 +325,7 @@ local master_postinit = function(inst)
 		inst.components.eater.spoiled_health = TUNING.MIOTAN_SPOILED_HEALTH_RATE
 	end
 
+	inst:ListenForEvent("equip", on_equip)
 	inst:ListenForEvent("ms_becameghost", on_becameghost)
 	inst.OnLongUpdate = on_long_update
 	inst.OnSave = on_save
