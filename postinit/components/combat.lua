@@ -20,8 +20,18 @@ function Combat:GetAttacked(...)
 	return Utils.WithAttackSource(nil, get_attacked, self, ...)
 end
 
-local function do_attack_with_context(self, ...)
-	return Utils.WithAttackSource(self.inst, do_attack, self, ...)
+local function do_attack_with_context(self, target, weapon, projectile, ...)
+	local hit_targets = projectile and projectile._ns_queen_torch_hits
+	if hit_targets ~= nil and target ~= nil then
+		if hit_targets[target] then
+			return
+		end
+		if self:CanHitTarget(target, weapon) then
+			-- Claim before damage callbacks, which may trigger nested attacks.
+			hit_targets[target] = true
+		end
+	end
+	return Utils.WithAttackSource(self.inst, do_attack, self, target, weapon, projectile, ...)
 end
 
 function Combat:DoAreaAttack(...)
@@ -56,7 +66,10 @@ function Combat:DoAttack(target, weapon, projectile, ...)
 
 	do_attack_with_context(self, target, weapon, projectile, ...)
 
-	if weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
+	-- Explicit torch launches must not launch additional shots through the chain.
+	if weapon ~= nil and weapon.prefab == "queen_torch" and projectile == nil then
+		return
+	elseif weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
 		return
 	elseif weapon and DISABLED_WEAPONS[weapon.prefab] then
 		return

@@ -28,6 +28,7 @@ PrefabFiles = {
 	-- "nightmare_spear",
 	"ns_skins",
 	"ns_spices",
+	"ns_queen_torch_projectile",
 	"portable_wardrobe",
 	"skilltree_respec_tool",
 }
