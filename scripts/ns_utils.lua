@@ -89,16 +89,47 @@ local function target_testfn(target)
 		and not target:HasTag("wall")
 end
 
-local function do_glash_attack(attacker, target, glash_prefab, enhanced)
+local function get_glash(attacker, glash_prefab, enhanced)
+	local cache
+	local key = enhanced == true and "enhanced" or "normal"
+	if glash_prefab == "shadowglash" then
+		local tick = GetTick()
+		cache = attacker._ns_shadowglash_cache
+		if cache == nil or cache.tick ~= tick then
+			cache = { tick = tick }
+			attacker._ns_shadowglash_cache = cache
+		end
+		local glash = cache[key]
+		if glash ~= nil and glash:IsValid() and not glash._ns_in_attack then
+			return glash
+		end
+	end
+
 	local glash = SpawnPrefab(glash_prefab)
 	if glash.SetEnhanced ~= nil then
 		glash:SetEnhanced(enhanced)
 	end
 	glash.entity:SetParent(attacker.entity)
-	local damagemultiplier = attacker.components.combat.damagemultiplier
-	attacker.components.combat.damagemultiplier = math.max(1, (damagemultiplier or 1))
-	attacker.components.combat:DoAttack(target, glash, glash)
-	attacker.components.combat.damagemultiplier = damagemultiplier
+	-- Keep the prefab's next-update removal. Never mutate an in-flight weapon's
+	-- enhancement, or share it between attackers or nested damage callbacks.
+	if cache ~= nil then
+		cache[key] = glash
+	end
+	return glash
+end
+
+local function do_glash_attack(attacker, target, glash_prefab, enhanced)
+	local glash = get_glash(attacker, glash_prefab, enhanced)
+	local combat = attacker.components.combat
+	local damagemultiplier = combat.damagemultiplier
+	combat.damagemultiplier = math.max(1, (damagemultiplier or 1))
+	glash._ns_in_attack = true
+	local ok, err = pcall(combat.DoAttack, combat, target, glash, glash)
+	glash._ns_in_attack = nil
+	combat.damagemultiplier = damagemultiplier
+	if not ok then
+		error(err, 0)
+	end
 end
 
 local attack_source

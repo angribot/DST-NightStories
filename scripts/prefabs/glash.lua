@@ -1,5 +1,11 @@
 local function setup_fx(attacker, target, is_shadow)
 	if is_shadow then
+		-- Only coalesce presentation; every hit still deals damage and refreshes its chain.
+		local tick = GetTick()
+		if target._ns_shadowglash_fx_tick == tick then
+			return
+		end
+		target._ns_shadowglash_fx_tick = tick
 		local spark = SpawnPrefab("hitsparks_fx")
 		spark:Setup(attacker, target, nil, { 1, 0, 0 })
 		spark.black:set(true)
