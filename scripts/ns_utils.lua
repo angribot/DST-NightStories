@@ -90,19 +90,21 @@ local function target_testfn(target)
 end
 
 local function get_glash(attacker, glash_prefab, enhanced)
-	local cache
+	local tick = GetTick()
+	local cache = attacker._ns_glash_cache
+	if cache == nil or cache.tick ~= tick then
+		cache = { tick = tick, weapons = {} }
+		attacker._ns_glash_cache = cache
+	end
+	local weapons = cache.weapons[glash_prefab]
+	if weapons == nil then
+		weapons = {}
+		cache.weapons[glash_prefab] = weapons
+	end
 	local key = enhanced == true and "enhanced" or "normal"
-	if glash_prefab == "shadowglash" then
-		local tick = GetTick()
-		cache = attacker._ns_shadowglash_cache
-		if cache == nil or cache.tick ~= tick then
-			cache = { tick = tick }
-			attacker._ns_shadowglash_cache = cache
-		end
-		local glash = cache[key]
-		if glash ~= nil and glash:IsValid() and not glash._ns_in_attack then
-			return glash
-		end
+	local cached = weapons[key]
+	if cached ~= nil and cached:IsValid() and not cached._ns_in_attack then
+		return cached
 	end
 
 	local glash = SpawnPrefab(glash_prefab)
@@ -112,9 +114,7 @@ local function get_glash(attacker, glash_prefab, enhanced)
 	glash.entity:SetParent(attacker.entity)
 	-- Keep the prefab's next-update removal. Never mutate an in-flight weapon's
 	-- enhancement, or share it between attackers or nested damage callbacks.
-	if cache ~= nil then
-		cache[key] = glash
-	end
+	weapons[key] = glash
 	return glash
 end
 
