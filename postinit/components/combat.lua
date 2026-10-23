@@ -15,17 +15,9 @@ local Utils = require("ns_utils")
 local do_attack = Combat.DoAttack
 local do_area_attack = Combat.DoAreaAttack
 local get_attacked = Combat.GetAttacked
-local calc_reflected_damage = Combat.CalcReflectedDamage
 
 function Combat:GetAttacked(...)
 	return Utils.WithAttackSource(nil, get_attacked, self, ...)
-end
-
-function Combat:CalcReflectedDamage(target, damage, weapon, ...)
-	if weapon ~= nil and weapon.prefab == "queen_torch" then
-		return 0, nil
-	end
-	return calc_reflected_damage(self, target, damage, weapon, ...)
 end
 
 local function do_attack_with_context(self, ...)
