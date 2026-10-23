@@ -9,8 +9,8 @@ local PUNCHINGBAGS = {
 }
 
 local NUM_DIGITS, MAX_NUM = 4, 9999
-local function do_digits(inst, number)
-	number = math.min(MAX_NUM, number or 0)
+local function do_digits(inst)
+	local number = math.min(MAX_NUM, inst._digits_num or 0)
 
 	for digit_index = NUM_DIGITS, 1, -1 do
 		local digit = number % 10
@@ -29,11 +29,9 @@ end
 local function pre_digits(inst, number)
 	inst._digits_num = inst._digits_num and (inst._digits_num + number) or number
 
-	if inst._digits_task ~= nil then
-		inst._digits_task:Cancel()
-		inst._digits_task = nil
+	if inst._digits_task == nil then
+		inst._digits_task = inst:DoTaskInTime(0, do_digits)
 	end
-	inst._digits_task = inst:DoTaskInTime(0, do_digits, inst._digits_num)
 end
 
 --------------------------------------------------------------------------------
