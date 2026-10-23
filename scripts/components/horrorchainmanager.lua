@@ -1,6 +1,5 @@
 local CHAIN_TAG = "horrorchain"
 local Utils = require("ns_utils")
-local ChainDamage = require("ns_horrorchain_damage")
 
 local HorrorChainManager = Class(function(self, inst)
 	self.inst = inst
@@ -104,64 +103,6 @@ function HorrorChainManager:GetNearbyMembers(member)
 		return TheSim:FindEntities(x, y, z, TUNING.HORRORCHAIN_DIST, { CHAIN_TAG })
 	end
 	return {}
-end
-
-function HorrorChainManager:QueueAttack(combat, target, weapon, projectile, stimuli, instancemult)
-	local entry = ChainDamage.Capture(combat, target, weapon, projectile, stimuli, instancemult)
-	if entry == nil then
-		return
-	end
-	if self.pending_damage == nil then
-		self.pending_damage = {}
-		self.pending_index = {}
-		self.pending_task = self.inst:DoTaskInTime(FRAMES, function()
-			self:FlushDamage()
-		end)
-	end
-
-	local index = self.pending_index
-	for _, key in ipairs({ GetTick(), entry.attacker, weapon or false, target, entry.stimuli or false }) do
-		if index[key] == nil then
-			index[key] = {}
-		end
-		index = index[key]
-	end
-	local previous = index[entry.ranged]
-	if previous then
-		previous.damage = previous.damage + entry.damage
-		if entry.spdamage then
-			previous.spdamage = previous.spdamage or {}
-			for kind, amount in pairs(entry.spdamage) do
-				previous.spdamage[kind] = (previous.spdamage[kind] or 0) + amount
-			end
-		end
-	else
-		index[entry.ranged] = entry
-		self.pending_damage[#self.pending_damage + 1] = entry
-	end
-end
-
-function HorrorChainManager:FlushDamage()
-	local pending = self.pending_damage
-	if self.pending_task then
-		self.pending_task:Cancel()
-	end
-	self.pending_task = nil
-	self.pending_damage = nil
-	self.pending_index = nil
-	-- Detach the batch before callbacks can enqueue new attacks.
-	for _, entry in ipairs(pending or {}) do
-		ChainDamage.Apply(entry)
-	end
-end
-
-function HorrorChainManager:OnRemoveFromEntity()
-	if self.pending_task then
-		self.pending_task:Cancel()
-	end
-	self.pending_task = nil
-	self.pending_damage = nil
-	self.pending_index = nil
 end
 
 return HorrorChainManager
