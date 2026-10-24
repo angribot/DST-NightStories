@@ -70,7 +70,7 @@ local function ProjectileFn()
 	end
 
 	inst.persists = false
-	inst._ns_queen_torch_hits = {}
+	inst._ns_attack_hits = {}
 	inst:AddComponent("projectile")
 	local projectile = inst.components.projectile
 	projectile:SetSpeed(50)
