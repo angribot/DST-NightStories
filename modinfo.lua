@@ -13,6 +13,7 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 澪的自动充能可以作用于冷却中的腐化国王魔杖
+- 修复人物动画包缺少部分脸部动画帧的问题
 
 最近更新：
 - 修复月之力与梦魇之力的附加攻击触发伏特羊电击反伤的问题
@@ -23,6 +24,7 @@ changelog = zheng(
 ]],
 	[[
 - Mio's automatic recharging now works on a corrupted King's Staff while it is on cooldown
+- Fix issue that anim packs miss some face frames
 
 Recent Changes:
 - Fixed moon and nightmare bonus attacks triggering Volt Goat electric retaliation
