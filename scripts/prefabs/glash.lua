@@ -46,8 +46,6 @@ local function common_fn()
 		return inst
 	end
 
-	inst:AddComponent("projectile")
-
 	inst:AddComponent("weapon")
 	inst.components.weapon:SetRange(TUNING.GLASH_HIT_RANGE)
 
