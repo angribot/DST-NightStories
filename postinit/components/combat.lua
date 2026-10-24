@@ -21,7 +21,8 @@ function Combat:GetAttacked(...)
 end
 
 local function do_attack_with_context(self, target, weapon, projectile, ...)
-	local hit_targets = projectile and projectile._ns_queen_torch_hits
+	-- Projectiles opt in by providing one shared hit set for their lifetime.
+	local hit_targets = projectile and projectile._ns_attack_hits
 	if hit_targets ~= nil and target ~= nil then
 		if hit_targets[target] then
 			return
@@ -38,8 +39,15 @@ function Combat:DoAreaAttack(...)
 	return Utils.WithAttackSource(self.inst, do_area_attack, self, ...)
 end
 
-local function ranged_weapon_testfn(weapon, projectile)
-	return weapon ~= nil and projectile == nil and (weapon.components.projectile ~= nil or weapon.components.complexprojectile ~= nil or weapon.components.weapon:CanRangedAttack())
+local function is_projectile_launch(weapon, projectile)
+	if weapon == nil or projectile ~= nil then
+		return false
+	end
+	local components = weapon.components
+	-- Match the native DoAttack launch branches, including melee projectiles.
+	return components.projectile ~= nil
+		or (components.complexprojectile ~= nil and not components.complexprojectile.ismeleeweapon)
+		or (components.weapon ~= nil and components.weapon:CanRangedAttack())
 end
 
 local function is_invalid_weapon(weapon)
@@ -64,12 +72,11 @@ function Combat:DoAttack(target, weapon, projectile, ...)
 		target = self.target
 	end
 
+	-- Resolve before native attacks can drop the weapon or change equipment.
+	local launching_projectile = is_projectile_launch(weapon or self:GetWeapon(), projectile)
 	do_attack_with_context(self, target, weapon, projectile, ...)
 
-	-- Explicit torch launches must not launch additional shots through the chain.
-	if weapon ~= nil and weapon.prefab == "queen_torch" and projectile == nil then
-		return
-	elseif weapon == nil and ranged_weapon_testfn(self:GetWeapon(), projectile) then
+	if launching_projectile then
 		return
 	elseif weapon and DISABLED_WEAPONS[weapon.prefab] then
 		return
