@@ -107,8 +107,37 @@ local function consume_item(inst, item, mult)
 	end
 end
 
+local function recharge_king_cane(inst)
+	local inventory = inst.components.inventory
+	local staff = inventory and inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+	if not staff or staff.prefab ~= "king_cane" or not staff.components.corruption or not staff.components.corruption:IsCorrupted() then
+		return false
+	end
+
+	local rechargeable = staff.components.rechargeable
+	local remaining = rechargeable and rechargeable:GetTimeToCharge() or 0
+	if remaining <= 0 then
+		return false
+	end
+
+	local fuel, fuelmult
+	if remaining > 20 then
+		fuel, fuelmult = check_fuel(inst, { only_horror = true })
+	end
+	if not fuel then
+		fuel, fuelmult = check_fuel(inst, {})
+	end
+	if not fuel then
+		return false
+	end
+
+	consume_item(inst, fuel)
+	rechargeable:SetPercent(rechargeable:GetPercent() + 10 * fuelmult / rechargeable:GetRechargeTime())
+	return true
+end
+
 local function auto_refuel(inst)
-	local is_fx_true = false
+	local is_fx_true = recharge_king_cane(inst)
 
 	local player_eslots = inst.components.inventory and inst.components.inventory.equipslots
 	local boat = inst.components.sailor and inst.components.sailor:GetBoat() -- Compatible for Island Adventures

@@ -6,24 +6,26 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.3"
+version = "1.61.4"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复月之力与梦魇之力的附加攻击触发伏特羊电击反伤的问题
+- 澪的自动充能可以作用于冷却中的腐化国王魔杖
 
 最近更新：
+- 修复月之力与梦魇之力的附加攻击触发伏特羊电击反伤的问题
 - 优化恐惧锁链的攻击联动
 - 月之力与梦魇之力的附加伤害不再被查理拦截或反弹
 - 女王火炬改为远程范围攻击
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- Fixed moon and nightmare bonus attacks triggering Volt Goat electric retaliation
+- Mio's automatic recharging now works on a corrupted King's Staff while it is on cooldown
 
 Recent Changes:
+- Fixed moon and nightmare bonus attacks triggering Volt Goat electric retaliation
 - Improved Horror Chain attack interactions
 - Bonus damage from moon and nightmare powers is no longer blocked or reflected by Charlie
 - The Queen's Torch now deals ranged area damage
