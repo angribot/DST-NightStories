@@ -6,23 +6,25 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.2"
+version = "1.61.3"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 优化恐惧锁链的攻击联动
+- 修复月之力与梦魇之力的附加攻击触发伏特羊电击反伤的问题
 
 最近更新：
+- 优化恐惧锁链的攻击联动
 - 月之力与梦魇之力的附加伤害不再被查理拦截或反弹
 - 女王火炬改为远程范围攻击
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- Improved Horror Chain attack interactions
+- Fixed moon and nightmare bonus attacks triggering Volt Goat electric retaliation
 
 Recent Changes:
+- Improved Horror Chain attack interactions
 - Bonus damage from moon and nightmare powers is no longer blocked or reflected by Charlie
 - The Queen's Torch now deals ranged area damage
 - Mio automatically gains and sustains her fuel buff while holding the Queen's Torch
