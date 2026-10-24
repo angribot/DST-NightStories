@@ -89,6 +89,11 @@ local function target_testfn(target)
 		and not target:HasTag("wall")
 end
 
+-- Targets whose IsRangedWeapon() checks should treat glash as melee.
+local GLASH_MELEE_TARGETS = {
+	charlie_boss = true,
+}
+
 local function get_glash(attacker, glash_prefab, enhanced)
 	local tick = GetTick()
 	local cache = attacker._ns_glash_cache
@@ -120,6 +125,9 @@ end
 
 local function do_glash_attack(attacker, target, glash_prefab, enhanced)
 	local glash = get_glash(attacker, glash_prefab, enhanced)
+	-- Glash is reused within a tick, so decide per hit instead of at spawn.
+	glash:AddOrRemoveTag("pseudorangedweapon", not GLASH_MELEE_TARGETS[target.prefab])
+
 	local combat = attacker.components.combat
 	local damagemultiplier = combat.damagemultiplier
 	combat.damagemultiplier = math.max(1, (damagemultiplier or 1))
