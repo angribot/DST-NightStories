@@ -76,6 +76,9 @@ local GEM_MAP = {
 	opalpreciousgem = "opal",
 }
 NS_ACTIONS.GEMTRADE.fn = function(act)
+	if act.target == nil or act.target:HasTag("nightpack_blighted") then
+		return false
+	end
 	local doer = act.doer
 	local target = act.target
 	if doer.components.inventory then
@@ -403,6 +406,7 @@ AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, acti
 	if
 		right
 		and target.prefab == "nightpack"
+		and not target:HasTag("nightpack_blighted")
 		and inst:HasTag("nightpackgem")
 		and not doer.replica.rider:IsRiding()
 		and not (target:HasTag("nofuelsocket") and (inst.prefab == "nightmarefuel" or inst.prefab == "horrorfuel"))

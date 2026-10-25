@@ -41,6 +41,7 @@ local strings = {
 		LIGHTAMULET = "Light Amulet",
 		DARKAMULET = "Dark Amulet",
 		NIGHTPACK = "Night Pack",
+		NIGHTPACK_BLIGHTED = "Blighted {backpack}",
 		NIGHTPACK_RED = "Red Night Pack",
 		NIGHTPACK_BLUE = "Blue Night Pack",
 		NIGHTPACK_PURPLE = "Purple Night Pack",

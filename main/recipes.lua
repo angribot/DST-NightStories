@@ -109,12 +109,13 @@ AddRecipe("civi_voidcloth", { Ingredient("lunarplant_husk", 1), Ingredient("horr
 SortAfter("civi_voidcloth", "civi_horrorfuel")
 
 -- 影背包 --
-AddRecipe(
-	"nightpack",
-	{ Ingredient("darkcrystal", 1), Ingredient("lightcrystal", 1), Ingredient("nightmarefuel", 5) },
-	CIVITECH_ONE,
-	{ nounlock = true, builder_tag = "ns_builder_civi" }
-)
+AddRecipe("nightpack", { Ingredient("darkcrystal", 1), Ingredient("lightcrystal", 1), Ingredient("nightmarefuel", 5) }, CIVITECH_ONE, {
+	nounlock = true,
+	builder_tag = "ns_builder_civi",
+	no_deconstruction = function(inst)
+		return inst:HasTag("nightpack_blighted")
+	end,
+})
 SortAfter("nightpack", "civi_bluegem")
 
 -- 友爱戒指

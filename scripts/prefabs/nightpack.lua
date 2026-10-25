@@ -321,23 +321,37 @@ local function ApplyState(inst, override_state)
 		state_fn(inst, inst.components.inventoryitem.owner)
 	end
 
-	inst.drawnameoverride = rawget(_G, "EncodeStrCode") and EncodeStrCode({ content = state and "NAMES.NIGHTPACK_" .. image_state:upper() or "NAMES.NIGHTPACK" })
+	inst.drawnameoverride = not inst:HasTag("nightpack_blighted")
+			and rawget(_G, "EncodeStrCode")
+			and EncodeStrCode({ content = state and "NAMES.NIGHTPACK_" .. image_state:upper() or "NAMES.NIGHTPACK" })
+		or nil
+end
+
+local function BlightedName(inst, name)
+	return inst:HasTag("nightpack_blighted") and subfmt(STRINGS.NAMES.NIGHTPACK_BLIGHTED, { backpack = name }) or name
+end
+
+local function BaseDisplayName(inst)
+	local state = inst:GetState()
+	return state and STRINGS.NAMES["NIGHTPACK_" .. state:upper()] or STRINGS.NAMES.NIGHTPACK
 end
 
 local function DisplayNameFn(inst)
-	local state = inst:GetState()
-	return state and STRINGS.NAMES["NIGHTPACK_" .. state:upper()] or STRINGS.NAMES.NIGHTPACK
+	return BlightedName(inst, BaseDisplayName(inst))
 end
 
 local function ImmortalDisplayNameFn(inst)
 	inst:DoTaskInTime(FRAMES, function()
 		inst.displaynamefn = function()
-			return subfmt(STRINGS.NAMES["IMMORTAL_BACKPACK"], { backpack = DisplayNameFn(inst) })
+			return BlightedName(inst, subfmt(STRINGS.NAMES["IMMORTAL_BACKPACK"], { backpack = BaseDisplayName(inst) }))
 		end
 	end)
 end
 
-local function RenewState(inst, gemtype, isdummy)
+local function RenewState(inst, gemtype, isdummy, blighted)
+	if inst:HasTag("nightpack_blighted") and not blighted then
+		return
+	end
 	local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
 	-- healing --
 	RemoveListen(inst, owner)
@@ -367,6 +381,14 @@ local function RenewState(inst, gemtype, isdummy)
 		newpack.Transform:SetPosition(inst.Transform:GetWorldPosition())
 	end
 
+	if blighted then
+		-- Set the destination capacity before moving items, including green-to-green corruption.
+		newpack:OnGemTrade(gemtype, isdummy, true)
+		newpack:AddTag("nightpack_blighted")
+		newpack.components.timer:StopTimer("state_change")
+		newpack.drawnameoverride = nil
+	end
+
 	local slots = inst.components.container.slots
 	local need_compress = newpack.components.container:GetNumSlots() < inst.components.container:GetNumSlots()
 	for _, slot, item in sorted_pairs(slots) do
@@ -387,7 +409,7 @@ local function RenewState(inst, gemtype, isdummy)
 	end
 	inst:Remove()
 
-	if gemtype then
+	if gemtype and not blighted then
 		newpack:OnGemTrade(gemtype, isdummy, true)
 	end
 
@@ -395,9 +417,21 @@ local function RenewState(inst, gemtype, isdummy)
 		newpack:setImmortal()
 		ImmortalDisplayNameFn(newpack)
 	end
+	return newpack
+end
+
+local CORRUPTED_STATES = { red = true, blue = true, purple = true, yellow = true, orange = true, green = true }
+local function CorruptWithGem(inst, state)
+	if not CORRUPTED_STATES[state] or (inst:HasTag("nightpack_blighted") and inst:GetState() == state) then
+		return false
+	end
+	return inst:RenewState(state, false, true) ~= nil
 end
 
 local function OnChangeState(inst, state, duration)
+	if inst:HasTag("nightpack_blighted") then
+		return
+	end
 	inst:SetState(state)
 	inst.components.timer:StopTimer("state_change")
 	if duration then
@@ -420,6 +454,9 @@ local GEM_DURATIONS = {
 }
 
 local function OnGemTrade(inst, gemtype, isdummy, from_renew)
+	if inst:HasTag("nightpack_blighted") then
+		return
+	end
 	local owner = inst.components.inventoryitem.owner
 	if not from_renew then
 		if inst:GetState() ~= gemtype then
@@ -473,6 +510,9 @@ end
 
 local function OnPreLoad(inst, data)
 	if data and type(data._state) == "string" then -- for old buggy codes...
+		if data.blighted and CORRUPTED_STATES[data._state] then
+			inst:AddTag("nightpack_blighted")
+		end
 		inst:SetState(data._state)
 		inst:ApplyState()
 	end
@@ -480,6 +520,7 @@ end
 
 local function OnSave(inst, data)
 	data._state = inst:GetState()
+	data.blighted = inst:HasTag("nightpack_blighted") or nil
 end
 
 local function OnRemove(inst)
@@ -576,6 +617,7 @@ local function fn()
 
 	inst.SetState = SetState
 	inst.OnGemTrade = OnGemTrade
+	inst.CorruptWithGem = CorruptWithGem
 	inst.ApplyState = ApplyState
 	inst.RenewState = RenewState
 	inst.OnChangeState = OnChangeState
