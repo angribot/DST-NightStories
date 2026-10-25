@@ -1454,6 +1454,11 @@ msgctxt "STRINGS.NAMES.NIGHTPACK"
 msgid "Night Pack"
 msgstr "影背包"
 
+#. STRINGS.NAMES.NIGHTPACK_BLIGHTED
+msgctxt "STRINGS.NAMES.NIGHTPACK_BLIGHTED"
+msgid "Blighted {backpack}"
+msgstr "凋零{backpack}"
+
 #. STRINGS.NAMES.NIGHTPACK_BLUE
 msgctxt "STRINGS.NAMES.NIGHTPACK_BLUE"
 msgid "Blue Night Pack"

@@ -24,6 +24,7 @@ local postinit = {
 	"components/builder_replica",
 	"components/bundler",
 	"components/combat",
+	"components/corruption",
 	"components/dryingrack",
 	"components/equippable",
 	"components/forgerepair",
