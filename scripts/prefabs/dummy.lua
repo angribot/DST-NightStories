@@ -1,6 +1,5 @@
 local MakePlayerCharacter = require("prefabs/player_common")
 local DummyBadge = require("widgets/dummybadge")
-local Utils = require("ns_utils")
 local BUILDER_TAG = "ns_builder_dummy"
 
 local assets = {
@@ -107,15 +106,15 @@ local function do_hunger_rate_change(inst)
 
 	local percent = math.max(0, (inst.components.sanity.current - (inst.components.sanity.max * 0.15)) / (inst.components.sanity.max * 0.85))
 
-	if inst.components.sanity and not inst.components.sanity.inducedinsanity and inst.components.sanity.sane then
+	if inst.components.sanity and inst.components.sanity:IsSane() then
 		inst.components.hunger:SetRate((1 + percent) * TUNING.WILSON_HUNGER_RATE)
 		inst:AddTag("playermonster")
 		inst:AddTag("monster")
 		if not inst.components.sanityaura then
 			inst:AddComponent("sanityaura")
 			inst.components.sanityaura.aurafn = calc_sanity_aura
-			inst.components.sanityaura.aura = (TUNING.DUMMY_SANITY_AURA * (1 + percent) / 2)
 		end
+		inst.components.sanityaura.aura = (TUNING.DUMMY_SANITY_AURA * (1 + percent) / 2)
 	else
 		inst.components.hunger:SetRate(TUNING.WILSON_HUNGER_RATE)
 		if inst:HasTag("playermonster") then
@@ -130,7 +129,7 @@ local function do_hunger_rate_change(inst)
 	end
 end
 
-local function on_health_sanity_change(inst, data)
+local function on_health_sanity_change(inst)
 	if inst.components.sanity and inst.components.health then
 		local sanity = inst.components.sanity
 		sanity.current = inst.components.health.currenthealth
@@ -142,14 +141,8 @@ local function on_health_sanity_change(inst, data)
 		})
 		sanity._oldpercent = sanity:GetPercent()
 	end
-	do_hunger_rate_change(inst)
 	check_insanity(inst)
-
-	if data and data.cause == "fire" then
-		local amount = data.amount and math.abs(data.amount) or 0
-		Utils.TableInsertRate(inst.firedamage_history, amount)
-	end
-	inst._firedamage_rate:set(Utils.GetRateFromTable(inst.firedamage_history))
+	do_hunger_rate_change(inst)
 end
 
 local function redirect_to_health(inst, amount, overtime, ...)
@@ -206,7 +199,7 @@ local common_postinit = function(inst)
 	-- Minimap icon
 	inst.MiniMapEntity:SetIcon("dummy.tex")
 
-	inst._firedamage_rate = net_byte(inst.GUID, "_firedamage_rate", "_firedamage_rate")
+	inst._resource_rate = net_float(inst.GUID, "dummy.resource_rate")
 
 	if not (TheNet:GetServerGameMode() == "lavaarena" or TheNet:GetServerGameMode() == "quagmire" or TheNet:IsDedicated()) then
 		inst.CreateHealthBadge = DummyBadge
@@ -220,8 +213,6 @@ local master_postinit = function(inst)
 	inst.talker_path_override = "nightstories/characters/"
 
 	inst.customidleanim = "idle_wortox"
-
-	inst.firedamage_history = {}
 
 	inst:AddComponent("reader")
 	inst.components.reader:SetOnReadFn(OnReadFn)
@@ -256,6 +247,7 @@ local master_postinit = function(inst)
 
 	inst:ListenForEvent("respawnfromghost", on_respawn_from_ghost)
 	inst:ListenForEvent("healthdelta", on_health_sanity_change)
+	inst:AddComponent("dummyhealthrate")
 
 	inst.skeleton_prefab = nil
 	inst:ListenForEvent("death", on_death)

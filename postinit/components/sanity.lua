@@ -28,10 +28,8 @@ end
 
 local set_induced_insanity = Sanity.SetInducedInsanity
 function Sanity:SetInducedInsanity(src, val)
-	if self.inducedinsanity ~= val then
-		self.inst.replica.sanity:SetInducedInsanity(val)
-	end
-	return set_induced_insanity(self, src, val)
+	set_induced_insanity(self, src, val)
+	self.inst.replica.sanity:SetInducedInsanity(self.inducedinsanity == true)
 end
 
 -- Sanity Replica --

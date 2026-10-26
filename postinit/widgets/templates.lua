@@ -8,18 +8,16 @@ function TEMPLATES.MakeUIStatusBadge(_status_name, c, ...)
 	local status = MakeUIStatusBadge(_status_name, c, ...)
 	local ChangeCharacter = status.ChangeCharacter
 	status.ChangeCharacter = function(self, character, ...)
-		-- print("status.ChangeCharacter", _status_name, character)
+		self:Show()
+		local result = ChangeCharacter(self, character, ...)
 		if character == "dummy" then
 			if _status_name == "sanity" then
 				self:Hide()
-				return
 			elseif _status_name == "health" then
 				self.status_icon:SetTexture("images/hud/dummy_status_health.xml", "status_" .. _status_name .. ".tex")
-				return
 			end
 		end
-		self:Show()
-		return ChangeCharacter(self, character, ...)
+		return result
 	end
 	if c ~= nil then
 		status:ChangeCharacter(c)
