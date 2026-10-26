@@ -29,7 +29,6 @@ local postinit = {
 	"components/equippable",
 	"components/forgerepair",
 	-- "components/lptw",
-	"components/moisture",
 	"components/planarentity",
 	"components/sanity",
 	"components/skilltreeupdater",
