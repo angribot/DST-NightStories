@@ -247,7 +247,10 @@ local master_postinit = function(inst)
 
 	inst:ListenForEvent("respawnfromghost", on_respawn_from_ghost)
 	inst:ListenForEvent("healthdelta", on_health_sanity_change)
-	inst:AddComponent("dummyhealthrate")
+	local gamemode = TheNet:GetServerGameMode()
+	if gamemode ~= "lavaarena" and gamemode ~= "quagmire" then
+		inst:AddComponent("dummyhealthrate")
+	end
 
 	inst.skeleton_prefab = nil
 	inst:ListenForEvent("death", on_death)
