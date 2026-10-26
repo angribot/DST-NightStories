@@ -135,13 +135,17 @@ local DummyBadge = Class(Badge, function(self, owner)
 		end
 	end, owner)
 
-	self.inst:ListenForEvent("dummyhealthpulseup", function()
+	self.inst:ListenForEvent("dummyhealthpulseup", function(_, data)
 		self:PulseGreen()
-		TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
+		if not data.silent then
+			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
+		end
 	end, owner)
-	self.inst:ListenForEvent("dummyhealthpulsedown", function()
+	self.inst:ListenForEvent("dummyhealthpulsedown", function(_, data)
 		self:PulseRed()
-		TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+		if not data.silent then
+			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+		end
 	end, owner)
 
 	self:StartUpdating()

@@ -53,6 +53,7 @@ local postinit = {
 	"prefabs/nightsword",
 	"prefabs/orangestaff",
 	"prefabs/pigking",
+	"prefabs/player_classified",
 	"prefabs/pocketwatch_recall",
 	"prefabs/punchingbag",
 	"prefabs/queen_torch",

@@ -1,3 +1,5 @@
+local Feedback = require("dummyhealthfeedback")
+
 local UPDATE_PERIOD = 0.25
 local SAMPLE_WINDOW = 1
 
@@ -30,11 +32,9 @@ local function FinishFireCapture(self, previous, ok, ...)
 	return ...
 end
 
-local function PushHealthPulse(inst, up)
-	local event = up and inst._healthpulseup or inst._healthpulsedown
-	event:push()
-	if not TheNet:IsDedicated() then
-		inst:PushEvent(up and "dummyhealthpulseup" or "dummyhealthpulsedown")
+local function OnForceHealthPulse(inst, data)
+	if data.up or data.down then
+		Feedback.Push(inst, data.up == true, false)
 	end
 end
 
@@ -45,13 +45,14 @@ local function OnHealthDelta(inst, data)
 	end
 	local health = inst.components.health
 	local lunarburn = data.afflicter ~= nil and health.lunarburns ~= nil and health.lunarburns[data.afflicter] ~= nil
-	-- Classify feedback before the death check so lethal hits can still pulse.
-	-- Acid rain can tick before its task has been discovered by the observer.
-	if self.capture == nil and not data.overtime and data.cause ~= "acidrain" and not lunarburn then
+	-- Rate capture describes scheduling, not feedback intent. Preserve the
+	-- source's overtime contract except for natural sanity drift.
+	local sanitydrift = data.cause == "lose_sanity" and data.overtime
+	if not sanitydrift then
 		if data.newpercent > data.oldpercent then
-			PushHealthPulse(inst, true)
-		elseif data.newpercent < data.oldpercent then
-			PushHealthPulse(inst, false)
+			Feedback.Push(inst, true, data.overtime == true)
+		elseif data.newpercent < data.oldpercent and not data.overtime then
+			Feedback.Push(inst, false, false)
 		end
 	end
 	if health:IsDead() then
@@ -61,7 +62,7 @@ local function OnHealthDelta(inst, data)
 		self.capture.amount = self.capture.amount + data.amount
 	elseif (self.capture ~= nil and self.capture.kind == "fire") or (data.overtime and data.cause ~= "lose_sanity") or lunarburn then
 		-- Fire and externally scheduled effects use a one-second window of
-		-- actual, post-modifier deltas instead of a local task's period.
+		-- post-modifier amounts before health clamping, not realized gains.
 		self.samples[#self.samples + 1] = { time = GetTime(), amount = data.amount }
 	end
 end
@@ -92,6 +93,7 @@ local DummyHealthRate = Class(function(self, inst)
 	self.methods[#self.methods + 1] = { object = health, name = "DoFireDamage", original = do_fire_damage, wrapper = wrapper }
 
 	inst:ListenForEvent("healthdelta", OnHealthDelta)
+	inst:ListenForEvent("forcehealthpulse", OnForceHealthPulse)
 	self:ObserveTasks()
 	inst:StartUpdatingComponent(self)
 end)
@@ -181,6 +183,7 @@ end
 function DummyHealthRate:OnRemoveFromEntity()
 	self.inst:StopUpdatingComponent(self)
 	self.inst:RemoveEventCallback("healthdelta", OnHealthDelta)
+	self.inst:RemoveEventCallback("forcehealthpulse", OnForceHealthPulse)
 	for _, method in ipairs(self.methods) do
 		if method.object[method.name] == method.wrapper then
 			method.object[method.name] = method.original
