@@ -135,8 +135,22 @@ local DummyBadge = Class(Badge, function(self, owner)
 		end
 	end, owner)
 
+	self.inst:ListenForEvent("dummyhealthpulseup", function()
+		self:PulseGreen()
+		TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
+	end, owner)
+	self.inst:ListenForEvent("dummyhealthpulsedown", function()
+		self:PulseRed()
+		TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+	end, owner)
+
 	self:StartUpdating()
 end)
+
+-- StatusDisplays updates values and warnings before calling HealthDelta.
+-- Only server-classified events may pulse; ignore the legacy pulse stream.
+function DummyBadge:HealthDelta() end
+function DummyBadge:ForceHealthPulse() end
 
 function DummyBadge:SetBuildForSymbol(build, symbol)
 	self.OVERRIDE_SYMBOL_BUILD[symbol] = build

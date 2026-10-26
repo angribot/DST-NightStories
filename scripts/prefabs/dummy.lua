@@ -200,6 +200,8 @@ local common_postinit = function(inst)
 	inst.MiniMapEntity:SetIcon("dummy.tex")
 
 	inst._resource_rate = net_float(inst.GUID, "dummy.resource_rate")
+	inst._healthpulseup = net_event(inst.GUID, "dummyhealthpulseup")
+	inst._healthpulsedown = net_event(inst.GUID, "dummyhealthpulsedown")
 
 	if not (TheNet:GetServerGameMode() == "lavaarena" or TheNet:GetServerGameMode() == "quagmire" or TheNet:IsDedicated()) then
 		inst.CreateHealthBadge = DummyBadge

@@ -30,18 +30,36 @@ local function FinishFireCapture(self, previous, ok, ...)
 	return ...
 end
 
+local function PushHealthPulse(inst, up)
+	local event = up and inst._healthpulseup or inst._healthpulsedown
+	event:push()
+	if not TheNet:IsDedicated() then
+		inst:PushEvent(up and "dummyhealthpulseup" or "dummyhealthpulsedown")
+	end
+end
+
 local function OnHealthDelta(inst, data)
 	local self = inst.components.dummyhealthrate
-	if data.amount == 0 or inst:HasTag("playerghost") or inst.components.health:IsDead() then
+	if data.amount == 0 or inst:HasTag("playerghost") then
+		return
+	end
+	local health = inst.components.health
+	local lunarburn = data.afflicter ~= nil and health.lunarburns ~= nil and health.lunarburns[data.afflicter] ~= nil
+	-- Classify feedback before the death check so lethal hits can still pulse.
+	-- Acid rain can tick before its task has been discovered by the observer.
+	if self.capture == nil and not data.overtime and data.cause ~= "acidrain" and not lunarburn then
+		if data.newpercent > data.oldpercent then
+			PushHealthPulse(inst, true)
+		elseif data.newpercent < data.oldpercent then
+			PushHealthPulse(inst, false)
+		end
+	end
+	if health:IsDead() then
 		return
 	end
 	if self.capture ~= nil and self.capture.kind == "periodic" then
 		self.capture.amount = self.capture.amount + data.amount
-	elseif
-		(self.capture ~= nil and self.capture.kind == "fire")
-		or (data.overtime and data.cause ~= "lose_sanity")
-		or (data.afflicter ~= nil and inst.components.health.lunarburns ~= nil and inst.components.health.lunarburns[data.afflicter] ~= nil)
-	then
+	elseif (self.capture ~= nil and self.capture.kind == "fire") or (data.overtime and data.cause ~= "lose_sanity") or lunarburn then
 		-- Fire and externally scheduled effects use a one-second window of
 		-- actual, post-modifier deltas instead of a local task's period.
 		self.samples[#self.samples + 1] = { time = GetTime(), amount = data.amount }
