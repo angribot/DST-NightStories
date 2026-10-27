@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.8"
+version = "1.61.9"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 同步版本760178的猪王交易逻辑
+- 友谊戒指现在支持物品随从、大伯尼、玩家建造的戍卫塔和友方螨地爬
 
 最近更新：
+- 同步版本760178的猪王交易逻辑
 - 修复达米的精神/血量控件的一些问题
 - 月之力与梦魇之力的附加攻击不再触发启迪之冠召唤小月灵
 - 国王魔杖可以腐化影背包
@@ -27,9 +28,10 @@ changelog = zheng(
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- Sync Pig King trading logic from game ver 760178
+- The Ring of Friendship now supports item-linked followers, Big Bernie, player-built Guard Towers, and friendly Terramites
 
 Recent Changes:
+- Sync Pig King trading logic from game ver 760178
 - Fix some issue with Dummy's Health-sanity badge
 - Bonus attacks from moon and nightmare powers no longer trigger Gestalt summons from the Enlightened Crown
 - The King's Staff can corrupt Night Packs
