@@ -51,7 +51,6 @@ local postinit = {
 	"prefabs/nightmarecreatures",
 	"prefabs/nightmarefuel",
 	"prefabs/nightsword",
-	"prefabs/orangestaff",
 	"prefabs/pigking",
 	"prefabs/player_classified",
 	"prefabs/pocketwatch_recall",
@@ -60,6 +59,7 @@ local postinit = {
 	"prefabs/raincoat",
 	"prefabs/sculptingtable",
 	"prefabs/shadow_container",
+	"prefabs/staff_common",
 	"prefabs/voidcloth_boomerang",
 	"prefabs/world",
 	-- widgets
