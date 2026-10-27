@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.7"
+version = "1.61.8"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复达米的精神/血量控件的一些问题
+- 同步版本760178的猪王交易逻辑
 
 最近更新：
+- 修复达米的精神/血量控件的一些问题
 - 月之力与梦魇之力的附加攻击不再触发启迪之冠召唤小月灵
 - 国王魔杖可以腐化影背包
 - 澪的自动充能可以作用于冷却中的腐化国王魔杖
@@ -26,9 +27,10 @@ changelog = zheng(
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- Fix some issue with Dummy's Health-sanity badge
+- Sync Pig King trading logic from game ver 760178
 
 Recent Changes:
+- Fix some issue with Dummy's Health-sanity badge
 - Bonus attacks from moon and nightmare powers no longer trigger Gestalt summons from the Enlightened Crown
 - The King's Staff can corrupt Night Packs
 - Mio's automatic recharging now works on a corrupted King's Staff while it is on cooldown
