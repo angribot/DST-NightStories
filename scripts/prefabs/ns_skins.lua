@@ -563,4 +563,27 @@ table.insert(
 	})
 )
 
+-- Recruited merms
+for _, data in ipairs({
+	{ prefab = "merm", build = "merm_bluefish" },
+	{ prefab = "merm_lunar", build = "merm_lunar_bluefish" },
+	{ prefab = "merm_shadow", build = "merm_shadow_bluefish" },
+}) do
+	table.insert(
+		prefabs,
+		CreatePrefabSkin(data.prefab .. "_bluefish", {
+			base_prefab = data.prefab,
+			type = "item",
+			rarity = "Glassic",
+			assets = {
+				Asset("DYNAMIC_ANIM", "anim/dynamic/" .. data.build .. ".zip"),
+				Asset("PKGREF", "anim/dynamic/" .. data.build .. ".dyn"),
+			},
+			build_name_override = data.build,
+			init_fn = ns_merm_bluefish_init_fn,
+			skin_tags = { "MERM", "GLASSIC" },
+		})
+	)
+end
+
 return unpack(prefabs)

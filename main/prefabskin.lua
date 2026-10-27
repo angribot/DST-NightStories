@@ -239,6 +239,36 @@ end
 
 ------------------------------------------------------------------------------
 
+-- Whale-maid merms use the same registered-skin pipeline as other mod skins.
+function ns_merm_bluefish_init_fn(inst)
+	if not TheWorld.ismastersim then
+		return
+	end
+	GlassicAPI.BasicInitFn(inst)
+	if not inst._ns_bluefish_changing then
+		inst._ns_bluefish_selected = true
+	end
+	inst._ns_bluefish_active = true
+	require("nightstories/bluefish").Apply(inst, inst.prefab, true)
+end
+
+local function clear_bluefish(inst)
+	if not TheWorld.ismastersim then
+		return
+	end
+	local bluefish = require("nightstories/bluefish")
+	basic_clear_fn(inst, bluefish.defaults[inst.prefab])
+	bluefish.Apply(inst, inst.prefab, false)
+	if not inst._ns_bluefish_changing then
+		inst._ns_bluefish_selected = false
+	end
+	inst._ns_bluefish_active = false
+end
+
+merm_clear_fn = clear_bluefish
+merm_lunar_clear_fn = clear_bluefish
+merm_shadow_clear_fn = clear_bluefish
+
 GlassicAPI.SkinHandler.AddModSkins({
 	-- Civi
 	civi = {
@@ -272,6 +302,9 @@ GlassicAPI.SkinHandler.AddModSkins({
 		{ name = "eyebrellahat_peggy", exclusive_char = "dummy" },
 	},
 	-- Common
+	merm = { "merm_bluefish" },
+	merm_lunar = { "merm_lunar_bluefish" },
+	merm_shadow = { "merm_shadow_bluefish" },
 	dragonflychest = { "dragonflychest_gingerbread" },
 	-- meatrack = { "meatrack_hermit_red", "meatrack_hermit_white" },
 	hivehat = { "hivehat_pigcrown", "hivehat_pigcrown_willow" },

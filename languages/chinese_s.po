@@ -1821,6 +1821,36 @@ msgctxt "STRINGS.SKIN_NAMES.armorskeleton_none"
 msgid "Emperor's New Clothes"
 msgstr "皇帝的新衣"
 
+#. STRINGS.SKIN_NAMES.merm_bluefish
+msgctxt "STRINGS.SKIN_NAMES.merm_bluefish"
+msgid "Blue Whale Maid"
+msgstr "蓝色大肥鱼"
+
+#. STRINGS.SKIN_NAMES.merm_lunar_bluefish
+msgctxt "STRINGS.SKIN_NAMES.merm_lunar_bluefish"
+msgid "Moonlit Whale Maid"
+msgstr "月光大肥鱼"
+
+#. STRINGS.SKIN_NAMES.merm_shadow_bluefish
+msgctxt "STRINGS.SKIN_NAMES.merm_shadow_bluefish"
+msgid "Shadow Whale Maid"
+msgstr "暗影大肥鱼"
+
+#. STRINGS.SKIN_DESCRIPTIONS.merm_bluefish
+msgctxt "STRINGS.SKIN_DESCRIPTIONS.merm_bluefish"
+msgid "A bowl of rice, then back to work."
+msgstr "吃碗白饭，再去干活。"
+
+#. STRINGS.SKIN_DESCRIPTIONS.merm_lunar_bluefish
+msgctxt "STRINGS.SKIN_DESCRIPTIONS.merm_lunar_bluefish"
+msgid "Moon-glass ribbons for a midnight snack."
+msgstr "系上月亮碎片色的缎带，去吃夜宵。"
+
+#. STRINGS.SKIN_DESCRIPTIONS.merm_shadow_bluefish
+msgctxt "STRINGS.SKIN_DESCRIPTIONS.merm_shadow_bluefish"
+msgid "Even shadows need a lunch break."
+msgstr "暗影也需要午饭时间。"
+
 #. STRINGS.SKIN_NAMES.cane_glass
 msgctxt "STRINGS.SKIN_NAMES.cane_glass"
 msgid "Gane"

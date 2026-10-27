@@ -145,6 +145,9 @@ local strings = {
 		SPICE_MOONGLASS = "Grant the power of the moon.",
 	},
 	SKIN_NAMES = {
+		merm_bluefish = "Blue Whale Maid",
+		merm_lunar_bluefish = "Moonlit Whale Maid",
+		merm_shadow_bluefish = "Shadow Whale Maid",
 		civi_none = "Civi",
 		armorskeleton_none = "Emperor's New Clothes",
 		skeletonhat_glass = "Crystal Skull",
@@ -188,6 +191,9 @@ local strings = {
 		lunarplanthat_trans = "Phantomshade Helm",
 	},
 	SKIN_DESCRIPTIONS = {
+		merm_bluefish = "A bowl of rice, then back to work.",
+		merm_lunar_bluefish = "Moon-glass ribbons for a midnight snack.",
+		merm_shadow_bluefish = "Even shadows need a lunch break.",
 		-- characters
 		civi_none = "Civi can control magic, turning lights into darks, or turning darks into lights.",
 		miotan_none = "Mio cames from another world, where nightmare is everywhere.",
