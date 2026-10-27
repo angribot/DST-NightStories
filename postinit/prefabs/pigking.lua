@@ -21,7 +21,7 @@ local function launchitem(item, angle)
 end
 
 local function ontradeforitem(inst, item, giver, ...)
-	-- copied from pigking.lua (synced with game version 756039) --
+	-- copied from pigking.lua (synced with game version 760178) --
 	AwardPlayerAchievement("pigking_trader", giver)
 
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -74,13 +74,23 @@ local function ontradeforitem(inst, item, giver, ...)
 				end
 			end
 
+			local numbombs = math.floor(numcandies % 6)
+
 			for k = 1, numcandies do
 				local candy = SpawnPrefab("halloweencandy_" .. GetRandomItem(candytypes))
 				candy.Transform:SetPosition(x, y, z)
 				launchitem(candy, angle)
 			end
 
-			if TryLuckRoll(inst, TUNING.HALLOWEEN_PUMPKINCARVER_PIGKING_TRADE_CHANCE, LuckFormulas.LootDropperChance) then
+			if numbombs > 0 and TryLuckRoll(giver, TUNING.PUMPKIN_BOMB_PIGKING_TRADE_CHANCE, LuckFormulas.LootDropperChance) then
+				for k = 1, numbombs do
+					local bomb = SpawnPrefab("pumpkin_bomb")
+					bomb.Transform:SetPosition(x, y, z)
+					launchitem(bomb, angle)
+				end
+			end
+
+			if TryLuckRoll(giver, TUNING.HALLOWEEN_PUMPKINCARVER_PIGKING_TRADE_CHANCE, LuckFormulas.LootDropperChance) then
 				local pumpkincarver = SpawnPrefab("pumpkincarver" .. math.random(NUM_HALLOWEEN_PUMPKINCARVERS))
 				pumpkincarver.Transform:SetPosition(x, y, z)
 				launchitem(pumpkincarver, angle)
