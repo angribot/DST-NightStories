@@ -18,12 +18,30 @@ AddPrefabPostInit("reskin_tool", function(inst)
 	end)
 	local spell = spellcaster.spell
 	spellcaster:SetSpellFn(function(tool, target, pos, doer)
-		if Bluefish.IsSupported(target) then
-			if not Bluefish.CanSweep(doer, target) then
-				return
-			end
+		if not Bluefish.IsSupported(target) then
+			return spell(tool, target, pos, doer)
 		end
-		return spell(tool, target, pos, doer)
+		if not Bluefish.CanSweep(doer, target) then
+			return
+		end
+
+		-- Keep vanilla skin selection, caching and FX, but guard the task it
+		-- queues: the employer or tool owner can change before it executes.
+		local previous_task = rawget(tool, "DoTaskInTime")
+		local dotask = tool.DoTaskInTime
+		tool.DoTaskInTime = function(self, delay, fn, ...)
+			return dotask(self, delay, function(inst, ...)
+				if tool:IsValid() and tool.parent == doer and doer:IsValid() and Bluefish.CanSweep(doer, target) then
+					return fn(inst, ...)
+				end
+			end, ...)
+		end
+		local ok, result = pcall(spell, tool, target, pos, doer)
+		tool.DoTaskInTime = previous_task
+		if not ok then
+			error(result)
+		end
+		return result
 	end)
 end)
 

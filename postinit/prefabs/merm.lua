@@ -5,7 +5,7 @@ local Bluefish = require("nightstories/bluefish")
 
 local function refresh_skin(inst, showfx)
 	-- Keep the last visible outfit through death and corpse creation.
-	if inst.components.health:IsDead() or inst._ns_bluefish_changing then
+	if not inst:IsValid() or inst.components.health:IsDead() or inst._ns_bluefish_changing then
 		return
 	end
 	local follower = inst.components.follower
@@ -97,8 +97,20 @@ local function postinit(inst)
 		set_selected(inst, transfer.selected, false)
 	end
 	wrap_transfer(inst, "DoLunarMutation", "merm_lunar")
-	wrap_transfer(inst, "DoLunarRevert", "merm")
 	wrap_transfer(inst, "TestForShadowDeath", "merm_shadow")
+	if inst.prefab == "merm_lunar" then
+		-- Vanilla calls its local DoLunarRevert from this callback, before
+		-- leaderchanged, and removes the old entity synchronously.
+		local follower = inst.components.follower
+		wrap_transfer(follower, "OnChangedLeader", "merm")
+		local onchangedleader = follower.OnChangedLeader
+		follower.OnChangedLeader = function(self, new_leader, previous_leader)
+			if new_leader == nil then
+				refresh_skin(self, not self._ns_bluefish_loading)
+			end
+			return onchangedleader(self, new_leader, previous_leader)
+		end
+	end
 
 	local savecorpse = inst.SaveCorpseData
 	inst.SaveCorpseData = function(self, corpse, ...)
