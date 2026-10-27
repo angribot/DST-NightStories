@@ -171,9 +171,11 @@ local totemfn = {
 ---------------------------------------------------------------
 ------------------------ RING FUNCTION ------------------------
 ---------------------------------------------------------------
-local function get_aibo(player, tags)
+local AIBO_TAGS = { "eyeturret", "catapult", "bigbernie", "vault_pillar_guard", "wagdrone_rolling" }
+
+local function get_aibo(player)
 	local ppx, ppy, ppz = player.Transform:GetWorldPosition()
-	return TheSim:FindEntities(ppx, ppy, ppz, 30, { tags })
+	return TheSim:FindEntities(ppx, ppy, ppz, 30, nil, nil, AIBO_TAGS)
 end
 
 local function buff_friends(oneatenfn, food, player, buff_self)
@@ -182,15 +184,18 @@ local function buff_friends(oneatenfn, food, player, buff_self)
 		buff_entities[player] = true
 	end
 	local leader = player.components.leader
-	if leader and leader.numfollowers > 0 then
+	if leader then
 		for follower in pairs(leader.followers) do
 			buff_entities[follower] = true
 		end
+		for follower in pairs(leader.itemfollowers) do
+			buff_entities[follower] = true
+		end
 	end
-	local eyeturrets = get_aibo(player, "eyeturret")
-	local catapults = get_aibo(player, "catapult")
-	for _, ent in ipairs(ArrayUnion(eyeturrets, catapults)) do
-		buff_entities[ent] = true
+	for _, ent in ipairs(get_aibo(player)) do
+		if (not ent:HasTag("vault_pillar_guard") or ent:HasTag("player_aligned")) and (not ent:HasTag("wagdrone_rolling") or ent.components.inventoryitem ~= nil) then
+			buff_entities[ent] = true
+		end
 	end
 	for ent in pairs(buff_entities) do
 		oneatenfn(food, ent)
