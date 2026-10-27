@@ -1,4 +1,4 @@
-local Utils = require("ns_utils")
+local Utils = require("nightstories/utils")
 
 local assets = {
 	Asset("ANIM", "anim/lunarshadow.zip"),

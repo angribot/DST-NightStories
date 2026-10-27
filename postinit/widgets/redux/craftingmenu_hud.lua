@@ -1,7 +1,7 @@
 local AddClassPostConstruct = AddClassPostConstruct
 GLOBAL.setfenv(1, GLOBAL)
 
-local FuelRecipe = require("ns_shadowglash_recipe")
+local FuelRecipe = require("nightstories/shadowglash_recipe")
 
 AddClassPostConstruct("widgets/redux/craftingmenu_hud", function(self)
 	local rebuild_recipes = self.RebuildRecipes

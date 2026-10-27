@@ -1,5 +1,5 @@
 local CHAIN_TAG = "horrorchain"
-local Utils = require("ns_utils")
+local Utils = require("nightstories/utils")
 
 local HorrorChainManager = Class(function(self, inst)
 	self.inst = inst

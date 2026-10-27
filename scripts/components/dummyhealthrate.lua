@@ -1,4 +1,4 @@
-local Feedback = require("dummyhealthfeedback")
+local Feedback = require("nightstories/dummyhealthfeedback")
 
 local UPDATE_PERIOD = 0.25
 local SAMPLE_WINDOW = 1

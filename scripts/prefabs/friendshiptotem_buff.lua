@@ -1,4 +1,4 @@
-local Utils = require("ns_utils")
+local Utils = require("nightstories/utils")
 
 local TRAIL_FLAGS = { "shadowtrail" }
 local function totem_do_trail(target)

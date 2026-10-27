@@ -1,6 +1,6 @@
 GLOBAL.setfenv(1, GLOBAL)
 
-local FuelRecipe = require("ns_shadowglash_recipe")
+local FuelRecipe = require("nightstories/shadowglash_recipe")
 local Builder = require("components/builder")
 
 local has_ingredients = Builder.HasIngredients

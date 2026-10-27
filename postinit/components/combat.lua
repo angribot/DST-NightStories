@@ -11,7 +11,7 @@ local DISABLED_ENTITIES = {
 }
 
 local Combat = require("components/combat")
-local Utils = require("ns_utils")
+local Utils = require("nightstories/utils")
 local do_attack = Combat.DoAttack
 local do_area_attack = Combat.DoAreaAttack
 local get_attacked = Combat.GetAttacked
