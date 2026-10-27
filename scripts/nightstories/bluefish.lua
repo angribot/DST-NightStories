@@ -18,7 +18,17 @@ M.defaults = {
 	merm_shadow = "merm_shadow_build",
 }
 
-local symbols = { "pig_head", "pig_torso", "pig_arm", "pig_leg", "pig_ear", "pig_cheeks", "merm_mutation_parts" }
+local symbols = {
+	"pig_head",
+	"pig_torso",
+	"pig_arm",
+	"pig_leg",
+	"pig_ear",
+	"pig_cheeks",
+	"merm_mutation_parts",
+	"bluefish_tail",
+	"bluefish_hair",
+}
 
 function M.IsSupported(inst)
 	return inst ~= nil and M.builds[inst.prefab] ~= nil
@@ -43,6 +53,7 @@ function M.Apply(inst, prefab, active)
 	if build == nil then
 		return
 	end
+	inst.AnimState:SetBank(active and "merm_bluefish" or "pigman")
 	for _, symbol in ipairs(symbols) do
 		if active then
 			inst.AnimState:OverrideSymbol(symbol, build, symbol)
