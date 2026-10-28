@@ -46,6 +46,11 @@ local function pickup(staff, target, pos)
 		return
 	end
 
+	local sanity = caster.components.sanity
+	if sanity ~= nil and sanity:GetPercent() >= TUNING.BLACKHOLESTAFF_SANITY_THRESHOLD then
+		prange = prange * TUNING.BLACKHOLESTAFF_RANGE_MULT
+	end
+
 	local ba = caster:GetBufferedAction()
 	local ents = TheSim:FindEntities(px, py, pz, prange, PICKUP_MUST_TAGS, PICKUP_CANT_TAGS)
 	--for i=1, #ents do
