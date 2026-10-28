@@ -6,16 +6,17 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.10"
+version = "1.61.11"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复技能树重置后部分技能效果未正确清除的问题
-- 澪在增益状态下使用国王魔杖闪现不再消耗精神值
+- 使用者精神值不低于50%时，黑洞法杖的吸取范围翻倍
 
 最近更新：
+- 修复技能树重置后部分技能效果未正确清除的问题
+- 澪在增益状态下使用国王魔杖闪现不再消耗精神值
 - 友谊戒指现在支持物品随从、大伯尼、玩家建造的戍卫塔和友方螨地爬
 - 同步版本760178的猪王交易逻辑
 - 修复达米的精神/血量控件的一些问题
@@ -30,10 +31,11 @@ changelog = zheng(
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- Fixed some skill effects not being properly removed when resetting skill trees
-- Mio no longer spends sanity when blinking with the King's Staff while boosted
+- The Blackhole Staff's pickup range doubles while the user's sanity is at least 50%
 
 Recent Changes:
+- Fixed some skill effects not being properly removed when resetting skill trees
+- Mio no longer spends sanity when blinking with the King's Staff while boosted
 - The Ring of Friendship now supports item-linked followers, Big Bernie, player-built Guard Towers, and friendly Terramites
 - Sync Pig King trading logic from game ver 760178
 - Fix some issue with Dummy's Health-sanity badge
