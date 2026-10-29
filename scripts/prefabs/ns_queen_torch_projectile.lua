@@ -35,13 +35,16 @@ local function OnHit(inst, attacker, target)
 		local combat = attacker.components.combat
 		local ignorehitrange = combat.ignorehitrange
 		combat.ignorehitrange = true
-		for _, ent in ipairs(TheSim:FindEntities(pos.x, pos.y, pos.z, 2, MUST_TAGS, NO_TAGS)) do
+		for _, ent in ipairs(TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.QUEEN_TORCH_AOE_RADIUS + TUNING.QUEEN_TORCH_AOE_RANGE_PADDING, MUST_TAGS, NO_TAGS)) do
 			if not IsAlive(attacker) or not weapon:IsValid() or weapon.components.weapon == nil then
 				break
 			end
 			if ent ~= target and ent ~= attacker and CanSplash(inst, ent, attacker) then
-				-- Already-hit splash targets still propagate their chains to new targets.
-				combat:DoAttack(ent, weapon, inst)
+				local radius = TUNING.QUEEN_TORCH_AOE_RADIUS + ent:GetPhysicsRadius(0)
+				if ent:GetDistanceSqToPoint(pos.x, pos.y, pos.z) < radius * radius then
+					-- Already-hit splash targets still propagate their chains to new targets.
+					combat:DoAttack(ent, weapon, inst)
+				end
 			end
 		end
 		combat.ignorehitrange = ignorehitrange
