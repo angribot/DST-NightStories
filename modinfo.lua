@@ -6,16 +6,22 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.62.0"
+version = "1.62.1"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- 修复猪王万圣节交易的南瓜炸弹奖励数量，与游戏版本760944保持一致
+
+最近更新：
 - 达米新增配方：灵魂剥离 Ⅱ
 - 修复澪在燃料加速状态下使用懒人魔杖时未能消耗噩梦燃料来免除精神与耐久消耗的问题
 ]],
 	[[
+- Fixed Pig King's Halloween Pumpkin Bomb reward counts to match game version 760944
+
+Recent Changes:
 - Dummy has a new recipe: Soul Split Ⅱ
 - Fixed Mio's Lazy Explorer not consuming Nightmare Fuel to prevent sanity and durability loss while fuel-boosted
 ]]
