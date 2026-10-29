@@ -42,7 +42,6 @@ STRINGS.NAMES.CIVI_REDGEM = STRINGS.NAMES.REDGEM
 STRINGS.NAMES.CIVI_BLUEGEM = STRINGS.NAMES.BLUEGEM
 STRINGS.NAMES.CIVI_DARKCRYSTAL = STRINGS.NAMES.DARKCRYSTAL
 STRINGS.NAMES.CIVI_LIGHTCRYSTAL = STRINGS.NAMES.LIGHTCRYSTAL
-STRINGS.NAMES.DUMMY_NIGHTMAREFUEL = STRINGS.NAMES.NIGHTMAREFUEL
 
 --------------------
 ------- Civi -------
@@ -140,9 +139,23 @@ AddDeconstructRecipe("lightamulet", { Ingredient("thulecite", 2), Ingredient("li
 AddRecipe("dummy_nightmarefuel", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 20, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
 	builder_tag = "ns_builder_dummy",
 	product = "nightmarefuel",
+	nameoverride = "dummy_soulsplit1",
 	actionstr = "SOULSPLIT",
 	hidden = true,
 })
+
+AddRecipe("dummy_soulsplit2", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 60, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
+	builder_tag = "ns_builder_dummy",
+	no_builder_tag = "ns_soulsplit2_locked",
+	product = "horrorfuel",
+	actionstr = "SOULSPLIT",
+	hidden = true,
+	canbuild = function(recipe, builder)
+		return builder:HasTag("ns_builder_dummy") and TheWorld.components.ns_atriumgateprogress.repaired
+	end,
+})
+SortAfter("dummy_soulsplit2", "dummy_nightmarefuel")
+
 -- 梦魇之力 --
 AddRecipe("shadowglash_builder", { Ingredient("nightmarefuel", 1) }, TECH.NONE, { builder_tag = "ns_builder_dummy", no_deconstruction = true, sg_state = "domediumaction" })
 

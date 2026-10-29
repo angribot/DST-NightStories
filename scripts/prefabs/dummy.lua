@@ -190,8 +190,27 @@ local function on_debuff_added(inst, name, ...)
 	end
 end
 
+local function OnSoulSplit2UnlockedDirty(inst)
+	if inst._soulsplit2unlocked:value() then
+		inst:RemoveTag("ns_soulsplit2_locked")
+	else
+		inst:AddTag("ns_soulsplit2_locked")
+	end
+	inst:PushEvent("refreshcrafting")
+end
+
+local function UpdateSoulSplit2Unlocked(inst)
+	inst._soulsplit2unlocked:set(TheWorld.components.ns_atriumgateprogress.repaired)
+	OnSoulSplit2UnlockedDirty(inst)
+end
+
 local common_postinit = function(inst)
 	inst:AddTag(BUILDER_TAG)
+	inst:AddTag("ns_soulsplit2_locked")
+	inst._soulsplit2unlocked = net_bool(inst.GUID, "dummy.soulsplit2unlocked", "soulsplit2unlockeddirty")
+	if not TheWorld.ismastersim then
+		inst:ListenForEvent("soulsplit2unlockeddirty", OnSoulSplit2UnlockedDirty)
+	end
 	inst:AddTag("insomniac")
 	inst:AddTag("reader")
 	inst:AddTag("nightstorychar")
@@ -209,6 +228,11 @@ end
 -- This initializes for the host only
 local master_postinit = function(inst)
 	inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+
+	inst:ListenForEvent("ns_atriumgate_repaired", function()
+		UpdateSoulSplit2Unlocked(inst)
+	end, TheWorld)
+	inst:DoTaskInTime(0, UpdateSoulSplit2Unlocked)
 
 	inst.talker_path_override = "nightstories/characters/"
 

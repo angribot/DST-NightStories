@@ -1321,6 +1321,16 @@ msgctxt "STRINGS.NAMES.DUMMY"
 msgid "Dummy"
 msgstr ""
 
+#. STRINGS.NAMES.DUMMY_SOULSPLIT1
+msgctxt "STRINGS.NAMES.DUMMY_SOULSPLIT1"
+msgid "Soul Split Ⅰ"
+msgstr ""
+
+#. STRINGS.NAMES.DUMMY_SOULSPLIT2
+msgctxt "STRINGS.NAMES.DUMMY_SOULSPLIT2"
+msgid "Soul Split Ⅱ"
+msgstr ""
+
 #. STRINGS.NAMES.FRIENDSHIPRING
 msgctxt "STRINGS.NAMES.FRIENDSHIPRING"
 msgid "Ring of Friendship"
