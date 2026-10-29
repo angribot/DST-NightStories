@@ -5,18 +5,16 @@ local stafffns = require("prefabs/staff_common").fns
 local orange = stafffns.orange
 stafffns.orange = function(inst, ...)
 	orange(inst, ...)
-	if inst.prefab ~= "king_cane" and inst.prefab ~= "orangestaff" then
-		return
-	end
 
 	local blinkstaff = inst.components.blinkstaff
 	local onblink = blinkstaff.onblinkfn
+	-- Prefab names are assigned after construction, so check them when blinking.
 	blinkstaff.onblinkfn = function(staff, pos, caster)
 		if caster and caster:HasTag("mio_boosted_task") then
 			if staff.prefab == "king_cane" then
 				-- DST 760178: the vanilla callback uses caster only for sanity costs.
 				caster = nil
-			else
+			elseif staff.prefab == "orangestaff" then
 				local inventory = caster.components.inventory
 				if inventory and inventory:Has("nightmarefuel", 1) then
 					inventory:ConsumeByName("nightmarefuel", 1)

@@ -13,9 +13,11 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 达米新增配方：灵魂剥离 Ⅱ
+- 修复澪在燃料加速状态下使用懒人魔杖时未能消耗噩梦燃料来免除精神与耐久消耗的问题
 ]],
 	[[
 - Dummy has a new recipe: Soul Split Ⅱ
+- Fixed Mio's Lazy Explorer not consuming Nightmare Fuel to prevent sanity and durability loss while fuel-boosted
 ]]
 )
 description = zheng("版本: ", "Version: ")
