@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.61.11"
+version = "1.61.12"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 使用者精神值不低于50%时，黑洞法杖的吸取范围翻倍
+- 修复女王火炬AOE命中范围问题
 
 最近更新：
+- 使用者精神值不低于50%时，黑洞法杖的吸取范围翻倍
 - 修复技能树重置后部分技能效果未正确清除的问题
 - 澪在增益状态下使用国王魔杖闪现不再消耗精神值
 - 友谊戒指现在支持物品随从、大伯尼、玩家建造的戍卫塔和友方螨地爬
@@ -31,9 +32,10 @@ changelog = zheng(
 - 澪手持女王火炬时自动获得并维持燃料增益
 ]],
 	[[
-- The Blackhole Staff's pickup range doubles while the user's sanity is at least 50%
+- Fix the Queen's Torch AOE hit range
 
 Recent Changes:
+- The Blackhole Staff's pickup range doubles while the user's sanity is at least 50%
 - Fixed some skill effects not being properly removed when resetting skill trees
 - Mio no longer spends sanity when blinking with the King's Staff while boosted
 - The Ring of Friendship now supports item-linked followers, Big Bernie, player-built Guard Towers, and friendly Terramites
