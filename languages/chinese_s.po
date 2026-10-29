@@ -1349,6 +1349,16 @@ msgctxt "STRINGS.NAMES.DUMMY"
 msgid "Dummy"
 msgstr "达米"
 
+#. STRINGS.NAMES.DUMMY_SOULSPLIT_1
+msgctxt "STRINGS.NAMES.DUMMY_SOULSPLIT_1"
+msgid "Soul Split Ⅰ"
+msgstr "灵魂剥离 Ⅰ"
+
+#. STRINGS.NAMES.DUMMY_SOULSPLIT_2
+msgctxt "STRINGS.NAMES.DUMMY_SOULSPLIT_2"
+msgid "Soul Split Ⅱ"
+msgstr "灵魂剥离 Ⅱ"
+
 #. STRINGS.NAMES.FRIENDSHIPRING
 msgctxt "STRINGS.NAMES.FRIENDSHIPRING"
 msgid "Ring of Friendship"

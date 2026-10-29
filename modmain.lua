@@ -23,6 +23,7 @@ local postinit = {
 	"components/builder",
 	"components/builder_replica",
 	"components/bundler",
+	"components/charliecutscene",
 	"components/combat",
 	"components/corruption",
 	"components/dryingrack",
