@@ -139,19 +139,19 @@ AddDeconstructRecipe("lightamulet", { Ingredient("thulecite", 2), Ingredient("li
 AddRecipe("dummy_nightmarefuel", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 20, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
 	builder_tag = "ns_builder_dummy",
 	product = "nightmarefuel",
-	nameoverride = "dummy_soulsplit1",
+	nameoverride = "dummy_soulsplit_1",
 	actionstr = "SOULSPLIT",
 	hidden = true,
 })
 
-AddRecipe("dummy_soulsplit2", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 60, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
+AddRecipe("dummy_soulsplit2", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 60, nil, nil, "decrease_sanity.tex") }, TECH.LOST, {
 	builder_tag = "ns_builder_dummy",
-	no_builder_tag = "ns_soulsplit2_locked",
 	product = "horrorfuel",
+	nameoverride = "dummy_soulsplit_2",
 	actionstr = "SOULSPLIT",
 	hidden = true,
 	canbuild = function(recipe, builder)
-		return builder:HasTag("ns_builder_dummy") and TheWorld.components.ns_atriumgateprogress.repaired
+		return builder:HasTag("ns_builder_dummy") and TheWorld._atriumgate_repaired
 	end,
 })
 SortAfter("dummy_soulsplit2", "dummy_nightmarefuel")

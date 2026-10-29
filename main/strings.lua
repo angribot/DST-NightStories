@@ -69,8 +69,8 @@ local strings = {
 		FUELPOCKETWATCH = "hacking Backtrek Watch",
 
 		DUMMY = "Dummy",
-		DUMMY_SOULSPLIT1 = "Soul Split Ⅰ",
-		DUMMY_SOULSPLIT2 = "Soul Split Ⅱ",
+		DUMMY_SOULSPLIT_1 = "Soul Split Ⅰ",
+		DUMMY_SOULSPLIT_2 = "Soul Split Ⅱ",
 		LOSE_SANITY = "the lost of sanity",
 		BLACKHOLESTAFF = "Blackhole Staff",
 		BOOK_HARVEST = "Season of Harvest",

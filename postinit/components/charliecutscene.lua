@@ -8,7 +8,7 @@ AddComponentPostInit("charliecutscene", function(self)
 
 	local function update_progress()
 		if self:IsGateRepaired() then
-			TheWorld.components.ns_atriumgateprogress:SetRepaired()
+			TheWorld:SetAtriumGateRepaired()
 		end
 	end
 
