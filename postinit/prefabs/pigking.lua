@@ -21,7 +21,7 @@ local function launchitem(item, angle)
 end
 
 local function ontradeforitem(inst, item, giver, ...)
-	-- copied from pigking.lua (synced with game version 760178) --
+	-- copied from pigking.lua (synced with game version 760944) --
 	AwardPlayerAchievement("pigking_trader", giver)
 
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -74,7 +74,7 @@ local function ontradeforitem(inst, item, giver, ...)
 				end
 			end
 
-			local numbombs = math.floor(numcandies % 6)
+			local numbombs = math.floor(numcandies % 8)
 
 			for k = 1, numcandies do
 				local candy = SpawnPrefab("halloweencandy_" .. GetRandomItem(candytypes))
