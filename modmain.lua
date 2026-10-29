@@ -47,6 +47,7 @@ local postinit = {
 	"prefabs/foodbuffs",
 	"prefabs/gems",
 	"prefabs/gestalt",
+	"prefabs/king_cane",
 	"prefabs/meatrack",
 	"prefabs/multiplayer_portal_moonrock",
 	"prefabs/nightmarecreatures",
