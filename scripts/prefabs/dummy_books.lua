@@ -9,6 +9,7 @@ local prefabs = {
 }
 
 local UpvalueUtil = GlassicAPI.UpvalueUtil
+local HARVEST_CANT_TAGS = { "INLIMBO" }
 
 local book_defs = {
 	{
@@ -56,7 +57,7 @@ local book_defs = {
 		fn = function(inst, reader)
 			local success
 			local pos = Vector3(inst.Transform:GetWorldPosition())
-			local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 30)
+			local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 30, nil, HARVEST_CANT_TAGS)
 			local NO_PICK_DEFS = {
 				"flower",
 				"flower_evil",
