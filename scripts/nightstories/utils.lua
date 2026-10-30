@@ -140,6 +140,22 @@ local function do_glash_attack(attacker, target, glash_prefab, enhanced)
 	end
 end
 
+-- Sources opt in with one shared _ns_attack_hits set for their lifetime.
+local function with_attack_hit(source, target, can_hit_fn, hit_fn, ...)
+	local hit_targets = source and source._ns_attack_hits
+	if hit_targets ~= nil and target ~= nil then
+		if hit_targets[target] then
+			return
+		end
+		-- Misses still run native callbacks, but only valid hits reserve a target.
+		if can_hit_fn == nil or can_hit_fn(...) then
+			-- Claim before callbacks so nested attacks share the same hit set.
+			hit_targets[target] = true
+		end
+	end
+	return hit_fn(...)
+end
+
 local attack_source
 
 local function restore_attack_source(previous, ok, ...)
@@ -168,6 +184,7 @@ return {
 	OwnerTestFn = owner_testfn,
 	TargetTestFn = target_testfn,
 	DoGlashAttack = do_glash_attack,
+	WithAttackHit = with_attack_hit,
 	WithAttackSource = with_attack_source,
 	IsAttackSource = is_attack_source,
 }

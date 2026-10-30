@@ -13,6 +13,7 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 澪在燃料加速状态下不再受装备的精神值降低效果影响
+- 恐惧锁链现在可传递亮茄炸弹的爆炸伤害，同一枚炸弹不会重复伤害同一目标
 
 最近更新：
 - 调整了部分配方
@@ -23,6 +24,7 @@ changelog = zheng(
 ]],
 	[[
 - Mio is no longer affected by sanity drain from equipment while fuel-boosted
+- Horror Chain now spreads Brightshade Bomb explosion damage without the same bomb damaging a target more than once
 
 Recent Changes:
 - Tweak some recipes
