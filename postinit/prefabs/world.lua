@@ -9,7 +9,7 @@ end
 
 local function UnlockSoulSplitRecipe(inst, player)
 	if inst._atriumgate_repaired and player:HasTag("ns_builder_dummy") and player.components.builder ~= nil then
-		player.components.builder:AddRecipe("dummy_soulsplit2")
+		player.components.builder:AddRecipe("dummy_soulsplit_2")
 		player:PushEvent("unlockrecipe")
 	end
 end

@@ -1,7 +1,9 @@
-local AddRecipe = GlassicAPI.AddRecipe
+local AddRecipe2 = AddRecipe2
+local AddCharacterRecipe = AddCharacterRecipe
 local SortAfter = GlassicAPI.RecipeSortAfter
 local SortBefore = GlassicAPI.RecipeSortBefore
 local AddDeconstructRecipe = AddDeconstructRecipe
+local RemoveRecipeFromFilter = RemoveRecipeFromFilter
 local AddPlayerPostInit = AddPlayerPostInit
 local AddPrefabPostInit = AddPrefabPostInit
 GLOBAL.setfenv(1, GLOBAL)
@@ -47,68 +49,62 @@ STRINGS.NAMES.CIVI_LIGHTCRYSTAL = STRINGS.NAMES.LIGHTCRYSTAL
 ------- Civi -------
 --------------------
 -- 红宝石 --
-AddRecipe("civi_redgem", { Ingredient("bluegem", 1), Ingredient("nightmarefuel", 1) }, CIVITECH_ONE, {
+AddRecipe2("civi_redgem", { Ingredient("bluegem", 1), Ingredient("nightmarefuel", 1) }, CIVITECH_ONE, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "redgem",
-	hidden = true,
 })
 
 -- 蓝宝石 --
-AddRecipe("civi_bluegem", { Ingredient("redgem", 1), Ingredient("nightmarefuel", 1) }, CIVITECH_ONE, {
+AddRecipe2("civi_bluegem", { Ingredient("redgem", 1), Ingredient("nightmarefuel", 1) }, CIVITECH_ONE, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "bluegem",
-	hidden = true,
 })
 SortAfter("civi_bluegem", "civi_redgem")
 
 -- 黑水晶
-AddRecipe("darkcrystal", { Ingredient("purplegem", 1), Ingredient("nightmarefuel", 4) }, TECH.NONE, { nomods = true, builder_tag = "ns_builder_civi", no_deconstruction = true })
+AddCharacterRecipe("darkcrystal", { Ingredient("purplegem", 1), Ingredient("nightmarefuel", 4) }, TECH.NONE, { builder_tag = "ns_builder_civi", no_deconstruction = true })
 SortAfter("darkcrystal", "purplegem")
 
 -- 白水晶
-AddRecipe("lightcrystal", { Ingredient("purplegem", 1), Ingredient("nightmarefuel", 4) }, TECH.NONE, { nomods = true, builder_tag = "ns_builder_civi", no_deconstruction = true })
+AddCharacterRecipe("lightcrystal", { Ingredient("yellowgem", 1), Ingredient("moonglass", 4) }, TECH.NONE, { builder_tag = "ns_builder_civi", no_deconstruction = true })
 SortAfter("lightcrystal", "darkcrystal")
 
 -- 纯粹辉煌
-AddRecipe("civi_purebrilliance", { Ingredient("horrorfuel", 1), Ingredient("moonglass", 1) }, TECH.LUNARFORGING_TWO, {
+AddRecipe2("civi_purebrilliance", { Ingredient("horrorfuel", 1), Ingredient("moonglass", 1) }, TECH.LUNARFORGING_TWO, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "purebrilliance",
-	hidden = true,
 })
 SortAfter("civi_purebrilliance", "lunarplant_kit")
 
 -- 亮茄外壳
-AddRecipe("civi_lunarplant_husk", { Ingredient("voidcloth", 1), Ingredient("purebrilliance", 1) }, TECH.LUNARFORGING_TWO, {
+AddRecipe2("civi_lunarplant_husk", { Ingredient("voidcloth", 1), Ingredient("purebrilliance", 1) }, TECH.LUNARFORGING_TWO, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "lunarplant_husk",
-	hidden = true,
 })
 SortAfter("civi_lunarplant_husk", "civi_purebrilliance")
 
 -- 纯粹恐惧
-AddRecipe("civi_horrorfuel", { Ingredient("purebrilliance", 1), Ingredient("nightmarefuel", 1) }, TECH.SHADOWFORGING_TWO, {
+AddRecipe2("civi_horrorfuel", { Ingredient("purebrilliance", 1), Ingredient("nightmarefuel", 1) }, TECH.SHADOWFORGING_TWO, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "horrorfuel",
-	hidden = true,
 })
 SortAfter("civi_horrorfuel", "voidcloth_kit")
 
 -- 暗影碎布
-AddRecipe("civi_voidcloth", { Ingredient("lunarplant_husk", 1), Ingredient("horrorfuel", 1) }, TECH.SHADOWFORGING_TWO, {
+AddRecipe2("civi_voidcloth", { Ingredient("lunarplant_husk", 1), Ingredient("horrorfuel", 1) }, TECH.SHADOWFORGING_TWO, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	product = "voidcloth",
-	hidden = true,
 })
 SortAfter("civi_voidcloth", "civi_horrorfuel")
 
 -- 影背包 --
-AddRecipe("nightpack", { Ingredient("darkcrystal", 1), Ingredient("lightcrystal", 1), Ingredient("nightmarefuel", 5) }, CIVITECH_ONE, {
+AddRecipe2("nightpack", { Ingredient("darkcrystal", 1), Ingredient("lightcrystal", 1), Ingredient("nightmarefuel", 5) }, CIVITECH_ONE, {
 	nounlock = true,
 	builder_tag = "ns_builder_civi",
 	no_deconstruction = function(inst)
@@ -118,12 +114,12 @@ AddRecipe("nightpack", { Ingredient("darkcrystal", 1), Ingredient("lightcrystal"
 SortAfter("nightpack", "civi_bluegem")
 
 -- 友爱戒指
-AddRecipe("friendshipring", { Ingredient("moonrocknugget", 4), Ingredient("nightmarefuel", 4) }, CIVITECH_TWO, { nounlock = true, builder_tag = "ns_builder_civi" })
+AddRecipe2("friendshipring", { Ingredient("moonrocknugget", 4), Ingredient("moonglass", 4), Ingredient("nightmarefuel", 4) }, CIVITECH_TWO, { nounlock = true, builder_tag = "ns_builder_civi" })
 SortAfter("friendshipring", "nightpack")
 
 -- 注能图腾
-AddDeconstructRecipe("friendshiptotem_dark", { Ingredient("moonrocknugget", 4), Ingredient("nightmarefuel", 4), Ingredient("darkcrystal", 1) })
-AddDeconstructRecipe("friendshiptotem_light", { Ingredient("moonrocknugget", 4), Ingredient("nightmarefuel", 4), Ingredient("lightcrystal", 1) })
+AddDeconstructRecipe("friendshiptotem_dark", { Ingredient("moonrocknugget", 4), Ingredient("moonglass", 4), Ingredient("nightmarefuel", 4), Ingredient("darkcrystal", 1) })
+AddDeconstructRecipe("friendshiptotem_light", { Ingredient("moonrocknugget", 4), Ingredient("moonglass", 4), Ingredient("nightmarefuel", 4), Ingredient("lightcrystal", 1) })
 
 AddDeconstructRecipe("darkgem", { Ingredient("darkcrystal", 1) })
 AddDeconstructRecipe("lightgem", { Ingredient("lightcrystal", 1) })
@@ -136,31 +132,34 @@ AddDeconstructRecipe("lightamulet", { Ingredient("thulecite", 2), Ingredient("li
 ---------------------
 
 -- 灵魂剥离 --
-AddRecipe("dummy_nightmarefuel", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 20, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
+AddCharacterRecipe("dummy_soulsplit_1", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 20, nil, nil, "decrease_sanity.tex") }, TECH.NONE, {
 	builder_tag = "ns_builder_dummy",
 	product = "nightmarefuel",
 	nameoverride = "dummy_soulsplit_1",
 	actionstr = "SOULSPLIT",
-	hidden = true,
 })
 
-AddRecipe("dummy_soulsplit2", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 60, nil, nil, "decrease_sanity.tex") }, TECH.LOST, {
+AddCharacterRecipe("dummy_soulsplit_2", { Ingredient(CHARACTER_INGREDIENT.HEALTH, 60, nil, nil, "decrease_sanity.tex") }, TECH.LOST, {
 	builder_tag = "ns_builder_dummy",
 	product = "horrorfuel",
 	nameoverride = "dummy_soulsplit_2",
 	actionstr = "SOULSPLIT",
-	hidden = true,
 	canbuild = function(recipe, builder)
 		return builder:HasTag("ns_builder_dummy") and TheWorld._atriumgate_repaired
 	end,
 })
-SortAfter("dummy_soulsplit2", "dummy_nightmarefuel")
+SortAfter("dummy_soulsplit_2", "dummy_soulsplit_1")
 
 -- 梦魇之力 --
-AddRecipe("shadowglash_builder", { Ingredient("nightmarefuel", 1) }, TECH.NONE, { builder_tag = "ns_builder_dummy", no_deconstruction = true, sg_state = "domediumaction" })
+AddCharacterRecipe(
+	"shadowglash_builder",
+	{ Ingredient("nightmarefuel", 1) },
+	TECH.NONE,
+	{ builder_tag = "ns_builder_dummy", no_deconstruction = true, sg_state = "domediumaction" }
+)
 
 -- 收获的季节 --
-AddRecipe(
+AddCharacterRecipe(
 	"book_harvest",
 	{ Ingredient("papyrus", 2), Ingredient(CHARACTER_INGREDIENT.HEALTH, 15, nil, nil, "decrease_sanity.tex") },
 	TECH.SCIENCE_TWO,
@@ -168,7 +167,7 @@ AddRecipe(
 )
 
 -- 雨神的眷恋 --
-AddRecipe(
+AddCharacterRecipe(
 	"book_toggledownfall",
 	{ Ingredient("papyrus", 2), Ingredient(CHARACTER_INGREDIENT.HEALTH, 30, nil, nil, "decrease_sanity.tex") },
 	TECH.MAGIC_THREE,
@@ -176,7 +175,7 @@ AddRecipe(
 )
 
 -- 黑洞法杖 --
-AddRecipe(
+AddRecipe2(
 	"blackholestaff",
 	{ Ingredient("livinglog", 2), Ingredient("orangegem", 2), Ingredient("nightmarefuel", 4) },
 	DUMMYTECH_ONE,
@@ -188,62 +187,66 @@ SortAfter("blackholestaff", "greenstaff")
 ---------------------
 
 -- Reset Skill Tree --
-AddRecipe("skilltree_respec_tool", { Ingredient("moonglass", 1), Ingredient("nightmarefuel", 1) }, TECH.NONE, { builder_tag = "skilltree_characters", nomods = true })
+AddCharacterRecipe("skilltree_respec_tool", { Ingredient("moonglass", 1), Ingredient("nightmarefuel", 1) }, TECH.NONE, { builder_tag = "skilltree_characters" })
 SortBefore("skilltree_respec_tool", "transmute_log")
 
 -- 月影 --
-AddRecipe(
+AddRecipe2(
 	"lunarshadow",
-	{ Ingredient("security_pulse_cage_full", 1), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1) },
+	{ Ingredient("lunar_seed", 5), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1) },
 	TECH.WAGPUNK_WORKSTATION_TWO,
-	{ nounlock = true }
+	{
+		nounlock = true,
+		-- `buffed` is a net_bool, so this check works on both master and clients.
+		no_deconstruction = function(inst)
+			return inst.buffed ~= nil and inst.buffed:value()
+		end,
+	}
 )
 SortAfter("lunarshadow", "wagpunk_workstation_security_pulse_cage")
 
--- 亮茄尖刺球棒 --
--- AddRecipe("bat_lunarplant", {Ingredient("purebrilliance", 2), Ingredient("lunarplant_husk", 1), Ingredient("plantmeat", 2)}, TECH.LUNARFORGING_TWO, {nounlock=true, station_tag="lunar_forge"})
--- SortAfter("bat_lunarplant", "sword_lunarplant")
-
 -- 恐惧锁链 --
-AddRecipe("horrorchain", { Ingredient("horrorfuel", 4), Ingredient("voidcloth", 2) }, TECH.SHADOWFORGING_TWO, { nounlock = true, station_tag = "shadow_forge" })
+AddRecipe2("horrorchain", { Ingredient("horrorfuel", 4), Ingredient("voidcloth", 2) }, TECH.SHADOWFORGING_TWO, { nounlock = true, station_tag = "shadow_forge" })
 SortAfter("horrorchain", "voidcloth_scythe")
 
--- 武神铥头 --
--- AddRecipe("battleruinshat", {Ingredient("wathgrithrhat", 1), Ingredient("thulecite", 4)}, TECH.NONE, {builder_tag = "valkyrie"})
--- SortAfter("battleruinshat", "wathgrithrhat")
-
 -- 厨师礼物包装 & 厨师包锅
-AddRecipe("cookpackagewrap", { Ingredient("portablecookpot_item", 1), Ingredient("bundlewrap", 4) }, TECH.NONE, { builder_tag = "masterchef", numtogive = 4 }, { "COOKING" })
+AddCharacterRecipe(
+	"cookpackagewrap",
+	{ Ingredient("portablecookpot_item", 1), Ingredient("bundlewrap", 4) },
+	TECH.NONE,
+	{ builder_tag = "masterchef", numtogive = 4 },
+	{ "COOKING" }
+)
 SortAfter("cookpackagewrap", "portablespicer_item")
-AddRecipe("cookgiftwrap", { Ingredient("portablecookpot_item", 1), Ingredient("giftwrap", 4) }, TECH.NONE, { builder_tag = "masterchef", numtogive = 4 }, { "COOKING" })
+AddCharacterRecipe("cookgiftwrap", { Ingredient("portablecookpot_item", 1), Ingredient("giftwrap", 4) }, TECH.NONE, { builder_tag = "masterchef", numtogive = 4 }, { "COOKING" })
 SortAfter("cookgiftwrap", "cookpackagewrap")
 
 -- 仙人掌粉 --
-AddRecipe(
+AddRecipe2(
 	"spice_cactus",
 	{ Ingredient("cactus_meat", 2), Ingredient("cactus_flower", 1) },
 	TECH.FOODPROCESSING_ONE,
-	{ nounlock = true, numtogive = 2, nochar = true, builder_tag = "professionalchef", no_deconstruction = true }
+	{ nounlock = true, numtogive = 2, builder_tag = "professionalchef", no_deconstruction = true }
 )
 SortAfter("spice_cactus", "spice_salt")
 
 -- 月光粉 --
-AddRecipe(
+AddRecipe2(
 	"spice_moonglass",
 	{ Ingredient("purebrilliance", 3) },
 	TECH.FOODPROCESSING_ONE,
-	{ nounlock = true, numtogive = 2, nochar = true, builder_tag = "professionalchef", no_deconstruction = true }
+	{ nounlock = true, numtogive = 2, builder_tag = "professionalchef", no_deconstruction = true }
 )
 SortAfter("spice_moonglass", "spice_cactus")
 
 -- 便携衣柜 & 魔法礼装 --
-AddRecipe("portable_wardrobe_wrap", { Ingredient("giftwrap", 1), Ingredient("nightmarefuel", 1) }, TECH.MAGIC_THREE, { no_deconstruction = true }, { "MAGIC", "DECOR" })
+AddRecipe2("portable_wardrobe_wrap", { Ingredient("giftwrap", 1), Ingredient("nightmarefuel", 1) }, TECH.MAGIC_THREE, { no_deconstruction = true }, { "MAGIC", "DECOR" })
 SortAfter("portable_wardrobe_wrap", "wardrobe", "DECOR")
-AddRecipe("portable_wardrobe_item", { Ingredient("portable_wardrobe_wrap", 3), Ingredient("boards", 4) }, TECH.MAGIC_THREE, { no_deconstruction = true }, { "MAGIC", "DECOR" })
+AddRecipe2("portable_wardrobe_item", { Ingredient("portable_wardrobe_wrap", 3), Ingredient("boards", 4) }, TECH.MAGIC_THREE, { no_deconstruction = true }, { "MAGIC", "DECOR" })
 SortAfter("portable_wardrobe_item", "portable_wardrobe_wrap")
 
 -- 鸭子雕像 --
-AddRecipe(
+AddRecipe2(
 	"chesspiece_headuck_builder",
 	{ Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2) },
 	TECH.LOST,
@@ -251,7 +254,7 @@ AddRecipe(
 )
 
 -- THE 潮涌 --
-AddRecipe(
+AddRecipe2(
 	"book_wetness",
 	{ Ingredient("book_rain", 1), Ingredient("book_temperature", 1), Ingredient("malbatross_feather", 10) },
 	TECH.BOOKCRAFT_ONE,
@@ -260,21 +263,20 @@ AddRecipe(
 SortAfter("book_wetness", "book_rain")
 
 -- 月镐和月锤 --
-AddRecipe(
-	"moonglasspickaxe",
-	{ Ingredient("twigs", 2), Ingredient("moonglass", 3) },
-	TECH.CELESTIAL_THREE,
-	{ nomods = true, description = "moonglassaxe", station_tag = "celestial_station" }
-)
+AddRecipe2("moonglasspickaxe", { Ingredient("twigs", 2), Ingredient("moonglass", 3) }, TECH.CELESTIAL_THREE, { description = "moonglassaxe", station_tag = "celestial_station" })
 SortAfter("moonglasspickaxe", "moonglassaxe")
 
-AddRecipe(
+AddRecipe2(
 	"moonglasshammer",
 	{ Ingredient("twigs", 3), Ingredient("cutgrass", 6), Ingredient("moonglass", 3) },
 	TECH.CELESTIAL_THREE,
-	{ nomods = true, description = "moonglassaxe", station_tag = "celestial_station" }
+	{ description = "moonglassaxe", station_tag = "celestial_station" }
 )
 SortAfter("moonglasshammer", "moonglasspickaxe")
+
+-- AddRecipe2 adds non-nounlock recipes to MODS; keep these with the vanilla moon glass tools only.
+RemoveRecipeFromFilter("moonglasspickaxe", CRAFTING_FILTERS.MODS.name)
+RemoveRecipeFromFilter("moonglasshammer", CRAFTING_FILTERS.MODS.name)
 
 AddDeconstructRecipe("glassiccutter", { Ingredient("glasscutter", 1) })
 
