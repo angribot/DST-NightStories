@@ -214,6 +214,15 @@ local function set_sanity_dapperness(inst)
 	end
 end
 
+-- Equipment cannot lower Mio's sanity while she is fuel-boosted.
+local function get_equippable_dapperness(owner, equippable)
+	local dapperness = equippable:GetDapperness(owner, owner.components.sanity.no_moisture_penalty)
+	if dapperness < 0 and owner:HasTag("mio_boosted_task") then
+		return 0
+	end
+	return dapperness
+end
+
 local function has_queen_torch_equipped(inst)
 	local inventory = inst.components.inventory
 	local item = inventory and inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
@@ -347,6 +356,7 @@ local master_postinit = function(inst)
 	inst.components.sanity.dapperness = TUNING.MIOTAN_SANITY_DAPPERNESS
 	inst.components.sanity.night_drain_mult = TUNING.MIOTAN_SANITY_NIGHT_MULT
 	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.MIOTAN_SANITY_MULT, "miotan")
+	inst.components.sanity.get_equippable_dappernessfn = get_equippable_dapperness
 
 	inst:ListenForEvent("sanitydelta", set_sanity_dapperness)
 	inst:ListenForEvent("isinsanitymodedirty", set_sanity_dapperness)
