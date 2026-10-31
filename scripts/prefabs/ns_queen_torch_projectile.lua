@@ -42,7 +42,6 @@ local function OnHit(inst, attacker, target)
 			if ent ~= target and ent ~= attacker and CanSplash(inst, ent, attacker) then
 				local radius = TUNING.QUEEN_TORCH_AOE_RADIUS + ent:GetPhysicsRadius(0)
 				if ent:GetDistanceSqToPoint(pos.x, pos.y, pos.z) < radius * radius then
-					-- Already-hit splash targets still propagate their chains to new targets.
 					combat:DoAttack(ent, weapon, inst)
 				end
 			end
@@ -73,7 +72,6 @@ local function ProjectileFn()
 	end
 
 	inst.persists = false
-	inst._ns_attack_hits = {}
 	inst:AddComponent("projectile")
 	local projectile = inst.components.projectile
 	projectile:SetSpeed(50)

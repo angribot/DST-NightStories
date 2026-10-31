@@ -1,3 +1,5 @@
+local HorrorChainUtil = require("nightstories/horrorchainutil")
+
 local function setup_fx(attacker, target, is_shadow)
 	if is_shadow then
 		-- Only coalesce presentation; every hit still deals damage and refreshes its chain.
@@ -26,7 +28,7 @@ local function on_attack_shadow(inst, attacker, target)
 	if attacker and target and target:IsValid() then
 		setup_fx(attacker, target, true)
 		if inst.enhanced then
-			TheWorld.components.horrorchainmanager:AddMember(target, TUNING.SHADOWGLASH_CHAIN_DURATION)
+			HorrorChainUtil.AddMember(target, TUNING.SHADOWGLASH_CHAIN_DURATION)
 		end
 	end
 end

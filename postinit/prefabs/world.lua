@@ -49,7 +49,6 @@ AddPrefabPostInit("world", function(inst)
 		return
 	end
 
-	inst:AddComponent("horrorchainmanager")
 	inst._atriumgate_repaired = false
 	inst.SetAtriumGateRepaired = SetAtriumGateRepaired
 
