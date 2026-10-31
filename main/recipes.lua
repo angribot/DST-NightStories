@@ -3,7 +3,6 @@ local AddCharacterRecipe = AddCharacterRecipe
 local SortAfter = GlassicAPI.RecipeSortAfter
 local SortBefore = GlassicAPI.RecipeSortBefore
 local AddDeconstructRecipe = AddDeconstructRecipe
-local RemoveRecipeFromFilter = RemoveRecipeFromFilter
 local AddPlayerPostInit = AddPlayerPostInit
 local AddPrefabPostInit = AddPrefabPostInit
 GLOBAL.setfenv(1, GLOBAL)
@@ -68,7 +67,7 @@ AddCharacterRecipe("darkcrystal", { Ingredient("purplegem", 1), Ingredient("nigh
 SortAfter("darkcrystal", "purplegem")
 
 -- 白水晶
-AddCharacterRecipe("lightcrystal", { Ingredient("yellowgem", 1), Ingredient("moonglass", 4) }, TECH.NONE, { builder_tag = "ns_builder_civi", no_deconstruction = true })
+AddCharacterRecipe("lightcrystal", { Ingredient("purplegem", 1), Ingredient("moonglass", 4) }, TECH.NONE, { builder_tag = "ns_builder_civi", no_deconstruction = true })
 SortAfter("lightcrystal", "darkcrystal")
 
 -- 纯粹辉煌
@@ -273,10 +272,6 @@ AddRecipe2(
 	{ description = "moonglassaxe", station_tag = "celestial_station" }
 )
 SortAfter("moonglasshammer", "moonglasspickaxe")
-
--- AddRecipe2 adds non-nounlock recipes to MODS; keep these with the vanilla moon glass tools only.
-RemoveRecipeFromFilter("moonglasspickaxe", CRAFTING_FILTERS.MODS.name)
-RemoveRecipeFromFilter("moonglasshammer", CRAFTING_FILTERS.MODS.name)
 
 AddDeconstructRecipe("glassiccutter", { Ingredient("glasscutter", 1) })
 
