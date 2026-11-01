@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.63.2"
+version = "1.63.3"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 注能黑暗图腾和注能光明图腾开启时会在作用范围边缘显示烟雾圈
+- 补齐启迪之冠“交叉手指”皮肤的升级火焰特效
 
 最近更新：
+- 注能黑暗图腾和注能光明图腾开启时会在作用范围边缘显示烟雾圈
 - 绿影背包改为12格
 - 恐惧锁链的传递范围扩大到30
 - 恐惧锁链现在可传递薇诺娜的投石机、哑铃、火药、弹弓等范围攻击的伤害
@@ -22,9 +23,10 @@ changelog = zheng(
 - 击杀被锁链的目标时，这次攻击仍会传递给附近被锁链的目标
 ]],
 	[[
-- Infused Dark Totem and Infused Light Totem now show a smoke ring at the edge of their range while active
+- Added missing upgraded flame effects to the Enlightened Crown's Crossed Fingers skin
 
 Recent Changes:
+- Infused Dark Totem and Infused Light Totem now show a smoke ring at the edge of their range while active
 - Green Night Pack now has 12 slots
 - Horror Chain now spreads damage up to 30 units away
 - Horror Chain now spreads damage from area attacks such as Winona's Catapult, Dumbbells, Gunpowder and Slingshot ammo
