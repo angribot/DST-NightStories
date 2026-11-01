@@ -2,6 +2,10 @@ local assets = {
 	Asset("ANIM", "anim/friendshipring.zip"),
 }
 
+local fx_proxy_assets = {
+	Asset("ANIM", "anim/lavaarena_staff_smoke_fx.zip"),
+}
+
 local prefabs = {
 	ring = {
 		"glash_fx",
@@ -12,6 +16,10 @@ local prefabs = {
 		"statue_transition_2",
 	},
 }
+
+local function GetFxProxyPrefab(color)
+	return "friendshiptotem_" .. color .. "_fx_proxy"
+end
 
 ----------------------------------------------------------------
 -------------------------- TOGGLE FX ---------------------------
@@ -100,6 +108,81 @@ local function SERVER_TriggerFX(inst)
 end
 
 ----------------------------------------------------------------
+--------------------------- RANGE FX ---------------------------
+----------------------------------------------------------------
+
+-- Mirrors alterguardian_phase3circle: smoke puffs flash at shuffled points
+-- on the range edge, one every 3 frames, every 10 degrees.
+local RANGE_FX_PERIOD = 3 * FRAMES
+local RANGE_FX_POINT_COUNT = 36
+local RANGE_FX_ALPHA = 0.95
+local RANGE_FX_COLOURS = {
+	dark = { 0, 0, 0 },
+	light = { 1, 1, 1 },
+}
+
+local function CreateRangeSmokeFX(color)
+	local inst = CreateEntity()
+
+	inst:AddTag("FX")
+	inst:AddTag("NOCLICK")
+	--[[Non-networked entity]]
+	inst.entity:SetCanSleep(false)
+	inst.persists = false
+
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+
+	local r, g, b = unpack(RANGE_FX_COLOURS[color])
+	inst.AnimState:SetBank("lavaarena_staff_smoke_fx")
+	inst.AnimState:SetBuild("lavaarena_staff_smoke_fx")
+	inst.AnimState:PlayAnimation("idle")
+	inst.AnimState:SetAddColour(r, g, b, 0)
+	inst.AnimState:SetMultColour(r, g, b, RANGE_FX_ALPHA)
+	if color == "light" then
+		-- Keep the white ring visible at night.
+		inst.AnimState:SetLightOverride(1)
+	end
+
+	inst:DoTaskInTime(inst.AnimState:GetCurrentAnimationLength() + 2 * FRAMES, inst.Remove)
+
+	return inst
+end
+
+local function SpawnRangeSmokeFX(inst)
+	if #inst.rangefx_angles <= 0 then
+		for i = 1, RANGE_FX_POINT_COUNT do
+			inst.rangefx_angles[i] = (i - 1) * TWOPI / RANGE_FX_POINT_COUNT
+		end
+		shuffleArray(inst.rangefx_angles)
+	end
+
+	-- Read the position on every spawn so the ring follows a carried totem.
+	local angle = table.remove(inst.rangefx_angles)
+	local x, _, z = inst.Transform:GetWorldPosition()
+	local radius = TUNING.TOTEM_BUFF_RANGE
+	CreateRangeSmokeFX(inst.color).Transform:SetPosition(x + radius * math.cos(angle), 0, z + radius * math.sin(angle))
+end
+
+local function CLIENT_OnRangeFxDirty(inst)
+	if inst.rangefx_active:value() then
+		if inst.rangefx_task == nil then
+			inst.rangefx_task = inst:DoPeriodicTask(RANGE_FX_PERIOD, SpawnRangeSmokeFX)
+		end
+	elseif inst.rangefx_task ~= nil then
+		inst.rangefx_task:Cancel()
+		inst.rangefx_task = nil
+	end
+end
+
+local function SERVER_SetRangeFX(inst, active)
+	inst.fx_proxy.rangefx_active:set(active)
+	if not TheNet:IsDedicated() then
+		CLIENT_OnRangeFxDirty(inst.fx_proxy)
+	end
+end
+
+----------------------------------------------------------------
 ------------------------ TOTEM FUNCTION ------------------------
 ----------------------------------------------------------------
 
@@ -107,6 +190,7 @@ local function turn_on(inst)
 	if not inst.toggled:value() then
 		inst.toggled:set(true)
 		inst.components.fueled:StartConsuming()
+		SERVER_SetRangeFX(inst, true)
 
 		if inst.shadowtask ~= nil then
 			inst.shadowtask:Cancel()
@@ -129,6 +213,7 @@ local function turn_off(inst)
 	if inst.toggled:value() then
 		inst.toggled:set(false)
 		inst.components.fueled:StopConsuming()
+		SERVER_SetRangeFX(inst, false)
 
 		if inst.task then
 			inst.task:Cancel()
@@ -371,24 +456,35 @@ local function base_fn()
 	return inst
 end
 
-local function fx_proxy_fn()
-	local inst = CreateEntity()
+local function MakeFxProxy(color)
+	local function fx_proxy_fn()
+		local inst = CreateEntity()
 
-	inst.entity:AddTransform()
-	inst.entity:AddNetwork()
+		inst.entity:AddTransform()
+		inst.entity:AddNetwork()
 
-	inst:AddTag("FX")
-	inst.entity:SetCanSleep(false)
-	inst.persists = false
+		inst:AddTag("FX")
+		inst.entity:SetCanSleep(false)
+		inst.persists = false
 
-	inst.entity:SetPristine()
-	inst.triggerfx = net_event(inst.GUID, "friendshiptotem.triggerfx")
+		inst.color = color
+		inst.rangefx_angles = {}
 
-	if not TheWorld.ismastersim then
-		inst:DoTaskInTime(0, inst.ListenForEvent, "friendshiptotem.triggerfx", CLIENT_TriggerFX)
+		inst.entity:SetPristine()
+		inst.triggerfx = net_event(inst.GUID, "friendshiptotem.triggerfx")
+		inst.rangefx_active = net_bool(inst.GUID, "friendshiptotem.rangefx_active", "friendshiptotem.rangefxdirty")
+
+		if not TheWorld.ismastersim then
+			inst:DoTaskInTime(0, inst.ListenForEvent, "friendshiptotem.triggerfx", CLIENT_TriggerFX)
+			inst:ListenForEvent("friendshiptotem.rangefxdirty", CLIENT_OnRangeFxDirty)
+			-- Catch a ring that was already active when this proxy replicated.
+			inst:DoTaskInTime(0, CLIENT_OnRangeFxDirty)
+			return inst
+		end
 		return inst
 	end
-	return inst
+
+	return Prefab(GetFxProxyPrefab(color), fx_proxy_fn, fx_proxy_assets)
 end
 
 local function MakeTotem(color)
@@ -399,13 +495,15 @@ local function MakeTotem(color)
 
 		inst.toggled = net_bool(inst.GUID, "friendshiptotem.toogle", "friendshiptotem.toggledirty")
 
-		inst.fx_proxy = SpawnPrefab("friendshiptotem_fx_proxy")
-		inst.fx_proxy.entity:SetParent(inst.entity)
-		inst:ListenForEvent("remove", inst.fx_proxy.Remove)
-
 		if not TheWorld.ismastersim then
 			return inst
 		end
+
+		inst.fx_proxy = SpawnPrefab(GetFxProxyPrefab(color))
+		inst.fx_proxy.entity:SetParent(inst.entity)
+		inst:ListenForEvent("onremove", function()
+			inst.fx_proxy:Remove()
+		end)
 
 		inst.components.inventoryitem:SetSinks(true)
 
@@ -440,7 +538,12 @@ local function MakeTotem(color)
 		return inst
 	end
 
-	return Prefab("friendshiptotem_" .. color, totem_fn, assets, prefabs.totem)
+	local totem_prefabs = { GetFxProxyPrefab(color) }
+	for _, prefab in ipairs(prefabs.totem) do
+		table.insert(totem_prefabs, prefab)
+	end
+
+	return Prefab("friendshiptotem_" .. color, totem_fn, assets, totem_prefabs)
 end
 
-return Prefab("friendshipring", base_fn, assets.ring), MakeTotem("dark"), MakeTotem("light"), Prefab("friendshiptotem_fx_proxy", fx_proxy_fn)
+return Prefab("friendshipring", base_fn, assets.ring), MakeTotem("dark"), MakeTotem("light"), MakeFxProxy("dark"), MakeFxProxy("light")
