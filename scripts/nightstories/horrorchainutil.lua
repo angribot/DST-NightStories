@@ -243,6 +243,8 @@ end
 
 -- Damage is snapshotted when the anchor is hit, while transient attack
 -- state such as catapult elements or Weremoose smash damage still applies.
+-- State the attack sets per target follows the anchor for every member, such
+-- as the smash planar bonus or a drone zap's insulated damage.
 local function snapshot_damage(anchor, calc)
 	anchor.damage = {}
 	for _, member in ipairs(anchor.members) do
@@ -506,7 +508,6 @@ local function on_hit(combat, attacker, damage, weapon, stimuli, spdamage)
 end
 
 return {
-	IsMember = is_member,
 	AddMember = add_member,
 	GetNearbyMembers = get_nearby_members,
 	Run = run,

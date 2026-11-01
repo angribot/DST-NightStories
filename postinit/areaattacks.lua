@@ -114,7 +114,14 @@ AddStategraphPostInit("wilson", function(sg)
 	if state == nil or state.timeline == nil then
 		return
 	end
+	-- Other attacks, including events added by other mods, keep their behavior.
 	for _, event in ipairs(state.timeline) do
-		wrap_field(event, "fn", NO_OPTS)
+		local fn = event.fn
+		event.fn = function(inst, ...)
+			if inst.sg.statemem.ismoosesmash then
+				return run(NO_OPTS, fn, inst, ...)
+			end
+			return fn(inst, ...)
+		end
 	end
 end)
