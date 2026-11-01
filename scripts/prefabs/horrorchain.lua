@@ -1,3 +1,5 @@
+local HorrorChainUtil = require("nightstories/horrorchainutil")
+
 local assets = {
 	Asset("ANIM", "anim/horrorchain.zip"),
 }
@@ -98,7 +100,7 @@ local function onattack(inst, attacker, target)
 			target.SoundEmitter:PlaySound(inst.skin_atk_sound or "wanda2/characters/wanda/watch/weapon/shadow_hit_old")
 		end
 		-- chain_target
-		TheWorld.components.horrorchainmanager:AddMember(target, TUNING.HORRORCHAIN_DRUATION * get_bonus_mult(inst))
+		HorrorChainUtil.AddMember(target, TUNING.HORRORCHAIN_DRUATION * get_bonus_mult(inst))
 		-- target hit fx
 		local spark = SpawnPrefab("hitsparks_fx")
 		spark:Setup(attacker, target, nil, hitsparks_fx_colouroverride)
