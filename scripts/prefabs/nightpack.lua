@@ -1,6 +1,7 @@
 local assets = {
 	Asset("ANIM", "anim/nightpack.zip"),
 	Asset("ANIM", "anim/ui_backpack_2x4.zip"),
+	Asset("ANIM", "anim/ui_piggyback_2x6.zip"),
 }
 
 local prefabs = {
@@ -235,7 +236,7 @@ local StateFns = {
 	end,
 
 	green = function(inst, owner)
-		inst.components.container:WidgetSetup("krampus_sack")
+		inst.components.container:WidgetSetup("piggyback")
 		if owner and not TheNet:IsDedicated() then -- For client host
 			try_reopen(inst, owner)
 		end
@@ -540,7 +541,7 @@ end
 local function OnStateDirty(inst)
 	if inst:GetState() == "green" then
 		if not inst.is_greenpack then
-			inst.replica.container:WidgetSetup("krampus_sack")
+			inst.replica.container:WidgetSetup("piggyback")
 			inst.is_greenpack = true
 		end
 	elseif inst.is_greenpack then
