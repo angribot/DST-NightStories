@@ -2,8 +2,9 @@ local AddPrefabPostInit = AddPrefabPostInit
 local AddStategraphPostInit = AddStategraphPostInit
 GLOBAL.setfenv(1, GLOBAL)
 
--- Groups each vanilla area attack into one Horror Chain attack, so a chain
--- member takes at most one hit from it, directly or propagated.
+-- Groups each vanilla area attack into one Horror Chain attack per frame, so
+-- a chain member takes at most one hit from it in that frame, directly or
+-- propagated.
 
 local HorrorChainUtil = require("nightstories/horrorchainutil")
 local run = HorrorChainUtil.Run
@@ -54,43 +55,14 @@ wrap_method(require("components/explosive"), "OnBurnt", function(self)
 	return { explosive = self.inst, flush_on_remove = self.inst }
 end)
 
+-- Multi-frame attacks (ground pound rings, charges, jousts, drone zaps) count
+-- each frame as its own attack, so later frames keep their native hits.
 local GroundPounder = require("components/groundpounder")
-local destroy_ring = GroundPounder.DestroyRing
--- Rings share ents_hit across delayed calls; share one attack with them.
-function GroundPounder:DestroyRing(pt, radius, points, breakobjects, dodamage, pushplatforms, pushinventoryitems, spawnfx, ents_hit, ...)
-	ents_hit = ents_hit or {}
-	local opts = {
-		key = ents_hit,
-		on_propagated = function(member)
-			ents_hit[member] = true
-		end,
-	}
-	return run(opts, destroy_ring, self, pt, radius, points, breakobjects, dodamage, pushplatforms, pushinventoryitems, spawnfx, ents_hit, ...)
-end
+wrap_method(GroundPounder, "DestroyRing", no_opts)
 wrap_method(GroundPounder, "DestroyPoints", no_opts)
 wrap_method(GroundPounder, "GroundPound_Offscreen", no_opts)
-
--- Charges reuse one ignore table across frames.
-wrap_method(require("components/tackler"), "CheckCollision", function(_, ignores)
-	if ignores == nil then
-		return NO_OPTS
-	end
-	return {
-		key = ignores,
-		on_propagated = function(member)
-			ignores[member] = true
-		end,
-	}
-end)
-
-wrap_method(require("components/joustsource"), "CheckCollision", function(_, _, targets)
-	return {
-		key = targets,
-		on_propagated = function(member)
-			targets[member] = GetTime()
-		end,
-	}
-end)
+wrap_method(require("components/tackler"), "CheckCollision", no_opts)
+wrap_method(require("components/joustsource"), "CheckCollision", no_opts)
 
 wrap_method(require("components/aoeweapon_lunge"), "DoLunge", no_opts)
 
@@ -123,23 +95,10 @@ AddPrefabPostInit("trident", function(inst)
 	end
 end)
 
--- Drone zaps expand over several frames and hit each target once.
+-- Drone zaps hit each target once over several frames; each frame is one attack.
 local function wrap_drone_zap(inst)
-	if not TheWorld.ismastersim then
-		return
-	end
-	local updatelooper = inst.components.updatelooper
-	local on_update = updatelooper.OnUpdate
-	local opts = {
-		key = inst,
-		on_propagated = function(member)
-			if inst.targets ~= nil then
-				inst.targets[member] = true
-			end
-		end,
-	}
-	updatelooper.OnUpdate = function(...)
-		return run(opts, on_update, ...)
+	if TheWorld.ismastersim then
+		wrap_field(inst.components.updatelooper, "OnUpdate", NO_OPTS)
 	end
 end
 AddPrefabPostInit("wagdrone_projectile_fx", wrap_drone_zap)

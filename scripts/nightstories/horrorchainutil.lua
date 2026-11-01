@@ -49,20 +49,15 @@ end
 -------------------------------------------------------------------------
 -- Attack scopes
 --
--- A scope is one logical attack. Every target it damages is recorded once.
--- Chain members hit directly become anchors; once the attack's own hits
--- resolve, each anchor replays the hit on nearby members not yet damaged.
--- Contexts nest inside the scope and flush their own anchors on exit.
+-- A scope is one logical attack within a single frame. Every target it
+-- damages is recorded once. Chain members hit directly become anchors; once
+-- the attack's own hits resolve, each anchor replays the hit on nearby
+-- members not yet damaged. Contexts nest inside the scope and flush their
+-- own anchors on exit. Multi-frame attacks start a new scope every frame.
 -------------------------------------------------------------------------
 
 local scope
 local contexts = {}
--- Multi-frame attacks reuse one scope per key, such as a native hit table.
-local persistent_scopes = setmetatable({}, { __mode = "k" })
-
-local function new_scope()
-	return { hits = setmetatable({}, { __mode = "k" }) }
-end
 
 local function propagate(ctx)
 	local anchors = ctx.anchors
@@ -76,9 +71,6 @@ local function propagate(ctx)
 				scope.propagating = member
 				anchor:Hit(member)
 				scope.propagating = true
-				if ctx.on_propagated ~= nil then
-					ctx.on_propagated(member)
-				end
 			end
 		end
 		i = i + 1
@@ -140,8 +132,6 @@ end
 
 -- Runs fn as one attack, or as part of the attack already in progress.
 -- opts (all optional):
---   key: reuse one scope across calls for a multi-frame attack
---   on_propagated(member): mirror a propagated hit into native state
 --   attacked: let combat:GetAttacked hits become anchors
 --   resist: record explosive resistance to rescale replayed damage
 --   explosive: replay hits as this explosive's damage
@@ -150,22 +140,13 @@ end
 local function run(opts, fn, ...)
 	local owns_scope = scope == nil
 	if owns_scope then
-		if opts.key ~= nil then
-			scope = persistent_scopes[opts.key]
-			if scope == nil then
-				scope = new_scope()
-				persistent_scopes[opts.key] = scope
-			end
-		else
-			scope = new_scope()
-		end
+		scope = { hits = {} }
 	end
 
 	local parent = contexts[#contexts]
 	local ctx = {
 		anchors = {},
 		flushed = 0,
-		on_propagated = opts.on_propagated,
 		attacked = opts.attacked,
 		resist = opts.resist,
 		explosive = opts.explosive,
@@ -340,6 +321,17 @@ function AreaAnchor:Hit(member)
 	end)
 end
 
+-- Applies and accumulates a target's explosive resistance, as vanilla explosions do.
+local function apply_explosive_resist(target, damage, source)
+	local explosiveresist = target.components.explosiveresist
+	if explosiveresist == nil then
+		return damage
+	end
+	damage = damage * (1 - explosiveresist:GetResistance())
+	explosiveresist:OnExplosiveDamage(damage, source)
+	return damage
+end
+
 local AttackedAnchor = {}
 AttackedAnchor.__index = AttackedAnchor
 
@@ -349,10 +341,8 @@ end
 
 function AttackedAnchor:Hit(member)
 	local damage = self.base_damage
-	local explosiveresist = self.resist and member.components.explosiveresist or nil
-	if explosiveresist ~= nil then
-		damage = damage * (1 - explosiveresist:GetResistance())
-		explosiveresist:OnExplosiveDamage(damage, self.attacker)
+	if self.resist then
+		damage = apply_explosive_resist(member, damage, self.attacker)
 	end
 	member.components.combat:GetAttacked(self.attacker, damage, self.weapon, self.stimuli, self.spdamage)
 end
@@ -378,11 +368,7 @@ function ExplosionAnchor:Hit(member)
 	-- Calculate fresh damage for each target's alignment bonus and defenses.
 	local stacksize = bomb.components.stackable ~= nil and bomb.components.stackable:StackSize() or 1
 	local mult = bomb.components.damagetypebonus ~= nil and bomb.components.damagetypebonus:GetBonus(member) or 1
-	local damage = explosive.explosivedamage * stacksize * mult
-	if member.components.explosiveresist ~= nil then
-		damage = damage * (1 - member.components.explosiveresist:GetResistance())
-		member.components.explosiveresist:OnExplosiveDamage(damage, bomb)
-	end
+	local damage = apply_explosive_resist(member, explosive.explosivedamage * stacksize * mult, bomb)
 	local spdamage = SpDamageUtil.ApplyMult(SpDamageUtil.CollectSpDamage(bomb), mult * stacksize)
 	member.components.combat:GetAttacked(bomb, damage, nil, nil, spdamage)
 
@@ -456,7 +442,9 @@ local function add_anchor(ctx, frame, target, attacker, damage, weapon, stimuli,
 		end
 		anchor = setmetatable({ bomb = attacker, members = members }, ExplosionAnchor)
 	elseif ctx.attacked then
-		-- Recover the damage before the anchor's explosive resistance.
+		-- Recover the damage before the anchor's explosive resistance. A fully
+		-- resisted anchor took no damage, so its base damage is unknown and the
+		-- hit does not spread.
 		local resistance = ctx.resistances ~= nil and ctx.resistances[target] or 0
 		if resistance >= 1 then
 			return
