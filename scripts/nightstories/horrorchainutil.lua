@@ -497,12 +497,15 @@ local function on_hit(combat, attacker, damage, weapon, stimuli, spdamage)
 		return false
 	end
 	local frame = frames[#frames]
-	-- Only the hit a combat frame made counts; thorns and redirects do not.
 	if attacker ~= nil and matches_frame(frame, combat, attacker) and is_alive(target) then
 		local ctx = claim(target)
 		if ctx ~= nil and is_member(target) then
 			add_anchor(ctx, frame, target, attacker, damage, weapon, stimuli, spdamage)
 		end
+	elseif scope ~= nil then
+		-- Redirected or retaliating damage never anchors, but still counts as
+		-- this target's hit so propagation cannot hit it again.
+		scope.hits[target] = true
 	end
 	return true
 end
