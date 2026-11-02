@@ -90,34 +90,49 @@ local function flush(ctx)
 	end
 end
 
--- Flush before the source entity is removed so replays still see it valid.
-local function intercept_remove(ctx, inst)
-	local own = rawget(inst, "Remove")
-	ctx.restore_remove = function()
-		if rawget(inst, "Remove") == ctx.remove_interceptor then
-			inst.Remove = own
+-- Reuse the attack stack, flushing inner contexts before their parents.
+local function flush_before_remove(inst)
+	for i = #contexts, 1, -1 do
+		local ctx = contexts[i]
+		if ctx.flush_on_remove == inst then
+			flush(ctx)
 		end
-		ctx.restore_remove = nil
 	end
-	ctx.remove_interceptor = function(...)
-		-- Deferred callbacks can outlive the attack context.
-		if ctx.restore_remove == nil then
-			return inst:Remove(select(2, ...))
-		end
-		ctx.restore_remove()
-		local ok, err = pcall(flush, ctx)
-		inst:Remove(select(2, ...))
+end
+
+-- Install once: cached callbacks stay valid and later wrappers cannot create
+-- a forwarding cycle through us. Never look up inst.Remove from this hook.
+local function hook_remove(inst)
+	if inst._ns_horrorchain_remove_hooked then
+		return
+	end
+	inst._ns_horrorchain_remove_hooked = true
+	local remove = inst.Remove
+	local removing = false
+
+	local function finish_remove(flush_ok, flush_err, ok, ...)
+		removing = false
 		if not ok then
-			error(err, 0)
+			error((...), 0)
+		elseif not flush_ok then
+			error(flush_err, 0)
 		end
+		return ...
 	end
-	inst.Remove = ctx.remove_interceptor
+
+	inst.Remove = function(self, ...)
+		if removing then
+			return
+		end
+		removing = true
+		-- Keep the source alive throughout propagation, even if a replay
+		-- tries to remove it again. Still remove it when propagation fails.
+		local ok, err = pcall(flush_before_remove, inst)
+		return finish_remove(ok, err, pcall(remove, self, ...))
+	end
 end
 
 local function finish(ctx, owns_scope, ok, ...)
-	if ctx.restore_remove ~= nil then
-		ctx.restore_remove()
-	end
 	local flush_ok, flush_err = true, nil
 	if ok then
 		flush_ok, flush_err = pcall(flush, ctx)
@@ -154,11 +169,12 @@ local function run(opts, fn, ...)
 		attacked = opts.attacked,
 		resist = opts.resist,
 		explosive = opts.explosive,
+		flush_on_remove = opts.flush_on_remove,
 		suppress = opts.suppress or (parent ~= nil and parent.suppress),
 	}
 	contexts[#contexts + 1] = ctx
 	if opts.flush_on_remove ~= nil then
-		intercept_remove(ctx, opts.flush_on_remove)
+		hook_remove(opts.flush_on_remove)
 	end
 	return finish(ctx, owns_scope, pcall(fn, ...))
 end
