@@ -6,15 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.63.4"
+version = "1.63.5"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复恐惧锁链在部分攻击后可能导致崩溃的问题
+- 进一步修复恐惧锁链在部分情况下可能导致崩溃或卡死的问题
 
 最近更新：
+- 修复恐惧锁链在部分攻击后可能导致崩溃的问题
 - 补齐启迪之冠“交叉手指”皮肤的升级火焰特效
 - 注能黑暗图腾和注能光明图腾开启时会在作用范围边缘显示烟雾圈
 - 绿影背包改为12格
@@ -24,9 +25,10 @@ changelog = zheng(
 - 击杀被锁链的目标时，这次攻击仍会传递给附近被锁链的目标
 ]],
 	[[
-- Fixed a crash that could occur after certain attacks involving Horror Chain
+- Fixed additional cases where Horror Chain could cause crashes or freezes
 
 Recent Changes:
+- Fixed a crash that could occur after certain attacks involving Horror Chain
 - Added missing upgraded flame effects to the Enlightened Crown's Crossed Fingers skin
 - Infused Dark Totem and Infused Light Totem now show a smoke ring at the edge of their range while active
 - Green Night Pack now has 12 slots
