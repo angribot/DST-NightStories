@@ -100,6 +100,10 @@ local function intercept_remove(ctx, inst)
 		ctx.restore_remove = nil
 	end
 	ctx.remove_interceptor = function(...)
+		-- Deferred callbacks can outlive the attack context.
+		if ctx.restore_remove == nil then
+			return inst:Remove(select(2, ...))
+		end
 		ctx.restore_remove()
 		local ok, err = pcall(flush, ctx)
 		inst:Remove(select(2, ...))
