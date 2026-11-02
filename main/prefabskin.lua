@@ -275,7 +275,16 @@ GlassicAPI.SkinHandler.AddModSkins({
 	dragonflychest = { "dragonflychest_gingerbread" },
 	-- meatrack = { "meatrack_hermit_red", "meatrack_hermit_white" },
 	hivehat = { "hivehat_pigcrown", "hivehat_pigcrown_willow" },
-	alterguardianhat = { "alterguardianhat_finger" },
+	alterguardianhat = {
+		"alterguardianhat_finger",
+		{
+			name = "alterguardianhat_celestial",
+			-- Unlocked per save once the Celestial Scion is defeated.
+			test_fn = function()
+				return TheWorld ~= nil and TheWorld.IsCelestialScionDefeated ~= nil and TheWorld:IsCelestialScionDefeated()
+			end,
+		},
+	},
 	wx78 = {
 		"wx78_potato",
 	},

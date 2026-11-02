@@ -328,6 +328,21 @@ table.insert(
 
 table.insert(
 	prefabs,
+	CreatePrefabSkin("alterguardianhat_celestial", {
+		base_prefab = "alterguardianhat",
+		type = "item",
+		rarity = "Glassic",
+		assets = {
+			Asset("DYNAMIC_ANIM", "anim/dynamic/alterguardianhat_celestial.zip"),
+			Asset("PKGREF", "anim/dynamic/alterguardianhat_celestial.dyn"),
+		},
+		init_fn = GlassicAPI.BasicInitFn,
+		skin_tags = { "ALTERGUARDIANHAT" },
+	})
+)
+
+table.insert(
+	prefabs,
 	CreatePrefabSkin("goldenaxe_victorian", {
 		base_prefab = "goldenaxe",
 		type = "item",

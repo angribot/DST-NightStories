@@ -171,6 +171,7 @@ local strings = {
 
 		eyebrellahat_peggy = "Peggy's Eyebrella",
 		alterguardianhat_finger = "Crossed Fingers",
+		alterguardianhat_celestial = "Celestial Crown",
 
 		krampus_sack_invisible = "Pantomimed Krampus Sack",
 		dreadstonehat_scrap = "Scrappy Hatm",
@@ -217,6 +218,7 @@ local strings = {
 
 		eyebrellahat_peggy = "Wow! It's Peggy!",
 		alterguardianhat_finger = "It's completely an emoji joke.",
+		alterguardianhat_celestial = "Every shard has become a Celestial Jewel.",
 
 		krampus_sack_invisible = "Convey an incredibly convincing impression of a krampus sack.",
 

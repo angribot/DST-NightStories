@@ -1,6 +1,7 @@
 <Atlas>
     <Texture filename="ns_inventoryimages.tex"/>
     <Elements>
+        <Element name="alterguardianhat_celestial.tex" u1="0.8125" u2="0.875" v1="0.375" v2="0.5"/>
         <Element name="alterguardianhat_finger.tex" u1="0" u2="0.0625" v1="0.875" v2="1"/>
         <Element name="armorskeleton_none.tex" u1="0.0625" u2="0.125" v1="0.875" v2="1"/>
         <Element name="bat_lunarplant.tex" u1="0.125" u2="0.1875" v1="0.875" v2="1"/>

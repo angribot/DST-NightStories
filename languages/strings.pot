@@ -1626,6 +1626,11 @@ msgctxt "STRINGS.RECIPE_DESC.SPICE_MOONGLASS"
 msgid "Grant the power of the moon."
 msgstr ""
 
+#. STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_celestial
+msgctxt "STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_celestial"
+msgid "Every shard has become a Celestial Jewel."
+msgstr ""
+
 #. STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_finger
 msgctxt "STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_finger"
 msgid "It's completely an emoji joke."
@@ -1779,6 +1784,11 @@ msgstr ""
 #. STRINGS.SKIN_DESCRIPTIONS.wx78_potato
 msgctxt "STRINGS.SKIN_DESCRIPTIONS.wx78_potato"
 msgid "A reworked machine becomes a potato!"
+msgstr ""
+
+#. STRINGS.SKIN_NAMES.alterguardianhat_celestial
+msgctxt "STRINGS.SKIN_NAMES.alterguardianhat_celestial"
+msgid "Celestial Crown"
 msgstr ""
 
 #. STRINGS.SKIN_NAMES.alterguardianhat_finger

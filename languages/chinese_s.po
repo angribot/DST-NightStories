@@ -1664,6 +1664,11 @@ msgctxt "STRINGS.RECIPE_DESC.SPICE_MOONGLASS"
 msgid "Grant the power of the moon."
 msgstr "赋予月之力量。"
 
+#. STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_celestial
+msgctxt "STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_celestial"
+msgid "Every shard has become a Celestial Jewel."
+msgstr "每一块碎片都化作了天体珠宝。"
+
 #. STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_finger
 msgctxt "STRINGS.SKIN_DESCRIPTIONS.alterguardianhat_finger"
 msgid "It's completely an emoji joke."
@@ -1820,6 +1825,11 @@ msgstr "致敬《夺宝奇兵4：水晶头骨王国》。"
 msgctxt "STRINGS.SKIN_DESCRIPTIONS.wx78_potato"
 msgid "A reworked machine becomes a potato!"
 msgstr "WX78重做以后竟然变成了一个土豆！"
+
+#. STRINGS.SKIN_NAMES.alterguardianhat_celestial
+msgctxt "STRINGS.SKIN_NAMES.alterguardianhat_celestial"
+msgid "Celestial Crown"
+msgstr "天体之冠"
 
 #. STRINGS.SKIN_NAMES.alterguardianhat_finger
 msgctxt "STRINGS.SKIN_NAMES.alterguardianhat_finger"
