@@ -24,11 +24,11 @@ function Combat:DoAttack(target, weapon, projectile, stimuli, instancemult, ...)
 	if target == nil then
 		target = self.target
 	end
-	return HorrorChainUtil.DoAttack(self, target, projectile, instancemult, do_attack_with_source, self, target, weapon, projectile, stimuli, instancemult, ...)
+	return HorrorChainUtil.DoAttack(self, target, weapon, projectile, instancemult, do_attack_with_source, self, target, weapon, projectile, stimuli, instancemult, ...)
 end
 
 function Combat:DoAreaAttack(target, range, weapon, validfn, stimuli, excludetags, ...)
-	return HorrorChainUtil.DoAreaAttack(self, validfn, excludetags, do_area_attack_with_source, self, target, range, weapon, validfn, stimuli, excludetags, ...)
+	return HorrorChainUtil.DoAreaAttack(self, range, validfn, excludetags, do_area_attack_with_source, self, target, range, weapon, validfn, stimuli, excludetags, ...)
 end
 
 function Combat:GetAttacked(attacker, ...)
@@ -36,8 +36,5 @@ function Combat:GetAttacked(attacker, ...)
 end
 
 function Combat:GetAttacked_Internal(attacker, damage, weapon, stimuli, spdamage, ...)
-	if not HorrorChainUtil.OnHit(self, attacker, damage, weapon, stimuli, spdamage) then
-		return false
-	end
-	return get_attacked_internal(self, attacker, damage, weapon, stimuli, spdamage, ...)
+	return HorrorChainUtil.GetAttackedInternal(self, attacker, damage, weapon, stimuli, spdamage, get_attacked_internal, self, attacker, damage, weapon, stimuli, spdamage, ...)
 end

@@ -5,6 +5,8 @@ local CHAIN_TAG = "horrorchain"
 -- The Horror Chain weapon prefab also carries this tag, so require combat.
 local MEMBER_MUST_TAGS = { CHAIN_TAG, "_combat" }
 
+-- Follow-up damage triggered by hits. Its own hits never spread, but a spread
+-- hit triggers it on every member like a direct hit would.
 local DISABLED_WEAPONS = {
 	glash = true,
 	shadowglash = true,
@@ -14,6 +16,25 @@ local DISABLED_WEAPONS = {
 local DISABLED_ENTITIES = {
 	alterguardianhat_projectile = true,
 }
+
+local WEAK_KEYS = { __mode = "k" }
+
+local function weak_table()
+	return setmetatable({}, WEAK_KEYS)
+end
+
+-- Returns a getter for a weak table that starts empty every tick.
+local function per_tick_table()
+	local tick, t
+	return function()
+		local now = GetTick()
+		if tick ~= now then
+			tick = now
+			t = weak_table()
+		end
+		return t
+	end
+end
 
 -------------------------------------------------------------------------
 -- Membership
@@ -46,301 +67,97 @@ local function get_nearby_members(member)
 	return members
 end
 
--------------------------------------------------------------------------
--- Attack scopes
---
--- A scope is one logical attack within a single frame. Every target it
--- damages is recorded once. Chain members hit directly become anchors; once
--- the attack's own hits resolve, each anchor replays the hit on nearby
--- members not yet damaged. Contexts nest inside the scope and flush their
--- own anchors on exit. Multi-frame attacks start a new scope every frame.
--------------------------------------------------------------------------
-
-local scope
-local contexts = {}
-
-local function propagate(ctx)
-	local anchors = ctx.anchors
-	local i = ctx.flushed + 1
-	while anchors[i] ~= nil do
-		local anchor = anchors[i]
-		ctx.flushed = i
-		for _, member in ipairs(anchor.members) do
-			if not scope.hits[member] and anchor:CanHit(member) then
-				scope.hits[member] = true
-				scope.propagating = member
-				anchor:Hit(member)
-				scope.propagating = true
-			end
-		end
-		i = i + 1
-	end
-end
-
-local function flush(ctx)
-	if ctx.anchors[ctx.flushed + 1] == nil then
-		return
-	end
-	local previous = scope.propagating
-	scope.propagating = true
-	local ok, err = pcall(propagate, ctx)
-	scope.propagating = previous
-	if not ok then
-		error(err, 0)
-	end
-end
-
--- Reuse the attack stack, flushing inner contexts before their parents.
-local function flush_before_remove(inst)
-	for i = #contexts, 1, -1 do
-		local ctx = contexts[i]
-		if ctx.flush_on_remove == inst then
-			flush(ctx)
-		end
-	end
-end
-
--- Install once: cached callbacks stay valid and later wrappers cannot create
--- a forwarding cycle through us. Never look up inst.Remove from this hook.
-local function hook_remove(inst)
-	if inst._ns_horrorchain_remove_hooked then
-		return
-	end
-	inst._ns_horrorchain_remove_hooked = true
-	local remove = inst.Remove
-	local removing = false
-
-	local function finish_remove(flush_ok, flush_err, ok, ...)
-		removing = false
-		if not ok then
-			error((...), 0)
-		elseif not flush_ok then
-			error(flush_err, 0)
-		end
-		return ...
-	end
-
-	inst.Remove = function(self, ...)
-		if removing then
-			return
-		end
-		removing = true
-		-- Keep the source alive throughout propagation, even if a replay
-		-- tries to remove it again. Still remove it when propagation fails.
-		local ok, err = pcall(flush_before_remove, inst)
-		return finish_remove(ok, err, pcall(remove, self, ...))
-	end
-end
-
-local function finish(ctx, owns_scope, ok, ...)
-	local flush_ok, flush_err = true, nil
-	if ok then
-		flush_ok, flush_err = pcall(flush, ctx)
-	end
-	contexts[#contexts] = nil
-	if owns_scope then
-		scope = nil
-	end
-	if not ok then
-		error((...), 0)
-	elseif not flush_ok then
-		error(flush_err, 0)
-	end
-	return ...
-end
-
--- Runs fn as one attack, or as part of the attack already in progress.
--- opts (all optional):
---   attacked: let combat:GetAttacked hits become anchors
---   resist: record explosive resistance to rescale replayed damage
---   explosive: replay hits as this explosive's damage
---   flush_on_remove: flush before this entity is removed
---   suppress: never create anchors, e.g. periodic aura ticks
-local function run(opts, fn, ...)
-	local owns_scope = scope == nil
-	if owns_scope then
-		scope = { hits = {} }
-	end
-
-	local parent = contexts[#contexts]
-	local ctx = {
-		anchors = {},
-		flushed = 0,
-		attacked = opts.attacked,
-		resist = opts.resist,
-		explosive = opts.explosive,
-		flush_on_remove = opts.flush_on_remove,
-		suppress = opts.suppress or (parent ~= nil and parent.suppress),
-	}
-	contexts[#contexts + 1] = ctx
-	if opts.flush_on_remove ~= nil then
-		hook_remove(opts.flush_on_remove)
-	end
-	return finish(ctx, owns_scope, pcall(fn, ...))
-end
-
-local NO_OPTS = {}
-
--- Combat calls join the open attack, or start a single-call attack.
-local function join(fn, ...)
-	if contexts[1] ~= nil then
-		return fn(...)
-	end
-	return run(NO_OPTS, fn, ...)
-end
-
--- Records a hit and returns the context that should own its anchor.
--- Only a target's first hit in the scope can become an anchor.
-local function claim(target)
-	local ctx = contexts[#contexts]
-	if ctx == nil or ctx.suppress or scope.hits[target] then
-		return
-	end
-	scope.hits[target] = true
-	if scope.propagating == nil then
-		return ctx
-	end
-end
-
-local function note_resistance(target, resistance)
-	local ctx = contexts[#contexts]
-	if ctx ~= nil and ctx.resist then
-		ctx.resistances = ctx.resistances or {}
-		ctx.resistances[target] = resistance
-	end
-end
-
--------------------------------------------------------------------------
--- Combat frames tell GetAttacked_Internal which call produced a hit.
--------------------------------------------------------------------------
-
-local frames = {}
-
-local function pop_frame(ok, ...)
-	frames[#frames] = nil
-	if not ok then
-		error((...), 0)
-	end
-	return ...
-end
-
-local function with_frame(frame, fn, ...)
-	frames[#frames + 1] = frame
-	return pop_frame(pcall(fn, ...))
-end
-
-local function matches_frame(frame, combat, attacker)
-	if frame == nil or attacker ~= frame.attacker then
-		return false
-	elseif frame.kind == "attack" then
-		return combat.inst == frame.target
-	elseif frame.kind == "area" then
-		return combat.inst ~= attacker
-	end
-	return combat == frame.combat
-end
-
 local function is_alive(target)
 	return target:IsValid() and not target:IsInLimbo() and not (target.components.health ~= nil and target.components.health:IsDead())
 end
 
 -------------------------------------------------------------------------
--- Anchor kinds replay the anchor's hit on each nearby member.
+-- Scoped state
 -------------------------------------------------------------------------
 
-local function calc_attack_damage(combat, target, weapon, stimuli)
-	-- Mirror DoAttack's electric multiplier; CalcDamage receives it as a multiplier.
-	local mult = 1
-	local weapon_cmp = weapon ~= nil and weapon.components.weapon or nil
-	if (stimuli == "electric" or (weapon_cmp ~= nil and weapon_cmp.stimuli == "electric")) and not IsEntityElectricImmune(target) then
-		local electric_damage_mult = weapon_cmp ~= nil and weapon_cmp.electric_damage_mult or TUNING.ELECTRIC_DAMAGE_MULT
-		local electric_wet_damage_mult = weapon_cmp ~= nil and weapon_cmp.electric_wet_damage_mult or TUNING.ELECTRIC_WET_DAMAGE_MULT
-		mult = electric_damage_mult + electric_wet_damage_mult * target:GetWetMultiplier()
-	end
-	local damage, spdamage = combat:CalcDamage(target, weapon, mult)
-	return { damage = damage, spdamage = spdamage }
-end
+-- spreading: the anchor whose hit is being replayed and the member it targets
+-- suppressed: hits never spread, e.g. periodic aura ticks
+-- boundary: attacks owned by the innermost attack boundary
+-- moose_smasher: the Weremoose whose smash is resolving
+local state = {}
 
--- Damage is snapshotted when the anchor is hit, while transient attack
--- state such as catapult elements or Weremoose smash damage still applies.
--- State the attack sets per target follows the anchor for every member, such
--- as the smash planar bonus or a drone zap's insulated damage.
-local function snapshot_damage(anchor, calc)
-	anchor.damage = {}
-	for _, member in ipairs(anchor.members) do
-		anchor.damage[member] = calc(member)
-	end
-end
-
-local AttackAnchor = {}
-AttackAnchor.__index = AttackAnchor
-
-function AttackAnchor:CanHit(member)
-	local combat = self.combat
-	return member ~= combat.inst
-		and combat.inst:IsValid()
-		and is_alive(member)
-		and member.components.combat ~= nil
-		and member.components.combat:CanBeAttacked(combat.inst)
-		and (self.weapon == nil or (self.weapon:IsValid() and self.weapon.components.weapon ~= nil))
-end
-
-local function restore_attack(combat, calc_damage, ignorehitrange, finiteuses, ignoreloss, ok, ...)
-	combat.CalcDamage = calc_damage
-	combat.ignorehitrange = ignorehitrange
-	if finiteuses ~= nil then
-		finiteuses.ignorecombatdurabilityloss = ignoreloss
-	end
+local function restore_state(key, previous, ok, ...)
+	state[key] = previous
 	if not ok then
 		error((...), 0)
 	end
+	return ...
 end
 
-function AttackAnchor:Hit(member)
-	local combat = self.combat
-	local weapon = self.weapon
-	local snapshot = self.damage[member]
-	local calc_damage = rawget(combat, "CalcDamage")
-	local class_calc_damage = getmetatable(combat).CalcDamage
-	combat.CalcDamage = function(cmp, target, weapon_arg, ...)
-		if target == member and weapon_arg == weapon then
-			return snapshot.damage, snapshot.spdamage
-		end
-		return (calc_damage or class_calc_damage)(cmp, target, weapon_arg, ...)
+local function with_state(key, value, fn, ...)
+	local previous = state[key]
+	state[key] = value
+	return restore_state(key, previous, pcall(fn, ...))
+end
+
+-------------------------------------------------------------------------
+-- Attack identity
+--
+-- An attack is the damage one attacker deals with one weapon in one tick, so
+-- a vanilla area attack that hits each target through its own call is still
+-- one attack. Each target takes at most one hit from it, directly or spread.
+-- Boundaries separate attacks that deal damage on an owner's behalf and would
+-- otherwise share that identity.
+-------------------------------------------------------------------------
+
+local NO_WEAPON = {}
+local tick_attacks = per_tick_table()
+
+local function get_attack(attacker, weapon)
+	local attacks = state.boundary or tick_attacks()
+	local by_weapon = attacks[attacker]
+	if by_weapon == nil then
+		by_weapon = weak_table()
+		attacks[attacker] = by_weapon
 	end
-	-- Range is measured from the anchor, which the attack already reached.
-	local ignorehitrange = combat.ignorehitrange
-	combat.ignorehitrange = true
-	-- Projectile hits consume durability on launch, not per propagated hit.
-	local finiteuses = self.projectile ~= nil and weapon ~= nil and weapon.components.finiteuses or nil
-	local ignoreloss = finiteuses ~= nil and finiteuses.ignorecombatdurabilityloss or nil
-	if finiteuses ~= nil then
-		finiteuses.ignorecombatdurabilityloss = true
+	weapon = weapon or NO_WEAPON
+	local attack = by_weapon[weapon]
+	if attack == nil then
+		-- hits: every target hit; spread: targets hit by spreading
+		attack = { hits = weak_table(), spread = weak_table() }
+		by_weapon[weapon] = attack
 	end
-	restore_attack(combat, calc_damage, ignorehitrange, finiteuses, ignoreloss, pcall(combat.DoAttack, combat, member, weapon, self.projectile, self.stimuli, self.instancemult))
+	return attack
 end
 
-local AreaAnchor = {}
-AreaAnchor.__index = AreaAnchor
+-------------------------------------------------------------------------
+-- Explosive resistance
+--
+-- Sources that deduct explosive resistance query it, report the resisted
+-- damage, then hit with the same source. Recording that lets a spread hit
+-- restore the base damage and deduct each member's own resistance instead.
+-------------------------------------------------------------------------
 
-function AreaAnchor:CanHit(member)
-	local combat = self.combat
-	local attacker = combat.inst
-	return member ~= attacker
-		and attacker:IsValid()
-		and member.components.combat ~= nil
-		and combat:IsValidTarget(member)
-		and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
-		and (self.validfn == nil or self.validfn(member, attacker))
+local queried_resistances = per_tick_table()
+local resisted_hits = per_tick_table()
+
+local function note_resistance(target, resistance)
+	queried_resistances()[target] = resistance
 end
 
-function AreaAnchor:Hit(member)
-	local attacker = self.combat.inst
-	local snapshot = self.damage[member]
-	Utils.WithAttackSource(attacker, function()
-		attacker:PushEvent("onareaattackother", { target = member, weapon = self.weapon, stimuli = self.stimuli })
-		member.components.combat:GetAttacked_Internal(attacker, snapshot.damage, self.weapon, self.stimuli, snapshot.spdamage, true)
-	end)
+local function note_explosive_damage(target, source)
+	local resistance = queried_resistances()[target]
+	if resistance ~= nil then
+		resisted_hits()[target] = { source = source, resistance = resistance }
+	end
+end
+
+-- Returns the resistance deducted from this hit, or nil if none was.
+local function take_resistance(target, attacker)
+	local records = resisted_hits()
+	local record = records[target]
+	if record == nil then
+		return
+	end
+	records[target] = nil
+	if record.source == attacker then
+		return record.resistance
+	end
 end
 
 -- Applies and accumulates a target's explosive resistance, as vanilla explosions do.
@@ -354,15 +171,161 @@ local function apply_explosive_resist(target, damage, source)
 	return damage
 end
 
+-------------------------------------------------------------------------
+-- Call frames
+--
+-- Combat calls push frames so a hit knows which call produced it, and so
+-- damage dealt back to an attacker mid-hit is recognized as retaliation.
+-------------------------------------------------------------------------
+
+local frames = {}
+
+local function push_frame(frame)
+	frames[#frames + 1] = frame
+end
+
+local function pop_frame(ok, ...)
+	frames[#frames] = nil
+	if not ok then
+		error((...), 0)
+	end
+	return ...
+end
+
+-- Synchronous retaliation: the victim is hitting back at whoever is hitting it.
+local function is_retaliation(victim, attacker)
+	for i = #frames, 1, -1 do
+		local frame = frames[i]
+		if frame.victim == attacker and frame.attacker == victim then
+			return true
+		end
+	end
+	return false
+end
+
+-- The combat call that produced this hit, or nil for redirected damage.
+local function get_producing_frame(combat, attacker)
+	local frame = frames[#frames]
+	if frame == nil or frame.attacker ~= attacker then
+		return
+	elseif frame.kind == "area" then
+		return combat.inst ~= attacker and frame or nil
+	elseif frame.kind == "attack" or frame.kind == "attacked" then
+		return combat.inst == frame.victim and frame or nil
+	end
+end
+
+-------------------------------------------------------------------------
+-- Anchors
+--
+-- An anchor is a chain member hit directly. Spreading replays the hit that
+-- produced it on each nearby member through the same kind of call, so the hit
+-- keeps its special effects and computes damage for each member.
+-------------------------------------------------------------------------
+
+local AttackAnchor = {}
+AttackAnchor.__index = AttackAnchor
+
+function AttackAnchor:CanHit(member)
+	local attacker = self.combat.inst
+	local weapon = self.weapon
+	return attacker:IsValid()
+		and is_alive(member)
+		and member.components.combat ~= nil
+		and member.components.combat:CanBeAttacked(attacker)
+		and (weapon == nil or (weapon:IsValid() and weapon.components.weapon ~= nil))
+end
+
+-- Weremoose smash adds its planar bonus only against planar targets, and a
+-- tackle multiplies damage only against the structure it collides with.
+local function adapt_to_member(anchor, member)
+	local attacker = anchor.combat.inst
+	local restores = {}
+
+	local multipliers = anchor.combat.externaldamagemultipliers
+	if multipliers:HasModifier(attacker, "tackler") then
+		local tackle = multipliers:CalculateModifierFromSource(attacker, "tackler")
+		multipliers:RemoveModifier(attacker, "tackler")
+		restores[#restores + 1] = function()
+			multipliers:SetModifier(attacker, tackle, "tackler")
+		end
+	end
+
+	local planardamage = anchor.moose_smash and attacker.components.planardamage or nil
+	if planardamage ~= nil then
+		local bonuses = planardamage.externalbonuses
+		local bonus = bonuses:HasModifier(attacker, "weremoose_smash") and bonuses:CalculateModifierFromSource(attacker, "weremoose_smash") or nil
+		if member.components.planarentity ~= nil then
+			planardamage:AddBonus(attacker, TUNING.SKILLS.WOODIE.MOOSE_SMASH_PLANAR_DAMAGE, "weremoose_smash")
+		else
+			planardamage:RemoveBonus(attacker, "weremoose_smash")
+		end
+		restores[#restores + 1] = function()
+			if bonus ~= nil then
+				planardamage:AddBonus(attacker, bonus, "weremoose_smash")
+			else
+				planardamage:RemoveBonus(attacker, "weremoose_smash")
+			end
+		end
+	end
+
+	return restores
+end
+
+local function restore_attack(combat, ignorehitrange, finiteuses, ignoreloss, restores, ok, ...)
+	for i = #restores, 1, -1 do
+		restores[i]()
+	end
+	if finiteuses ~= nil then
+		finiteuses.ignorecombatdurabilityloss = ignoreloss
+	end
+	combat.ignorehitrange = ignorehitrange
+	if not ok then
+		error((...), 0)
+	end
+end
+
+function AttackAnchor:Hit(member)
+	local combat = self.combat
+	-- Range is measured from the anchor, which the attack already reached.
+	local ignorehitrange = combat.ignorehitrange
+	combat.ignorehitrange = true
+	-- One launch uses durability once; the projectile only flew to the anchor.
+	local finiteuses = self.projectile ~= nil and self.weapon ~= nil and self.weapon.components.finiteuses or nil
+	local ignoreloss
+	if finiteuses ~= nil then
+		ignoreloss = finiteuses.ignorecombatdurabilityloss
+		finiteuses.ignorecombatdurabilityloss = true
+	end
+	local restores = adapt_to_member(self, member)
+	restore_attack(combat, ignorehitrange, finiteuses, ignoreloss, restores, pcall(combat.DoAttack, combat, member, self.weapon, self.projectile, self.stimuli, self.instancemult))
+end
+
+local AreaAnchor = {}
+AreaAnchor.__index = AreaAnchor
+
+-- DoAreaAttack checks the target and validfn itself, but only applies
+-- excludetags when searching for targets.
+function AreaAnchor:CanHit(member)
+	return self.combat.inst:IsValid() and member.components.combat ~= nil and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
+end
+
+-- Hits only the member. The call goes through the DoAreaAttack hook, which
+-- sets the attack source; hits nested in a spread hit never anchor.
+function AreaAnchor:Hit(member)
+	self.combat:DoAreaAttack(member, self.range, self.weapon, self.validfn, self.stimuli, self.excludetags, true)
+end
+
 local AttackedAnchor = {}
 AttackedAnchor.__index = AttackedAnchor
 
 function AttackedAnchor:CanHit(member)
-	return member ~= self.attacker and is_alive(member) and member.components.combat ~= nil and member.components.combat:CanBeAttacked(self.attacker)
+	local attacker = self.attacker
+	return attacker:IsValid() and is_alive(member) and member.components.combat ~= nil and member.components.combat:CanBeAttacked(attacker)
 end
 
 function AttackedAnchor:Hit(member)
-	local damage = self.base_damage
+	local damage = self.damage
 	if self.resist then
 		damage = apply_explosive_resist(member, damage, self.attacker)
 	end
@@ -375,8 +338,7 @@ ExplosionAnchor.__index = ExplosionAnchor
 function ExplosionAnchor:CanHit(member)
 	local bomb = self.bomb
 	local explosive = bomb.components.explosive
-	return member ~= bomb
-		and bomb:IsValid()
+	return bomb:IsValid()
 		and explosive ~= nil
 		and is_alive(member)
 		and member.components.combat ~= nil
@@ -406,137 +368,230 @@ function ExplosionAnchor:Hit(member)
 	end
 end
 
-local function is_disabled(attacker, weapon)
-	return DISABLED_ENTITIES[attacker.prefab] or (weapon ~= nil and DISABLED_WEAPONS[weapon.prefab])
+local function can_spread_from(attacker, weapon)
+	return (attacker.components.combat ~= nil or attacker.components.explosive ~= nil)
+		and not DISABLED_ENTITIES[attacker.prefab]
+		and not (weapon ~= nil and DISABLED_WEAPONS[weapon.prefab])
 end
 
-local function get_members(target, attacker)
+-- Capture members before a lethal hit removes the anchor's chain membership.
+local function create_anchor(frame, attack, target, attacker, damage, weapon, stimuli, spdamage, resistance)
 	local members = get_nearby_members(target)
 	for i = #members, 1, -1 do
 		if members[i] == attacker then
 			table.remove(members, i)
 		end
 	end
-	return members
-end
-
-local function add_anchor(ctx, frame, target, attacker, damage, weapon, stimuli, spdamage)
-	if is_disabled(attacker, weapon) then
-		return
-	end
-	-- Capture before a lethal hit removes the anchor's chain membership.
-	local members = get_members(target, attacker)
 	if members[1] == nil then
 		return
 	end
 
 	local anchor
 	if frame.kind == "attack" then
-		local combat = frame.combat
 		anchor = setmetatable({
-			combat = combat,
+			combat = frame.combat,
 			weapon = weapon,
 			projectile = frame.projectile,
 			stimuli = stimuli,
 			instancemult = frame.instancemult,
-			members = members,
+			moose_smash = state.moose_smasher == attacker,
 		}, AttackAnchor)
-		snapshot_damage(anchor, function(member)
-			return calc_attack_damage(combat, member, weapon, stimuli)
-		end)
 	elseif frame.kind == "area" then
-		local combat = frame.combat
 		anchor = setmetatable({
-			combat = combat,
+			combat = frame.combat,
 			weapon = weapon,
 			stimuli = stimuli,
+			range = frame.range,
 			validfn = frame.validfn,
 			excludetags = frame.excludetags,
-			members = members,
 		}, AreaAnchor)
-		snapshot_damage(anchor, function(member)
-			local member_damage, member_spdamage = combat:CalcDamage(member, weapon, combat.areahitdamagepercent)
-			return { damage = member_damage, spdamage = member_spdamage }
-		end)
-	elseif ctx.explosive ~= nil then
-		if attacker ~= ctx.explosive then
-			return
-		end
-		anchor = setmetatable({ bomb = attacker, members = members }, ExplosionAnchor)
-	elseif ctx.attacked then
-		-- Recover the damage before the anchor's explosive resistance. A fully
-		-- resisted anchor took no damage, so its base damage is unknown and the
-		-- hit does not spread.
-		local resistance = ctx.resistances ~= nil and ctx.resistances[target] or 0
-		if resistance >= 1 then
+	elseif attacker.components.explosive ~= nil then
+		anchor = setmetatable({ bomb = attacker }, ExplosionAnchor)
+	else
+		-- A fully resisted anchor took no damage, so its base damage is
+		-- unknown and the hit does not spread.
+		if resistance ~= nil and resistance >= 1 then
 			return
 		end
 		anchor = setmetatable({
 			attacker = attacker,
-			base_damage = (damage or 0) / (1 - resistance),
-			resist = ctx.resist,
+			damage = (damage or 0) / (1 - (resistance or 0)),
+			resist = resistance ~= nil,
 			weapon = weapon,
 			stimuli = stimuli,
 			spdamage = spdamage,
-			members = members,
 		}, AttackedAnchor)
-	else
-		return
 	end
-	ctx.anchors[#ctx.anchors + 1] = anchor
+	anchor.attack = attack
+	anchor.members = members
+	return anchor
+end
+
+-- Replays the anchor's hit on each nearby member not hit by this attack yet.
+local function spread_members(anchor)
+	local attack = anchor.attack
+	for _, member in ipairs(anchor.members) do
+		-- The replayed hit marks the member when it lands; a replay the game
+		-- refuses, such as a failed area target check, leaves it unmarked.
+		if not attack.hits[member] and member:IsValid() and anchor:CanHit(member) then
+			with_state("spreading", { attack = attack, target = member }, anchor.Hit, anchor, member)
+		end
+	end
+end
+
+local function spread(anchors)
+	for _, anchor in ipairs(anchors) do
+		spread_members(anchor)
+	end
 end
 
 -------------------------------------------------------------------------
 -- Combat entry points, called by the Combat hooks
 -------------------------------------------------------------------------
 
-local function do_attack(combat, target, projectile, instancemult, fn, ...)
-	local frame = { kind = "attack", combat = combat, attacker = combat.inst, target = target, projectile = projectile, instancemult = instancemult }
-	return join(with_frame, frame, fn, ...)
+-- Anchors from a call spread once the call has resolved its own hits, so a
+-- weapon cannot break between dealing damage and its OnAttack.
+local function finish_call(frame, ...)
+	spread(frame.anchors)
+	return ...
 end
 
-local function do_area_attack(combat, validfn, excludetags, fn, ...)
-	local frame = { kind = "area", combat = combat, attacker = combat.inst, validfn = validfn, excludetags = excludetags }
-	return join(with_frame, frame, fn, ...)
+local function run_call(frame, fn, ...)
+	frame.anchors = {}
+	push_frame(frame)
+	return finish_call(frame, pop_frame(pcall(fn, ...)))
 end
 
--- Outside an attack, GetAttacked never propagates.
+-- Whether the target already took this attack through spreading. The member
+-- a spread hit is aimed at still takes the replayed call.
+local function was_spread_to(attack, target)
+	local spreading = state.spreading
+	return attack.spread[target] and not (spreading ~= nil and spreading.target == target)
+end
+
+local function do_attack(combat, target, weapon, projectile, instancemult, fn, ...)
+	local attacker = combat.inst
+	weapon = weapon or combat:GetWeapon()
+	if target ~= nil and was_spread_to(get_attack(attacker, weapon), target) then
+		return
+	end
+	return run_call({
+		kind = "attack",
+		combat = combat,
+		attacker = attacker,
+		victim = target,
+		projectile = projectile,
+		instancemult = instancemult,
+	}, fn, ...)
+end
+
+local function do_area_attack(combat, range, validfn, excludetags, fn, ...)
+	return run_call({
+		kind = "area",
+		combat = combat,
+		attacker = combat.inst,
+		range = range,
+		validfn = validfn,
+		excludetags = excludetags,
+	}, fn, ...)
+end
+
 local function get_attacked(combat, attacker, fn, ...)
-	if contexts[1] == nil then
+	return run_call({
+		kind = "attacked",
+		combat = combat,
+		attacker = attacker,
+		victim = combat.inst,
+	}, fn, ...)
+end
+
+-- Projectile anchors spread right after their hit: they cannot break the
+-- weapon, and the projectile may be removed before its DoAttack returns.
+local function finish_hit(frame, anchor, ...)
+	if anchor ~= nil then
+		if anchor.projectile ~= nil then
+			spread_members(anchor)
+		else
+			frame.anchors[#frame.anchors + 1] = anchor
+		end
+	end
+	return ...
+end
+
+local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, spdamage, fn, ...)
+	-- Damage without an attacker, such as darkness, never spreads.
+	if attacker == nil then
 		return fn(...)
 	end
-	return with_frame({ kind = "attacked", combat = combat, attacker = attacker }, fn, ...)
-end
-
--- Returns false when the hit must be dropped.
-local function on_hit(combat, attacker, damage, weapon, stimuli, spdamage)
 	local target = combat.inst
-	-- During propagation, nested damage may not reach targets already hit,
-	-- except the member currently being propagated to.
-	if scope ~= nil and scope.propagating ~= nil and scope.propagating ~= target and scope.hits[target] then
+	local resistance = take_resistance(target, attacker)
+	local hit_frame = { attacker = attacker, victim = target }
+	-- Suppressed hits are not part of any attack, so they cannot block one.
+	if state.suppressed then
+		push_frame(hit_frame)
+		return pop_frame(pcall(fn, ...))
+	end
+	local attack = get_attack(attacker, weapon)
+
+	-- Hits nested in a spread hit never anchor.
+	local spreading = state.spreading
+	if spreading ~= nil then
+		-- The spread attack itself may only reach the member it is aimed at
+		-- among the targets it already hit.
+		if attack == spreading.attack then
+			if target ~= spreading.target and attack.hits[target] then
+				return false
+			end
+			attack.spread[target] = true
+		end
+		attack.hits[target] = true
+		push_frame(hit_frame)
+		return pop_frame(pcall(fn, ...))
+	end
+
+	if was_spread_to(attack, target) then
 		return false
 	end
-	local frame = frames[#frames]
-	if attacker ~= nil and matches_frame(frame, combat, attacker) and is_alive(target) then
-		local ctx = claim(target)
-		if ctx ~= nil and is_member(target) then
-			add_anchor(ctx, frame, target, attacker, damage, weapon, stimuli, spdamage)
+
+	local frame, anchor
+	if not attack.hits[target] then
+		attack.hits[target] = true
+		frame = get_producing_frame(combat, attacker)
+		if frame ~= nil and is_member(target) and is_alive(target) and can_spread_from(attacker, weapon) and not is_retaliation(target, attacker) then
+			anchor = create_anchor(frame, attack, target, attacker, damage, weapon, stimuli, spdamage, resistance)
 		end
-	elseif scope ~= nil then
-		-- Redirected or retaliating damage never anchors, but still counts as
-		-- this target's hit so propagation cannot hit it again.
-		scope.hits[target] = true
 	end
-	return true
+
+	push_frame(hit_frame)
+	return finish_hit(frame, anchor, pop_frame(pcall(fn, ...)))
+end
+
+-------------------------------------------------------------------------
+-- Scopes, called by source hooks
+-------------------------------------------------------------------------
+
+local function suppress(fn, ...)
+	return with_state("suppressed", true, fn, ...)
+end
+
+local function run_boundary(fn, ...)
+	return with_state("boundary", weak_table(), fn, ...)
+end
+
+local function run_moose_smash(inst, fn, ...)
+	return with_state("moose_smasher", inst, fn, inst, ...)
 end
 
 return {
 	AddMember = add_member,
 	GetNearbyMembers = get_nearby_members,
-	Run = run,
-	NoteResistance = note_resistance,
 	DoAttack = do_attack,
 	DoAreaAttack = do_area_attack,
 	GetAttacked = get_attacked,
-	OnHit = on_hit,
+	GetAttackedInternal = get_attacked_internal,
+	NoteResistance = note_resistance,
+	NoteExplosiveDamage = note_explosive_damage,
+	Suppress = suppress,
+	RunBoundary = run_boundary,
+	RunMooseSmash = run_moose_smash,
 }
