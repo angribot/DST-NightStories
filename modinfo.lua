@@ -6,16 +6,16 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.64.0"
+version = "1.65.0"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 新增启迪之冠皮肤“天体之冠”
+- 改进了恐惧锁链的伤害传递
 ]],
 	[[
-- New skin: Celestial Crown for Enlightened Crown
+- Improved how Horror Chain spreads damage
 ]]
 )
 description = zheng("版本: ", "Version: ")
