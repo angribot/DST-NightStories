@@ -69,7 +69,7 @@ local postinit = {
 	"widgets/statusdisplays",
 	"widgets/templates",
 	-- root
-	"areaattacks",
+	"horrorchain",
 	"only_dazui",
 	"tools_mutable",
 }
