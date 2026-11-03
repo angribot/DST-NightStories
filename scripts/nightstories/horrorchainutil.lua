@@ -23,6 +23,19 @@ local function weak_table()
 	return setmetatable({}, WEAK_KEYS)
 end
 
+-- Returns a getter for a weak table that starts empty every tick.
+local function per_tick_table()
+	local tick, t
+	return function()
+		local now = GetTick()
+		if tick ~= now then
+			tick = now
+			t = weak_table()
+		end
+		return t
+	end
+end
+
 -------------------------------------------------------------------------
 -- Membership
 -------------------------------------------------------------------------
@@ -62,7 +75,7 @@ end
 -- Scoped state
 -------------------------------------------------------------------------
 
--- spread_target: the member a spread hit is being replayed on
+-- spreading: the anchor whose hit is being replayed and the member it targets
 -- suppressed: hits never spread, e.g. periodic aura ticks
 -- boundary: attacks owned by the innermost attack boundary
 -- moose_smasher: the Weremoose whose smash is resolving
@@ -93,19 +106,10 @@ end
 -------------------------------------------------------------------------
 
 local NO_WEAPON = {}
-local attacks_tick
-local tick_attacks
+local tick_attacks = per_tick_table()
 
 local function get_attack(attacker, weapon)
-	local attacks = state.boundary
-	if attacks == nil then
-		local tick = GetTick()
-		if attacks_tick ~= tick then
-			attacks_tick = tick
-			tick_attacks = weak_table()
-		end
-		attacks = tick_attacks
-	end
+	local attacks = state.boundary or tick_attacks()
 	local by_weapon = attacks[attacker]
 	if by_weapon == nil then
 		by_weapon = weak_table()
@@ -129,40 +133,28 @@ end
 -- restore the base damage and deduct each member's own resistance instead.
 -------------------------------------------------------------------------
 
-local resist_tick
-local queried_resistances
-local resisted_hits
-
-local function get_resist_records()
-	local tick = GetTick()
-	if resist_tick ~= tick then
-		resist_tick = tick
-		queried_resistances = weak_table()
-		resisted_hits = weak_table()
-	end
-end
+local queried_resistances = per_tick_table()
+local resisted_hits = per_tick_table()
 
 local function note_resistance(target, resistance)
-	get_resist_records()
-	queried_resistances[target] = resistance
+	queried_resistances()[target] = resistance
 end
 
 local function note_explosive_damage(target, source)
-	get_resist_records()
-	local resistance = queried_resistances[target]
+	local resistance = queried_resistances()[target]
 	if resistance ~= nil then
-		resisted_hits[target] = { source = source, resistance = resistance }
+		resisted_hits()[target] = { source = source, resistance = resistance }
 	end
 end
 
 -- Returns the resistance deducted from this hit, or nil if none was.
 local function take_resistance(target, attacker)
-	get_resist_records()
-	local record = resisted_hits[target]
+	local records = resisted_hits()
+	local record = records[target]
 	if record == nil then
 		return
 	end
-	resisted_hits[target] = nil
+	records[target] = nil
 	if record.source == attacker then
 		return record.resistance
 	end
@@ -450,7 +442,7 @@ local function spread_members(anchor)
 		if not attack.hits[member] and member:IsValid() and anchor:CanHit(member) then
 			attack.hits[member] = true
 			attack.spread[member] = true
-			with_state("spread_target", member, anchor.Hit, anchor, member)
+			with_state("spreading", { attack = attack, target = member }, anchor.Hit, anchor, member)
 		end
 	end
 end
@@ -467,11 +459,7 @@ end
 
 -- Anchors from a call spread once the call has resolved its own hits, so a
 -- weapon cannot break between dealing damage and its OnAttack.
-local function finish_call(frame, ok, ...)
-	frames[#frames] = nil
-	if not ok then
-		error((...), 0)
-	end
+local function finish_call(frame, ...)
 	spread(frame.anchors)
 	return ...
 end
@@ -479,14 +467,20 @@ end
 local function run_call(frame, fn, ...)
 	frame.anchors = {}
 	push_frame(frame)
-	return finish_call(frame, pcall(fn, ...))
+	return finish_call(frame, pop_frame(pcall(fn, ...)))
+end
+
+-- Whether the target already took this attack through spreading. The member
+-- a spread hit is aimed at still takes the replayed call.
+local function was_spread_to(attack, target)
+	local spreading = state.spreading
+	return attack.spread[target] and not (spreading ~= nil and spreading.target == target)
 end
 
 local function do_attack(combat, target, weapon, projectile, instancemult, fn, ...)
 	local attacker = combat.inst
 	weapon = weapon or combat:GetWeapon()
-	-- The target already took this attack through spreading.
-	if target ~= nil and target ~= state.spread_target and get_attack(attacker, weapon).spread[target] then
+	if target ~= nil and was_spread_to(get_attack(attacker, weapon), target) then
 		return
 	end
 	return run_call({
@@ -520,11 +514,7 @@ end
 
 -- Projectile anchors spread right after their hit: they cannot break the
 -- weapon, and the projectile may be removed before its DoAttack returns.
-local function finish_hit(frame, anchor, ok, ...)
-	frames[#frames] = nil
-	if not ok then
-		error((...), 0)
-	end
+local function finish_hit(frame, anchor, ...)
 	if anchor ~= nil then
 		if anchor.projectile ~= nil then
 			spread_members(anchor)
@@ -550,20 +540,23 @@ local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, 
 	end
 	local attack = get_attack(attacker, weapon)
 
-	if state.spread_target ~= nil then
-		-- Damage nested in a spread hit may only reach the member it is aimed
-		-- at among the targets this attack already hit.
-		if target ~= state.spread_target and attack.hits[target] then
-			return false
+	-- Hits nested in a spread hit never anchor.
+	local spreading = state.spreading
+	if spreading ~= nil then
+		-- The spread attack itself may only reach the member it is aimed at
+		-- among the targets it already hit.
+		if attack == spreading.attack then
+			if target ~= spreading.target and attack.hits[target] then
+				return false
+			end
+			attack.spread[target] = true
 		end
 		attack.hits[target] = true
-		attack.spread[target] = true
 		push_frame(hit_frame)
 		return pop_frame(pcall(fn, ...))
 	end
 
-	-- The target already took this attack through spreading.
-	if attack.spread[target] then
+	if was_spread_to(attack, target) then
 		return false
 	end
 
@@ -577,7 +570,7 @@ local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, 
 	end
 
 	push_frame(hit_frame)
-	return finish_hit(frame, anchor, pcall(fn, ...))
+	return finish_hit(frame, anchor, pop_frame(pcall(fn, ...)))
 end
 
 -------------------------------------------------------------------------
