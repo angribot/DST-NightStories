@@ -28,7 +28,7 @@ function Combat:DoAttack(target, weapon, projectile, stimuli, instancemult, ...)
 end
 
 function Combat:DoAreaAttack(target, range, weapon, validfn, stimuli, excludetags, ...)
-	return HorrorChainUtil.DoAreaAttack(self, validfn, excludetags, do_area_attack_with_source, self, target, range, weapon, validfn, stimuli, excludetags, ...)
+	return HorrorChainUtil.DoAreaAttack(self, range, validfn, excludetags, do_area_attack_with_source, self, target, range, weapon, validfn, stimuli, excludetags, ...)
 end
 
 function Combat:GetAttacked(attacker, ...)

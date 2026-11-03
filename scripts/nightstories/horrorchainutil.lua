@@ -304,25 +304,16 @@ end
 local AreaAnchor = {}
 AreaAnchor.__index = AreaAnchor
 
+-- DoAreaAttack checks the target and validfn itself, but only applies
+-- excludetags when searching for targets.
 function AreaAnchor:CanHit(member)
-	local combat = self.combat
-	local attacker = combat.inst
-	return attacker:IsValid()
-		and member.components.combat ~= nil
-		and combat:IsValidTarget(member)
-		and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
-		and (self.validfn == nil or self.validfn(member, attacker))
+	return self.combat.inst:IsValid() and member.components.combat ~= nil and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
 end
 
--- Mirrors one target of Combat:DoAreaAttack.
+-- Hits only the member. The call goes through the DoAreaAttack hook, which
+-- sets the attack source; hits nested in a spread hit never anchor.
 function AreaAnchor:Hit(member)
-	local combat = self.combat
-	local attacker = combat.inst
-	Utils.WithAttackSource(attacker, function()
-		attacker:PushEvent("onareaattackother", { target = member, weapon = self.weapon, stimuli = self.stimuli })
-		local damage, spdamage = combat:CalcDamage(member, self.weapon, combat.areahitdamagepercent)
-		member.components.combat:GetAttacked_Internal(attacker, damage, self.weapon, self.stimuli, spdamage, true)
-	end)
+	self.combat:DoAreaAttack(member, self.range, self.weapon, self.validfn, self.stimuli, self.excludetags, true)
 end
 
 local AttackedAnchor = {}
@@ -410,6 +401,7 @@ local function create_anchor(frame, attack, target, attacker, damage, weapon, st
 			combat = frame.combat,
 			weapon = weapon,
 			stimuli = stimuli,
+			range = frame.range,
 			validfn = frame.validfn,
 			excludetags = frame.excludetags,
 		}, AreaAnchor)
@@ -439,9 +431,9 @@ end
 local function spread_members(anchor)
 	local attack = anchor.attack
 	for _, member in ipairs(anchor.members) do
+		-- The replayed hit marks the member when it lands; a replay the game
+		-- refuses, such as a failed area target check, leaves it unmarked.
 		if not attack.hits[member] and member:IsValid() and anchor:CanHit(member) then
-			attack.hits[member] = true
-			attack.spread[member] = true
 			with_state("spreading", { attack = attack, target = member }, anchor.Hit, anchor, member)
 		end
 	end
@@ -493,11 +485,12 @@ local function do_attack(combat, target, weapon, projectile, instancemult, fn, .
 	}, fn, ...)
 end
 
-local function do_area_attack(combat, validfn, excludetags, fn, ...)
+local function do_area_attack(combat, range, validfn, excludetags, fn, ...)
 	return run_call({
 		kind = "area",
 		combat = combat,
 		attacker = combat.inst,
+		range = range,
 		validfn = validfn,
 		excludetags = excludetags,
 	}, fn, ...)
