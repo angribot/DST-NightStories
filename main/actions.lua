@@ -300,7 +300,10 @@ end
 NS_ACTIONS.FUELPOCKETWATCH.fn = function(act)
 	local caster = act.doer
 	local inventory = caster.components.inventory
-	if act.invobject ~= nil and caster ~= nil and caster:HasTag("nightmare_twins") then
+	local recallmark = act.invobject ~= nil and act.invobject.components.recallmark
+	-- Only marked watches can be hacked; casting an unmarked one would just mark it
+	-- without setting the warpback data that pocketwatch_warpback requires.
+	if recallmark and recallmark:IsMarked() and caster ~= nil and caster:HasTag("nightmare_twins") then
 		if fuel_pocket_watch(act.invobject, act.doer) then
 			if inventory:Has("horrorfuel", 1) then
 				inventory:ConsumeByName("horrorfuel", 1)
@@ -395,7 +398,12 @@ AddComponentAction("USEITEM", "nightfuel", function(inst, doer, target, actions)
 end)
 
 AddComponentAction("INVENTORY", "fuelpocketwatch", function(inst, doer, actions)
-	if inst:HasTag("pocketwatch_inactive") and doer:HasTag("nightmare_twins") and inst:HasTag("pocketwatch_castfrominventory") then
+	if
+		inst:HasTag("pocketwatch_inactive")
+		and not inst:HasTag("recall_unmarked")
+		and doer:HasTag("nightmare_twins")
+		and inst:HasTag("pocketwatch_castfrominventory")
+	then
 		if doer.prefab == "dummy" or (doer.replica.inventory and doer.replica.inventory:HasItemWithTag("fuelpocketwatch_fuel", 1)) then
 			table.insert(actions, NS_ACTIONS.FUELPOCKETWATCH)
 		end
