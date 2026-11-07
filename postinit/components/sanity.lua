@@ -15,6 +15,15 @@ function Sanity:GetPercent()
 	return sanity_get_percent(self)
 end
 
+-- Dummy's sanity mirrors her health, so only health carries over when swapping into her.
+local transfer_component = Sanity.TransferComponent
+function Sanity:TransferComponent(newinst, ...)
+	if newinst.prefab == "dummy" then
+		return
+	end
+	return transfer_component(self, newinst, ...)
+end
+
 local set_induced_insanity = Sanity.SetInducedInsanity
 function Sanity:SetInducedInsanity(src, val)
 	set_induced_insanity(self, src, val)
