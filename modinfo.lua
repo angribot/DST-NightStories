@@ -6,22 +6,24 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.65.2"
+version = "1.65.3"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复了入侵未标记溯源表导致服务器崩溃的问题
+- 修复了重置洞察会使薇诺娜和沃尔特遗忘已学配方的问题
 
 最近更新：
+- 修复了入侵未标记溯源表导致服务器崩溃的问题
 - 修复启迪之冠“天体之冠”皮肤部分情况下不显示的问题
 - 改进了恐惧锁链的伤害传递
 ]],
 	[[
-- Fixed a server crash when hacking an unmarked Backtrek Watch
+- Fixed Reset Insight making Winona and Walter forget learned recipes
 
 Recent Changes:
+- Fixed a server crash when hacking an unmarked Backtrek Watch
 - Fixed the Enlightened Crown's Celestial Crown skin sometimes not showing
 - Improved how Horror Chain spreads damage
 ]]
