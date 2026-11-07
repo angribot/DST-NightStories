@@ -146,29 +146,51 @@ local function on_health_sanity_change(inst)
 end
 
 local function redirect_to_health(inst, amount, overtime, ...)
+	-- Ghosts hold a placeholder health value and ignore sanity like vanilla ghosts.
+	if inst:HasTag("playerghost") then
+		return
+	end
 	return inst.components.health
 		and (amount and amount < 0 or inst.components.health.currenthealth > 0)
 		and inst.components.health:DoDelta(amount, overtime, "lose_sanity", true, nil, true)
 end
 
+local MIN_REVIVE_HEALTH = 5
+
 local function on_haunt(inst, doer)
-	return doer.prefab == "dummy" and inst.components.sanity and inst.components.sanity.current >= 5
+	return doer.prefab == "dummy" and inst.components.sanity and inst.components.sanity.current >= MIN_REVIVE_HEALTH
+end
+
+-- Returns whoever pays for the revive: the giver of a reviver item, the
+-- holder of a Second Chance Watch, or the haunted twin.
+local function get_reviver(data)
+	local source = data.source
+	if source:HasTag("reviver") then
+		return data.user
+	elseif source.prefab == "pocketwatch_revive" then
+		return source.components.inventoryitem.owner
+	end
+	return source
 end
 
 local function on_respawn_from_ghost(inst, data)
 	if data and data.source then
-		local target = (data.source.prefab == "reviver" and data.user) or (data.source.prefab == "pocketwatch_revive" and data.source.components.inventoryitem.owner) or data.source
-		local reviver_sanity = target and target.components.sanity
+		local reviver = get_reviver(data)
+		local reviver_sanity = reviver and reviver.components.sanity
 		if reviver_sanity then
-			local current = reviver_sanity.current
-			inst.components.health:SetCurrentHealth(current <= 5 and 5 or current)
+			-- The reviver gives up sanity only up to what Dummy can hold.
+			local given = math.min(reviver_sanity.current, inst.components.health:GetMaxWithPenalty())
+			inst.components.health:SetCurrentHealth(math.max(given, MIN_REVIVE_HEALTH))
 			on_health_sanity_change(inst)
-			reviver_sanity:DoDelta(-current)
+			reviver_sanity:DoDelta(-given)
 		end
 	end
 end
 
 local function on_death(inst, data)
+	if inst:HasTag("playerghost") then
+		return
+	end
 	if inst.death_task == nil then
 		inst.death_task = inst:DoTaskInTime(2, function(inst)
 			SpawnPrefab("nightmarefuel").Transform:SetPosition(inst:GetPosition():Get())

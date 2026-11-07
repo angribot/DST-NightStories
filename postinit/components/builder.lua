@@ -1,7 +1,13 @@
 GLOBAL.setfenv(1, GLOBAL)
 
+local DummyIngredient = require("nightstories/dummyingredient")
 local FuelRecipe = require("nightstories/shadowglash_recipe")
 local Builder = require("components/builder")
+
+local has_character_ingredient = Builder.HasCharacterIngredient
+function Builder:HasCharacterIngredient(ingredient, ...)
+	return has_character_ingredient(self, DummyIngredient.Resolve(ingredient, self.inst), ...)
+end
 
 local has_ingredients = Builder.HasIngredients
 function Builder:HasIngredients(recipe, ...)
