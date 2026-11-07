@@ -146,6 +146,10 @@ local function on_health_sanity_change(inst)
 end
 
 local function redirect_to_health(inst, amount, overtime, ...)
+	-- Ghosts hold a placeholder health value and ignore sanity like vanilla ghosts.
+	if inst:HasTag("playerghost") then
+		return
+	end
 	return inst.components.health
 		and (amount and amount < 0 or inst.components.health.currenthealth > 0)
 		and inst.components.health:DoDelta(amount, overtime, "lose_sanity", true, nil, true)
@@ -169,6 +173,9 @@ local function on_respawn_from_ghost(inst, data)
 end
 
 local function on_death(inst, data)
+	if inst:HasTag("playerghost") then
+		return
+	end
 	if inst.death_task == nil then
 		inst.death_task = inst:DoTaskInTime(2, function(inst)
 			SpawnPrefab("nightmarefuel").Transform:SetPosition(inst:GetPosition():Get())
