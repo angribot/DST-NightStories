@@ -133,11 +133,32 @@ local REFRESH = {
 	end,
 }
 
+-- A character swap carries every learned recipe over through SaveForReroll and
+-- LoadForReroll; builder_skill keeps them locked until the skill is chosen
+-- again. These characters' deactivation callbacks forget learned recipes, such
+-- as Winona's scanned blueprints and Walter's station ammo. Other recipes that
+-- deactivation removes are derived state and must stay removed, e.g. WX-78's
+-- shadow drones, which follow socket contents.
+local KEEP_LEARNED_RECIPES = {
+	walter = true,
+	winona = true,
+}
+
+local function RestoreLearnedRecipes(builder, known)
+	for _, recname in ipairs(known) do
+		local recipe = GetValidRecipe(recname)
+		if recipe and recipe.builder_skill and not table.contains(builder.recipes, recname) then
+			builder:AddRecipe(recname)
+		end
+	end
+end
+
 local function ResetSkillTree(player)
 	local updater = player and player.components.skilltreeupdater
 	if not updater or not SKILLTREE_DEFS[player.prefab] then
 		return
 	end
+	local builder = player.components.builder
 
 	-- Snapshot before callbacks mutate the selection; never pass locks or
 	-- infographic nodes to DeactivateSkill. Preserve accumulated insight XP.
@@ -149,6 +170,7 @@ local function ResetSkillTree(player)
 		return
 	end
 	table.sort(skills)
+	local known = KEEP_LEARNED_RECIPES[player.prefab] and builder and shallowcopy(builder.recipes)
 	for _, skill in ipairs(skills) do
 		updater:DeactivateSkill(skill)
 		if not updater:IsActivated(skill) then
@@ -158,6 +180,9 @@ local function ResetSkillTree(player)
 	local refresh = REFRESH[player.prefab]
 	if refresh then
 		refresh(player, removed)
+	end
+	if known then
+		RestoreLearnedRecipes(builder, known)
 	end
 	player:PushEvent("unlockrecipe")
 end
