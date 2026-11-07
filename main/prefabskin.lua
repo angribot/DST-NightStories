@@ -232,9 +232,7 @@ dragonflychest_gingerbread_init_fn = function(inst)
 		return
 	end
 	local ret = { dragonflychest_init_fn(inst, "dragonflychest_gingerbread") }
-	if inst.components.placer == nil then
-		inst:ListenForEvent("dragonflychest_upgraded", gingerbread_upgrade_visuals)
-	end
+	inst:ListenForEvent("dragonflychest_upgraded", gingerbread_upgrade_visuals)
 	inst.AnimState:SetBank(inst._chestupgrade_stacksize and "chest_upgraded" or "chest")
 	inst.AnimState:SetScale(1.2, 1.2, 1.2)
 	return unpack(ret)

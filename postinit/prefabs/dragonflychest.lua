@@ -24,16 +24,16 @@ AddPrefabPostInit("dragonflychest", function(inst)
 		-- the same tick run in no fixed order, so a separate task could run before
 		-- the official one and have its visuals overwritten. Push the event from
 		-- inside the official task instead.
-		local own_fn = rawget(inst, "DoTaskInTime")
+		local instance_do_task_in_time = rawget(inst, "DoTaskInTime")
 		local do_task_in_time = inst.DoTaskInTime
-		inst.DoTaskInTime = function(inst, time, fn, ...)
-			return do_task_in_time(inst, time, function(...)
+		inst.DoTaskInTime = function(self, time, fn, ...)
+			return do_task_in_time(self, time, function(...)
 				fn(...)
 				push_event(inst)
 			end, ...)
 		end
 		_OnUpgrade(inst, performer, upgraded_from_item)
-		inst.DoTaskInTime = own_fn
+		inst.DoTaskInTime = instance_do_task_in_time
 	end
 	upgradeable:SetOnUpgradeFn(OnUpgrade)
 
