@@ -155,11 +155,11 @@ local function redirect_to_health(inst, amount, overtime, ...)
 		and inst.components.health:DoDelta(amount, overtime, "lose_sanity", true, nil, true)
 end
 
-local function on_haunt(inst, doer)
-	return doer.prefab == "dummy" and inst.components.sanity and inst.components.sanity.current >= 5
-end
-
 local MIN_REVIVE_HEALTH = 5
+
+local function on_haunt(inst, doer)
+	return doer.prefab == "dummy" and inst.components.sanity and inst.components.sanity.current >= MIN_REVIVE_HEALTH
+end
 
 -- Returns whoever pays for the revive: the giver of a reviver item, the
 -- holder of a Second Chance Watch, or the haunted twin.
