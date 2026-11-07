@@ -13,6 +13,7 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 修复达米精神血量二合一机制中存在的一些问题
+- 修复龙鳞宝箱“姜饼箱妈妈”皮肤在放置预览中以及用弹性空间制造器升级后缺少锁的问题
 
 最近更新：
 - 修复了重置洞察会使薇诺娜和沃尔特遗忘已学配方的问题
@@ -22,6 +23,7 @@ changelog = zheng(
 ]],
 	[[
 - Fixed several issues with Dummy's shared health and sanity
+- Fixed the Scaled Chest's Gingerbread Chest skin missing its lock in the placement preview and after an Elastispacer upgrade
 
 Recent Changes:
 - Fixed Reset Insight making Winona and Walter forget learned recipes

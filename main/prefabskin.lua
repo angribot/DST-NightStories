@@ -227,7 +227,8 @@ dragonflychest_clear_fn = function(inst)
 end
 
 dragonflychest_gingerbread_init_fn = function(inst)
-	if not TheWorld.ismastersim then
+	-- Placers are client-side, so they must be initialized on clients too.
+	if inst.components.placer == nil and not TheWorld.ismastersim then
 		return
 	end
 	local ret = { dragonflychest_init_fn(inst, "dragonflychest_gingerbread") }
