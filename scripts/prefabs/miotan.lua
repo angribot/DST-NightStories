@@ -121,7 +121,7 @@ local function check_fuel(inst, data)
 			return override_fuel, 1
 		end
 		return
-	elseif not data.only_horror and check_has_fuel(inv, inv_boat, "nightmarefuel", num) then
+	elseif check_has_fuel(inv, inv_boat, "nightmarefuel", num) then
 		return "nightmarefuel", FUELMULT["nightmarefuel"]
 	elseif check_has_fuel(inv, inv_boat, "horrorfuel", num) then
 		return "horrorfuel", FUELMULT["horrorfuel"]
@@ -142,6 +142,20 @@ local function consume_item(inst, item, mult)
 	end
 end
 
+-- Counts a fuel across the places consume_item takes it from: Mio's inventory and her boat.
+local function count_fuel(inst, item)
+	local inv_boat = inst.components.sailor and inst.components.sailor:GetBoat() and inst.components.sailor:GetBoat().components.container
+	local _, count = inst.components.inventory:Has(item, 1)
+	if inv_boat then
+		local _, boat_count = inv_boat:Has(item, 1)
+		count = count + boat_count
+	end
+	return count
+end
+
+-- Cooldown seconds removed per Nightmare Fuel; Pure Horror removes FUELMULT.horrorfuel times as much.
+local KING_CANE_FUEL_TIME = 10
+
 local function recharge_king_cane(inst, staff)
 	if not staff or staff.prefab ~= "king_cane" or not staff.components.corruption or not staff.components.corruption:IsCorrupted() then
 		return false
@@ -153,19 +167,23 @@ local function recharge_king_cane(inst, staff)
 		return false
 	end
 
-	local fuel, fuelmult
-	if remaining > 20 then
-		fuel, fuelmult = check_fuel(inst, { only_horror = true })
-	end
-	if not fuel then
-		fuel, fuelmult = check_fuel(inst, {})
-	end
-	if not fuel then
+	-- Settle the whole cooldown at once, counted in Nightmare Fuel units: Pure Horror covers only what Nightmare Fuel cannot,
+	-- so no Nightmare Fuel is spent where Pure Horror already covers it.
+	local units_needed = math.ceil(remaining / KING_CANE_FUEL_TIME)
+	local nightmare_owned = count_fuel(inst, "nightmarefuel")
+	local horror_spent = math.max(0, math.min(count_fuel(inst, "horrorfuel"), math.ceil((units_needed - nightmare_owned) / FUELMULT.horrorfuel)))
+	local nightmare_spent = math.max(0, math.min(nightmare_owned, units_needed - horror_spent * FUELMULT.horrorfuel))
+	if horror_spent + nightmare_spent <= 0 then
 		return false
 	end
 
-	consume_item(inst, fuel)
-	rechargeable:SetPercent(rechargeable:GetPercent() + 10 * fuelmult / rechargeable:GetRechargeTime())
+	for _ = 1, horror_spent do
+		consume_item(inst, "horrorfuel")
+	end
+	for _ = 1, nightmare_spent do
+		consume_item(inst, "nightmarefuel")
+	end
+	rechargeable:SetPercent(rechargeable:GetPercent() + (nightmare_spent + horror_spent * FUELMULT.horrorfuel) * KING_CANE_FUEL_TIME / rechargeable:GetRechargeTime())
 	return true
 end
 
