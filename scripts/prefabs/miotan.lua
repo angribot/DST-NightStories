@@ -112,7 +112,7 @@ local function check_has_fuel(inv, inv_boat, item, num)
 end
 
 local function check_fuel(inst, data)
-	local num = data.count or 1
+	local num = data.cost or 1
 	local inv = inst.components.inventory
 	local inv_boat = inst.components.sailor and inst.components.sailor:GetBoat() and inst.components.sailor:GetBoat().components.container
 	local override_fuel = data.override_fuel
