@@ -91,6 +91,19 @@ local function OnMurdered(inst, data)
 	end
 end
 
+local function OnRedHaunt(inst, haunter)
+	-- Abigail can haunt too; only revive player ghosts. A repeat haunt is refused by the "haunted" tag.
+	if not haunter:HasTag("playerghost") then
+		return false
+	end
+	-- Hauntable revives the ghost with this pack as the source after we return, so renew next frame.
+	-- Force it so that a blighted pack turns plain as well.
+	inst:DoTaskInTime(0, function()
+		inst:RenewState(nil, nil, nil, true)
+	end)
+	return true
+end
+
 local function RemoveListen(inst, owner)
 	if inst._onentitydroplootfn ~= nil then
 		inst:RemoveEventCallback("entity_droploot", inst._onentitydroplootfn, TheWorld)
@@ -203,6 +216,9 @@ end
 local StateFns = {
 
 	red = function(inst, owner)
+		-- Like the Life Giving Amulet, a ghost can haunt the pack on the ground to revive.
+		inst.components.hauntable:SetOnHauntFn(OnRedHaunt)
+		inst.components.hauntable:SetHauntValue(TUNING.HAUNT_INSTANT_REZ)
 		-- Like the Life Giving Amulet, skip healing when worn by an equipment model such as a mannequin.
 		if owner and not owner:HasTag("equipmentmodel") then
 			ActivateListen(inst, owner)
@@ -350,8 +366,9 @@ local function ImmortalDisplayNameFn(inst)
 	end)
 end
 
-local function RenewState(inst, gemtype, isdummy, blighted)
-	if inst:HasTag("nightpack_blighted") and not blighted then
+-- force: renew even a blighted pack. The new pack is blighted only when blighted is set.
+local function RenewState(inst, gemtype, isdummy, blighted, force)
+	if inst:HasTag("nightpack_blighted") and not (blighted or force) then
 		return
 	end
 	local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
