@@ -10,16 +10,15 @@ stafffns.orange = function(inst, ...)
 	local onblink = blinkstaff.onblinkfn
 	-- Prefab names are assigned after construction, so check them when blinking.
 	blinkstaff.onblinkfn = function(staff, pos, caster)
-		if caster and caster:HasTag("mio_boosted_task") then
-			if staff.prefab == "king_cane" then
-				-- DST 760178: the vanilla callback uses caster only for sanity costs.
-				caster = nil
-			elseif staff.prefab == "orangestaff" then
-				local inventory = caster.components.inventory
-				if inventory and inventory:Has("nightmarefuel", 1) then
-					inventory:ConsumeByName("nightmarefuel", 1)
+		-- DST 760178: the vanilla callback uses caster only for sanity costs, so clearing it skips them.
+		if caster ~= nil then
+			if caster.CanShadowpoof ~= nil and caster:CanShadowpoof(staff) then
+				if caster:PayShadowpoof(staff) then
 					return
 				end
+				caster = nil
+			elseif staff.prefab == "king_cane" and caster:HasTag("mio_boosted_task") then
+				caster = nil
 			end
 		end
 		return onblink(staff, pos, caster)
