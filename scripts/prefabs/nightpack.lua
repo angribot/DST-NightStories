@@ -125,7 +125,7 @@ local function ActivateListen(inst, owner)
 	end
 	if inst._onstarvedtrapsoulsfn == nil then
 		inst._onstarvedtrapsoulsfn = function(src, data)
-			OnStarvedTrapSouls(inst, data)
+			OnStarvedTrapSouls(owner, data)
 		end
 		inst:ListenForEvent("starvedtrapsouls", inst._onstarvedtrapsoulsfn, TheWorld)
 	end
@@ -203,7 +203,8 @@ end
 local StateFns = {
 
 	red = function(inst, owner)
-		if owner then
+		-- Like the Life Giving Amulet, skip healing when worn by an equipment model such as a mannequin.
+		if owner and not owner:HasTag("equipmentmodel") then
 			ActivateListen(inst, owner)
 		end
 	end,
@@ -231,7 +232,7 @@ local StateFns = {
 			inst.pickup_task = nil
 		end
 		if owner then
-			inst.pickup_task = inst:DoPeriodicTask(0.2, pickup, nil, owner)
+			inst.pickup_task = inst:DoPeriodicTask(TUNING.ORANGEAMULET_ICD / 2, pickup, nil, owner)
 		end
 	end,
 
@@ -481,7 +482,8 @@ local function OnGemTrade(inst, gemtype, isdummy, from_renew)
 end
 
 local function onequip(inst, owner)
-	if inst.components.container ~= nil then
+	-- Vanilla backpacks close their container on equipment models such as mannequins; never open it for them.
+	if inst.components.container ~= nil and not owner:HasTag("equipmentmodel") then
 		inst.components.container:Open(owner)
 	end
 	if inst:GetState() then
