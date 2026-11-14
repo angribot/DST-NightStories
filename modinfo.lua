@@ -6,30 +6,18 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.65.4"
+version = "1.66.0"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 修复达米精神血量二合一机制中存在的一些问题
-- 修复龙鳞宝箱“姜饼箱妈妈”皮肤在放置预览中以及用弹性空间制造器升级后缺少锁的问题
-
-最近更新：
-- 修复了重置洞察会使薇诺娜和沃尔特遗忘已学配方的问题
-- 修复了入侵未标记溯源表导致服务器崩溃的问题
-- 修复启迪之冠“天体之冠”皮肤部分情况下不显示的问题
-- 改进了恐惧锁链的伤害传递
+- 澪在燃料加速状态下使用懒人魔杖改为暗影传送：不消耗精神，并优先消耗噩梦燃料或纯粹恐惧代替耐久
+- 澪在燃料加速状态下为懒人魔杖自动充能时，每份燃料恢复的耐久减半
 ]],
 	[[
-- Fixed several issues with Dummy's shared health and sanity
-- Fixed the Scaled Chest's Gingerbread Chest skin missing its lock in the placement preview and after an Elastispacer upgrade
-
-Recent Changes:
-- Fixed Reset Insight making Winona and Walter forget learned recipes
-- Fixed a server crash when hacking an unmarked Backtrek Watch
-- Fixed the Enlightened Crown's Celestial Crown skin sometimes not showing
-- Improved how Horror Chain spreads damage
+- Mio's Lazy Explorer casts become Shadowpoofs while fuel-boosted: they cost no sanity and spend Nightmare Fuel or Pure Horror before durability
+- Mio's fuel-boosted auto refuel now restores half as much Lazy Explorer durability per fuel
 ]]
 )
 description = zheng("版本: ", "Version: ")
