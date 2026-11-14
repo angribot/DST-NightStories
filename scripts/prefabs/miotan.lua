@@ -40,6 +40,41 @@ local FUELMULT = {
 	horrorfuel = 2,
 }
 
+-- Shadowpoof: a fuel-boosted Mio's own Lazy Explorer casts, which never cost sanity and spend fuel instead of uses.
+local function can_shadowpoof(inst, staff)
+	return staff ~= nil and staff.prefab == "orangestaff" and inst:HasTag("mio_boosted_task") and staff.replica.inventoryitem ~= nil and staff.replica.inventoryitem:IsHeldBy(inst)
+end
+
+-- Uses the carried fuel can pay beyond the staff's own; map blink mods read this on clients and the server.
+local function get_extra_blink_uses(inst, staff)
+	local inventory = inst.replica.inventory
+	if inventory == nil or not can_shadowpoof(inst, staff) then
+		return 0
+	end
+	-- Count only the fuels pay_shadowpoof spends, or map blinks could pass with uses it cannot pay.
+	local _, nightmarefuel = inventory:Has("nightmarefuel", 1)
+	local _, horrorfuel = inventory:Has("horrorfuel", 1)
+	return nightmarefuel * FUELMULT.nightmarefuel + horrorfuel * FUELMULT.horrorfuel
+end
+
+-- Pays one Shadowpoof use with fuel; returns false when the staff's own use should pay instead.
+local function pay_shadowpoof(inst, staff)
+	local inventory = inst.components.inventory
+	if inventory:Has("nightmarefuel", 1) then
+		inventory:ConsumeByName("nightmarefuel", 1)
+		return true
+	end
+	-- Pure Horror's spare uses repair the staff. A staff without room spends its own use now and takes the spare later.
+	local spare = FUELMULT.horrorfuel - 1
+	local finiteuses = staff.components.finiteuses
+	if inventory:Has("horrorfuel", 1) and finiteuses:GetUses() + spare <= finiteuses.total then
+		inventory:ConsumeByName("horrorfuel", 1)
+		finiteuses:Use(-spare)
+		return true
+	end
+	return false
+end
+
 local function set_moisture(table)
 	for _, v in pairs(table) do
 		if (v.components.equippable and v.components.equippable:IsEquipped()) and (v.components.inventoryitem and v.components.inventoryitem:IsWet()) then
@@ -331,6 +366,9 @@ local common_postinit = function(inst)
 	inst:AddTag("nightfueleater")
 	-- Minimap icon
 	inst.MiniMapEntity:SetIcon("miotan.tex")
+
+	inst.CanShadowpoof = can_shadowpoof
+	inst.GetExtraBlinkUses = get_extra_blink_uses
 end
 
 -- This initializes for the host only
@@ -378,6 +416,7 @@ local master_postinit = function(inst)
 	inst:ListenForEvent("death", on_death)
 
 	inst.StartBoost = start_boost
+	inst.PayShadowpoof = pay_shadowpoof
 end
 
 return MakePlayerCharacter("miotan", prefabs, assets, common_postinit, master_postinit)

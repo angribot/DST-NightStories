@@ -37,16 +37,25 @@ NS_ACTIONS.LUNARSHADOWSTATE.str = STRINGS.ACTIONS.LUNARSHADOWSTATE
 -- 	end
 -- end
 
+local function is_shadowpoof(act)
+	local doer = act.doer
+	return doer ~= nil and doer.CanShadowpoof ~= nil and doer:CanShadowpoof(act.invobject)
+end
+
 local blink_strfn = ACTIONS.BLINK.strfn
 ACTIONS.BLINK.strfn = function(act)
-	local blinkstaff = act.invobject == nil or act.invobject.prefab == "orangestaff"
-	local doer = act.doer
-	if blinkstaff and doer and doer:HasTag("mio_boosted_task") then
-		if doer.replica.inventory:Has("nightmarefuel", 1) then
-			return "FUEL"
-		end
+	if is_shadowpoof(act) then
+		return "FUEL"
 	end
 	return blink_strfn(act)
+end
+
+local blink_map_stroverridefn = ACTIONS.BLINK_MAP.stroverridefn
+ACTIONS.BLINK_MAP.stroverridefn = function(act)
+	if is_shadowpoof(act) then
+		return subfmt(STRINGS.ACTIONS.BLINK_MAP.FUEL, { uses = act.distancecount })
+	end
+	return blink_map_stroverridefn(act)
 end
 
 local change_tackle_strfn = ACTIONS.CHANGE_TACKLE.strfn
