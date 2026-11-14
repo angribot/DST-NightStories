@@ -40,35 +40,88 @@ local FUELMULT = {
 	horrorfuel = 2,
 }
 
+local function get_boat_container(inst)
+	local boat = inst.components.sailor and inst.components.sailor:GetBoat() -- Island Adventures
+	return boat and boat.components.container
+end
+
+local function get_stack_size(item)
+	return item.components.stackable and item.components.stackable:StackSize() or 1
+end
+
+-- Counts a fuel in Mio's pockets, cursor, and backpack and in her boat's cargo. Island Adventures' Inventory:Has counts
+-- the backpack twice, so count the places Inventory:ConsumeByName takes from directly.
+local function count_fuel(inst, item)
+	local inventory = inst.components.inventory
+	local count = 0
+	for _, v in pairs(inventory.itemslots) do
+		if v.prefab == item then
+			count = count + get_stack_size(v)
+		end
+	end
+	local active_item = inventory:GetActiveItem()
+	if active_item and active_item.prefab == item then
+		count = count + get_stack_size(active_item)
+	end
+	for _, container in pairs({ inventory:GetOverflowContainer(), get_boat_container(inst) }) do
+		local _, found = container:Has(item, 1)
+		count = count + found
+	end
+	return count
+end
+
+-- Spends a fuel from the boat's cargo first, the order Island Adventures' Inventory:ConsumeByName already uses, then
+-- from Mio's inventory. The cargo is taken directly because Island Adventures skips a boat container not yet opened.
+local function consume_fuel(inst, item, amount)
+	amount = amount or 1
+	local boat_container = get_boat_container(inst)
+	if boat_container then
+		local _, found = boat_container:Has(item, 1)
+		local from_boat = math.min(amount, found)
+		boat_container:ConsumeByName(item, from_boat)
+		amount = amount - from_boat
+	end
+	inst.components.inventory:ConsumeByName(item, amount)
+end
+
 -- Shadowpoof: a fuel-boosted Mio's own Lazy Explorer casts, which never cost sanity and spend fuel instead of uses.
 local function can_shadowpoof(inst, staff)
 	return staff ~= nil and staff.prefab == "orangestaff" and inst:HasTag("mio_boosted_task") and staff.replica.inventoryitem ~= nil and staff.replica.inventoryitem:IsHeldBy(inst)
 end
 
+-- Counts a fuel on either side: clients only have the replica, whose Has already adds an Island Adventures boat's cargo.
+local function count_blink_fuel(inst, item)
+	if inst.components.inventory ~= nil then
+		return count_fuel(inst, item)
+	end
+	local inventory = inst.replica.inventory
+	if inventory == nil then
+		return 0
+	end
+	local _, found = inventory:Has(item, 1)
+	return found
+end
+
 -- Uses the carried fuel can pay beyond the staff's own; map blink mods read this on clients and the server.
 local function get_extra_blink_uses(inst, staff)
-	local inventory = inst.replica.inventory
-	if inventory == nil or not can_shadowpoof(inst, staff) then
+	if not can_shadowpoof(inst, staff) then
 		return 0
 	end
 	-- Count only the fuels pay_shadowpoof spends, or map blinks could pass with uses it cannot pay.
-	local _, nightmarefuel = inventory:Has("nightmarefuel", 1)
-	local _, horrorfuel = inventory:Has("horrorfuel", 1)
-	return nightmarefuel * FUELMULT.nightmarefuel + horrorfuel * FUELMULT.horrorfuel
+	return count_blink_fuel(inst, "nightmarefuel") * FUELMULT.nightmarefuel + count_blink_fuel(inst, "horrorfuel") * FUELMULT.horrorfuel
 end
 
 -- Pays one Shadowpoof use with fuel; returns false when the staff's own use should pay instead.
 local function pay_shadowpoof(inst, staff)
-	local inventory = inst.components.inventory
-	if inventory:Has("nightmarefuel", 1) then
-		inventory:ConsumeByName("nightmarefuel", 1)
+	if count_fuel(inst, "nightmarefuel") > 0 then
+		consume_fuel(inst, "nightmarefuel", 1)
 		return true
 	end
 	-- Pure Horror's spare uses repair the staff. A staff without room spends its own use now and takes the spare later.
 	local spare = FUELMULT.horrorfuel - 1
 	local finiteuses = staff.components.finiteuses
-	if inventory:Has("horrorfuel", 1) and finiteuses:GetUses() + spare <= finiteuses.total then
-		inventory:ConsumeByName("horrorfuel", 1)
+	if count_fuel(inst, "horrorfuel") > 0 and finiteuses:GetUses() + spare <= finiteuses.total then
+		consume_fuel(inst, "horrorfuel", 1)
 		finiteuses:Use(-spare)
 		return true
 	end
@@ -94,63 +147,28 @@ local function dry_equipment(inst)
 		set_moisture(eslots)
 	end
 
-	local boat = inst.components.sailor and inst.components.sailor:GetBoat()
-	if boat then
-		local boatinv = boat.components.container and boat.components.container.boatequipslots
-		local boatslots = boat.components.container and boat.components.container.slots
-		if boatinv then
-			set_moisture(boatinv)
+	local boat_container = get_boat_container(inst)
+	if boat_container then
+		if boat_container.boatequipslots then
+			set_moisture(boat_container.boatequipslots)
 		end
-		if boatslots then
-			set_moisture(boatslots)
-		end
+		set_moisture(boat_container.slots)
 	end
-end
-
-local function check_has_fuel(inv, inv_boat, item, num)
-	return (inv and inv:Has(item, num)) or (inv_boat and inv_boat:Has(item, num))
 end
 
 local function check_fuel(inst, data)
 	local num = data.cost or 1
-	local inv = inst.components.inventory
-	local inv_boat = inst.components.sailor and inst.components.sailor:GetBoat() and inst.components.sailor:GetBoat().components.container
 	local override_fuel = data.override_fuel
 	if override_fuel then
-		if check_has_fuel(inv, inv_boat, override_fuel, num) then
+		if count_fuel(inst, override_fuel) >= num then
 			return override_fuel, 1
 		end
 		return
-	elseif check_has_fuel(inv, inv_boat, "nightmarefuel", num) then
+	elseif count_fuel(inst, "nightmarefuel") >= num then
 		return "nightmarefuel", FUELMULT["nightmarefuel"]
-	elseif check_has_fuel(inv, inv_boat, "horrorfuel", num) then
+	elseif count_fuel(inst, "horrorfuel") >= num then
 		return "horrorfuel", FUELMULT["horrorfuel"]
 	end
-end
-
-local function consume_item(inst, item, mult)
-	local num = mult or 1
-	if item == nil then
-		return
-	end
-	local inv = inst.components.inventory
-	local inv_boat = inst.components.sailor and inst.components.sailor:GetBoat() and inst.components.sailor:GetBoat().components.container
-	if check_has_fuel(inv, nil, item, num) then
-		inv:ConsumeByName(item, num)
-	elseif check_has_fuel(nil, inv_boat, item, num) then
-		inv_boat:ConsumeByName(item, num)
-	end
-end
-
--- Counts a fuel across the places consume_item takes it from: Mio's inventory and her boat.
-local function count_fuel(inst, item)
-	local inv_boat = inst.components.sailor and inst.components.sailor:GetBoat() and inst.components.sailor:GetBoat().components.container
-	local _, count = inst.components.inventory:Has(item, 1)
-	if inv_boat then
-		local _, boat_count = inv_boat:Has(item, 1)
-		count = count + boat_count
-	end
-	return count
 end
 
 -- Cooldown seconds removed per Nightmare Fuel; Pure Horror removes FUELMULT.horrorfuel times as much.
@@ -177,12 +195,8 @@ local function recharge_king_cane(inst, staff)
 		return false
 	end
 
-	for _ = 1, horror_spent do
-		consume_item(inst, "horrorfuel")
-	end
-	for _ = 1, nightmare_spent do
-		consume_item(inst, "nightmarefuel")
-	end
+	consume_fuel(inst, "horrorfuel", horror_spent)
+	consume_fuel(inst, "nightmarefuel", nightmare_spent)
 	rechargeable:SetPercent(rechargeable:GetPercent() + (nightmare_spent + horror_spent * FUELMULT.horrorfuel) * KING_CANE_FUEL_TIME / rechargeable:GetRechargeTime())
 	return true
 end
@@ -197,8 +211,8 @@ local function auto_refuel(inst)
 	end
 
 	local player_eslots = inst.components.inventory and inst.components.inventory.equipslots
-	local boat = inst.components.sailor and inst.components.sailor:GetBoat() -- Compatible for Island Adventures
-	local boatequipslots = boat and boat.components.container and boat.components.container.boatequipslots
+	local boat_container = get_boat_container(inst)
+	local boatequipslots = boat_container and boat_container.boatequipslots
 
 	local fueled_table = TUNING.MIOTAN_AUTO_REFUEL_TABLE.FUELED
 	local finiteuses_table = TUNING.MIOTAN_AUTO_REFUEL_TABLE.FINITEUSES
@@ -214,7 +228,7 @@ local function auto_refuel(inst)
 					if fueled and fueled:GetPercent() + TUNING.LARGE_FUEL / fueled.maxfuel * fuelmult * data.trigger * fueled.bonusmult <= 1 then
 						is_fx_true = true
 						fueled:DoDelta(TUNING.LARGE_FUEL * bonus * fueled.bonusmult * fuelmult)
-						consume_item(inst, fuel, data.cost)
+						consume_fuel(inst, fuel, data.cost)
 						if fueled.ontakefuelfn then
 							fueled.ontakefuelfn(target)
 						end
@@ -229,7 +243,7 @@ local function auto_refuel(inst)
 					if finiteuses and finiteuses:GetUses() + data.trigger * fuelmult <= finiteuses.total then
 						is_fx_true = true
 						finiteuses:Use(-bonus * fuelmult)
-						consume_item(inst, fuel, data.cost)
+						consume_fuel(inst, fuel, data.cost)
 					end
 				end
 			end
