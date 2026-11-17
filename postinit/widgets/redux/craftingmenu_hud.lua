@@ -1,15 +1,16 @@
 local AddClassPostConstruct = AddClassPostConstruct
 GLOBAL.setfenv(1, GLOBAL)
 
-local FuelRecipe = require("nightstories/shadowglash_recipe")
+local SHADOWGLASH = "shadowglash_builder"
 
 AddClassPostConstruct("widgets/redux/craftingmenu_hud", function(self)
 	local rebuild_recipes = self.RebuildRecipes
 	self.RebuildRecipes = function(self, ...)
 		rebuild_recipes(self, ...)
-		local data = self.valid_recipes[FuelRecipe.RecipeName]
+		local data = self.valid_recipes[SHADOWGLASH]
 		if data ~= nil then
-			data.recipe = FuelRecipe.ResolveRecipe(AllRecipes[FuelRecipe.RecipeName], self.owner.replica.inventory)
+			-- Show the fuel this player would pay; see main/recipes.lua.
+			data.recipe = AllRecipes[SHADOWGLASH].ForInventory(self.owner.replica.inventory)
 		end
 	end
 

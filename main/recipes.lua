@@ -150,12 +150,28 @@ AddCharacterRecipe("dummy_soulsplit_2", { Ingredient(CHARACTER_INGREDIENT.HEALTH
 SortAfter("dummy_soulsplit_2", "dummy_soulsplit_1")
 
 -- 梦魇之力 --
-AddCharacterRecipe(
+local shadowglash = AddCharacterRecipe(
 	"shadowglash_builder",
 	{ Ingredient("nightmarefuel", 1) },
 	TECH.NONE,
 	{ builder_tag = "ns_builder_dummy", no_deconstruction = true, sg_state = "domediumaction" }
 )
+
+-- Builders pay with Pure Horror when they carry any, otherwise with Nightmare Fuel.
+-- The Builder and crafting menu hooks in postinit/ call these.
+local SHADOWGLASH_INGREDIENTS = {
+	nightmarefuel = { Ingredient("nightmarefuel", 1) },
+	horrorfuel = { Ingredient("horrorfuel", 1) },
+}
+
+function shadowglash.GetFuel(inventory)
+	return inventory:Has("horrorfuel", 1, true) and "horrorfuel" or "nightmarefuel"
+end
+
+-- Keep the shared recipe immutable: each player's available fuel can differ.
+function shadowglash.ForInventory(inventory)
+	return setmetatable({ ingredients = SHADOWGLASH_INGREDIENTS[shadowglash.GetFuel(inventory)] }, { __index = shadowglash })
+end
 
 -- 收获的季节 --
 AddCharacterRecipe(
