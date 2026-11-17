@@ -6,18 +6,19 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.66.2"
+version = "1.66.3"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- 整理了内部代码结构
+
+最近更新：
 - 橙影背包拾取更快
 - 红影背包穿在假人身上不再导致崩溃
 - 红影背包现在会在附近陷阱里的猎物饿死时回血
 - 玩家鬼魂作祟地上的红影背包可以复活
-
-最近更新：
 - 澪为腐化国王魔杖缩减冷却改为一次完成，并优先消耗噩梦燃料
 - 澪的暗影传送可以使用船上的燃料
 - 修复了鼹鼠帽和螺旋桨只剩一份燃料时被免费充能的问题
@@ -26,12 +27,13 @@ changelog = zheng(
 - 澪在燃料加速状态下为懒人魔杖自动充能时，每份燃料恢复的耐久减半
 ]],
 	[[
+- Reorganized internal code structure
+
+Recent Changes:
 - The Orange Night Pack picks up items faster
 - The Red Night Pack no longer crashes the game when worn by a Mannequin
 - The Red Night Pack now heals you when a trapped creature starves nearby
 - Player ghosts can haunt a Red Night Pack on the ground to revive
-
-Recent Changes:
 - Mio now clears a corrupted King's Staff's cooldown in one go, spending Nightmare Fuel first
 - Mio's Shadowpoofs can use fuel stored on her boat
 - Fixed Moggles and the Iron Wind refueling for free with only one fuel left
