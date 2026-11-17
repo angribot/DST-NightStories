@@ -21,7 +21,6 @@ local postinit = {
 	-- components
 	"components/brightmarespawner",
 	"components/builder",
-	"components/builder_replica",
 	"components/bundler",
 	"components/charliecutscene",
 	"components/combat",

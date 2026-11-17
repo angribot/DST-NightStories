@@ -1,5 +1,3 @@
-local Utils = require("nightstories/utils")
-
 local TRAIL_FLAGS = { "shadowtrail" }
 local function totem_do_trail(target)
 	if not target.entity:IsVisible() then
@@ -51,9 +49,57 @@ end
 ------------------------- light totem functions -------------------------
 -------------------------------------------------------------------------
 
+local function get_aura_rate(inst)
+	local aura_delta = 0
+	local sanity = inst.components.sanity
+	if sanity then
+		local aura_names = {}
+		local function add_aura(source)
+			local baseauraname = source.components.sanityaura.baseauraname
+			if baseauraname then
+				if aura_names[baseauraname] then
+					return
+				end
+				aura_names[baseauraname] = true
+			end
+			local aura_val = source.components.sanityaura:GetAura(inst)
+			aura_val = (aura_val < 0 and (sanity.neg_aura_absorb > 0 and sanity.neg_aura_absorb * -aura_val or aura_val) * sanity:GetAuraMultipliers() or aura_val)
+			aura_delta = aura_delta + ((aura_val < 0 and sanity.neg_aura_immune_sources:Get()) and 0 or aura_val)
+		end
+
+		if not sanity.sanity_aura_immune_sources:Get() then
+			local x, y, z = inst.Transform:GetWorldPosition()
+			local ents = TheSim:FindEntities(x, y, z, TUNING.SANITY_AURA_SEACH_RANGE, { "sanityaura" }, { "FX", "NOCLICK", "DECOR", "INLIMBO" })
+			for i, v in ipairs(ents) do
+				if v.components.sanityaura ~= nil and v ~= inst then
+					local is_aura_immune = false
+					if sanity.sanity_aura_immunities ~= nil then
+						for tag, sources in pairs(sanity.sanity_aura_immunities) do
+							if sources:Get() and v:HasTag(tag) then
+								is_aura_immune = true
+								break
+							end
+						end
+					end
+
+					if not is_aura_immune then
+						add_aura(v)
+					end
+				end
+			end
+		end
+
+		local mount = inst.components.rider and inst.components.rider:IsRiding() and inst.components.rider:GetMount() or nil
+		if mount ~= nil and mount.components.sanityaura ~= nil then
+			add_aura(mount)
+		end
+	end
+	return aura_delta < 0 and 0.5 or 2
+end
+
 local function sanity_attach(inst, target)
 	if target.components.sanity then
-		target.components.sanity.neg_aura_modifiers:SetModifier(inst, Utils.GetAuraRate(target), "friendshiptotem_light")
+		target.components.sanity.neg_aura_modifiers:SetModifier(inst, get_aura_rate(target), "friendshiptotem_light")
 	end
 end
 

@@ -5,8 +5,61 @@ local Utils = require("nightstories/utils")
 -------------------------------------------------------------------------
 
 local TARGET_NOT_TAGS = { "balloon", "smashable", "deck_of_cards" }
-local owner_testfn = Utils.OwnerTestFn
-local do_glash_attack = Utils.DoGlashAttack
+
+local function owner_testfn(owner)
+	return owner ~= nil and (owner.components.health == nil or not owner.components.health:IsDead())
+end
+
+-- Targets whose IsRangedWeapon() checks should treat glash as melee.
+local GLASH_MELEE_TARGETS = {
+	charlie_boss = true,
+}
+
+local function get_glash(attacker, glash_prefab, enhanced)
+	local tick = GetTick()
+	local cache = attacker._ns_glash_cache
+	if cache == nil or cache.tick ~= tick then
+		cache = { tick = tick, weapons = {} }
+		attacker._ns_glash_cache = cache
+	end
+	local weapons = cache.weapons[glash_prefab]
+	if weapons == nil then
+		weapons = {}
+		cache.weapons[glash_prefab] = weapons
+	end
+	local key = enhanced == true and "enhanced" or "normal"
+	local cached = weapons[key]
+	if cached ~= nil and cached:IsValid() and not cached._ns_in_attack then
+		return cached
+	end
+
+	local glash = SpawnPrefab(glash_prefab)
+	if glash.SetEnhanced ~= nil then
+		glash:SetEnhanced(enhanced)
+	end
+	glash.entity:SetParent(attacker.entity)
+	-- Keep the prefab's next-update removal. Never mutate an in-flight weapon's
+	-- enhancement, or share it between attackers or nested damage callbacks.
+	weapons[key] = glash
+	return glash
+end
+
+local function do_glash_attack(attacker, target, glash_prefab, enhanced)
+	local glash = get_glash(attacker, glash_prefab, enhanced)
+	-- Glash is reused within a tick, so decide per hit instead of at spawn.
+	glash:AddOrRemoveTag("pseudorangedweapon", not GLASH_MELEE_TARGETS[target.prefab])
+
+	local combat = attacker.components.combat
+	local damagemultiplier = combat.damagemultiplier
+	combat.damagemultiplier = math.max(1, (damagemultiplier or 1))
+	glash._ns_in_attack = true
+	local ok, err = pcall(combat.DoAttack, combat, target, glash, glash)
+	glash._ns_in_attack = nil
+	combat.damagemultiplier = damagemultiplier
+	if not ok then
+		error(err, 0)
+	end
+end
 
 local function target_testfn(target)
 	return Utils.TargetTestFn(target) and not target:HasAnyTag(TARGET_NOT_TAGS)
