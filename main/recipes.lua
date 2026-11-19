@@ -260,6 +260,16 @@ SortAfter("portable_wardrobe_wrap", "wardrobe", "DECOR")
 AddRecipe2("portable_wardrobe_item", { Ingredient("portable_wardrobe_wrap", 3), Ingredient("boards", 4) }, TECH.MAGIC_THREE, { no_deconstruction = true }, { "MAGIC", "DECOR" })
 SortAfter("portable_wardrobe_item", "portable_wardrobe_wrap")
 
+AddRecipe2(
+	"saltlick_dreadstone",
+	{ Ingredient("boards", 2), Ingredient("dreadstone", TUNING.SALTLICK_DREADSTONE_RECIPE_COST) },
+	TECH.SCIENCE_TWO,
+	{ placer = "saltlick_dreadstone_placer", min_spacing = 2 },
+	{ "STRUCTURES", "RIDING" }
+)
+SortAfter("saltlick_dreadstone", "saltlick_improved", "STRUCTURES")
+SortAfter("saltlick_dreadstone", "saltlick_improved", "RIDING")
+
 -- 鸭子雕像 --
 AddRecipe2(
 	"chesspiece_headuck_builder",

@@ -73,6 +73,7 @@
         <Element name="raincoat_peggy.tex" u1="0.25" u2="0.3125" v1="0.375" v2="0.5"/>
         <Element name="shadowglash_builder.tex" u1="0.3125" u2="0.375" v1="0.375" v2="0.5"/>
         <Element name="skeletonhat_glass.tex" u1="0.375" u2="0.4375" v1="0.375" v2="0.5"/>
+        <Element name="saltlick_dreadstone.tex" u1="0.0625" u2="0.125" v1="0.125" v2="0.25"/>
         <Element name="skilltree_respec_tool.tex" u1="0.4375" u2="0.5" v1="0.375" v2="0.5"/>
         <Element name="spice_cactus.tex" u1="0.5" u2="0.5625" v1="0.375" v2="0.5"/>
         <Element name="spice_cactus_over.tex" u1="0.5625" u2="0.625" v1="0.375" v2="0.5"/>
