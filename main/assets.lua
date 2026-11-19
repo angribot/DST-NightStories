@@ -30,6 +30,7 @@ PrefabFiles = {
 	"ns_spices",
 	"ns_queen_torch_projectile",
 	"portable_wardrobe",
+	"saltlick_dreadstone",
 	"skilltree_respec_tool",
 }
 

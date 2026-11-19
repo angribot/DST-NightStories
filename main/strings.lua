@@ -88,6 +88,7 @@ local strings = {
 
 		PORTABLE_WARDROBE_WRAP = "Magic Dress",
 		PORTABLE_WARDROBE_ITEM = "Portable Wardrobe",
+		SALTLICK_DREADSTONE = "Dreadstone Salt Lick",
 
 		CHESSPIECE_HEADUCK = "Headuck Figure",
 		CHESSPIECE_HEADUCK_BUILDER = "Headuck Figure",
@@ -143,6 +144,7 @@ local strings = {
 		COOKGIFTWRAP = "Wrap things up and cook them!",
 		PORTABLE_WARDROBE_ITEM = "Convenient for dressing up a lot.",
 		PORTABLE_WARDROBE_WRAP = "Convenient for dressing up.",
+		SALTLICK_DREADSTONE = "Abandon all hope, ye who lick here.",
 		SPICE_CACTUS = "Make sanity great again.",
 		SPICE_MOONGLASS = "Grant the power of the moon.",
 	},
@@ -311,6 +313,7 @@ local strings = {
 
 				PORTABLE_WARDROBE_WRAP = "Dress up anytime.",
 				PORTABLE_WARDROBE_ITEM = "Dress up anywhere.",
+				SALTLICK_DREADSTONE = "No beefalo will ever lick through to the center. How dreadful.",
 
 				CHESSPIECE_HEADUCK = "󰂷",
 				BOOK_WETNESS = "We would be able to see a wet world.",

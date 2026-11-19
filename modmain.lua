@@ -42,6 +42,7 @@ local postinit = {
 	"prefabs/birdcage",
 	"prefabs/charlie_boss",
 	"prefabs/dragonflychest",
+	"prefabs/dreadstone",
 	"prefabs/flower",
 	"prefabs/foodbuffs",
 	"prefabs/gems",

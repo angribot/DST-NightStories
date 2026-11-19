@@ -334,6 +334,11 @@ msgctxt "STRINGS.CHARACTERS.GENERIC.DESCRIBE.PORTABLE_WARDROBE_WRAP"
 msgid "Dress up anytime."
 msgstr "有了它便可随时换装。"
 
+#. STRINGS.CHARACTERS.GENERIC.DESCRIBE.SALTLICK_DREADSTONE
+msgctxt "STRINGS.CHARACTERS.GENERIC.DESCRIBE.SALTLICK_DREADSTONE"
+msgid "No beefalo will ever lick through to the center. How dreadful."
+msgstr "没有哪头牛能舔到中心，真叫牛绝望。"
+
 #. STRINGS.CHARACTERS.GENERIC.DESCRIBE.SPICE_CACTUS
 msgctxt "STRINGS.CHARACTERS.GENERIC.DESCRIBE.SPICE_CACTUS"
 msgid "Make sanity great again."
@@ -1524,6 +1529,11 @@ msgctxt "STRINGS.NAMES.SHADOWGLASH_BUILDER"
 msgid "Power of Nightmare"
 msgstr "梦魇之力"
 
+#. STRINGS.NAMES.SALTLICK_DREADSTONE
+msgctxt "STRINGS.NAMES.SALTLICK_DREADSTONE"
+msgid "Dreadstone Salt Lick"
+msgstr "绝望石舔盐块"
+
 #. STRINGS.NAMES.SKILLTREE_RESPEC_TOOL
 msgctxt "STRINGS.NAMES.SKILLTREE_RESPEC_TOOL"
 msgid "Reset Insight"
@@ -1648,6 +1658,11 @@ msgstr "用噩梦扭曲冰冻。"
 msgctxt "STRINGS.RECIPE_DESC.SHADOWGLASH_BUILDER"
 msgid "Disappear in a moment."
 msgstr "转瞬即逝。"
+
+#. STRINGS.RECIPE_DESC.SALTLICK_DREADSTONE
+msgctxt "STRINGS.RECIPE_DESC.SALTLICK_DREADSTONE"
+msgid "Abandon all hope, ye who lick here."
+msgstr "舔此盐者，当弃一切希望。"
 
 #. STRINGS.RECIPE_DESC.SKILLTREE_RESPEC_TOOL
 msgctxt "STRINGS.RECIPE_DESC.SKILLTREE_RESPEC_TOOL"

@@ -12,8 +12,10 @@ name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- 新增绝望石舔盐块
 ]],
 	[[
+- Add the Dreadstone Salt Lick
 ]]
 )
 description = zheng("版本: ", "Version: ")
