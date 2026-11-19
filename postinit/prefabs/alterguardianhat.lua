@@ -6,9 +6,8 @@ local function OnUpdateDapperness(owner)
 	-- if inst.components.equippable == nil then return end
 	if inst then
 		if inst.lunarseedsmaxed then
-			local _, num = inst.components.container:Has("lunar_seed", 5)
-			local single_seed_dapperness = TUNING.CRAZINESS_SMALL * 0.4
-			inst.components.equippable.dapperness = -(single_seed_dapperness * num)
+			local _, jewel_count = inst.components.container:Has("lunar_seed", 5)
+			inst.components.equippable.dapperness = TUNING.LUNAR_SEED_DAPPERNESS * jewel_count
 		else
 			inst.components.equippable.dapperness = -TUNING.CRAZINESS_SMALL
 		end

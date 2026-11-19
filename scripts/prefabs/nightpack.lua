@@ -234,8 +234,11 @@ local StateFns = {
 		end
 	end,
 
-	purple = function(inst, owner)
-		inst.components.equippable.dapperness = -TUNING.CRAZINESS_SMALL
+	purple = function(inst)
+		inst.components.equippable:SetDappernessFn(function(pack)
+			local _, jewel_count = pack.components.container:Has("lunar_seed", 1)
+			return math.max(-TUNING.CRAZINESS_SMALL, TUNING.LUNAR_SEED_DAPPERNESS * jewel_count)
+		end)
 	end,
 
 	yellow = function(inst, owner)
