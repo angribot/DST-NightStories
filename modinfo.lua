@@ -13,9 +13,11 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 新增绝望石舔盐块
+- 紫影背包的理智恢复速度可根据天体珠宝数量调节
 ]],
 	[[
 - Add the Dreadstone Salt Lick
+- The Purple Night Pack's sanity recovery rate scales with the number of Celestial Jewels it holds
 ]]
 )
 description = zheng("版本: ", "Version: ")
