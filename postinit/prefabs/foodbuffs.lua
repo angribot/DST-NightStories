@@ -36,10 +36,8 @@ local function timer_fn(base_fn, buff_timer)
 		local duration = inst.components.timer:GetTimeLeft(buff_timer)
 
 		if target and target.prefab == "civi" and not inst.components.timer.timers[buff_timer].civi_buffed then
-			local level_mult = 1 + target.level * 0.25
-
 			inst.components.timer:StopTimer(buff_timer)
-			inst.components.timer:StartTimer(buff_timer, duration * level_mult)
+			inst.components.timer:StartTimer(buff_timer, duration * target.buff_duration_mult)
 			if inst.components.timer.timers[buff_timer] then
 				inst.components.timer.timers[buff_timer].civi_buffed = true
 			end

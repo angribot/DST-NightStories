@@ -6,18 +6,18 @@ local function zheng(zh, en)
 	return LOC[locale] or en
 end
 
-version = "1.67.0"
+version = "1.68.0"
 -- basic info --
 name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 新增绝望石舔盐块
-- 紫影背包的理智恢复速度可根据天体珠宝数量调节
+- Civi 的等级上限提升至 3 级
+- Civi 2 级的喜爱食物改为蘑菇蛋糕
 ]],
 	[[
-- Add the Dreadstone Salt Lick
-- The Purple Night Pack's sanity recovery rate scales with the number of Celestial Jewels it holds
+- Raise Civi's level cap to 3
+- Change Civi's level 2 favorite food to the Mushy Cake
 ]]
 )
 description = zheng("版本: ", "Version: ")

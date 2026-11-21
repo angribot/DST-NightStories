@@ -19,18 +19,26 @@ prefabs = FlattenTree({ prefabs, start_inv }, true)
 local function update_food(inst)
 	inst.components.foodaffinity:RemovePrefabAffinity("bonesoup")
 	inst.components.foodaffinity:RemovePrefabAffinity("meatballs")
+	inst.components.foodaffinity:RemovePrefabAffinity("shroomcake")
 	inst.components.foodaffinity:RemovePrefabAffinity("voltgoatjelly")
 	if inst.level == 0 then
 		inst.components.foodaffinity:AddPrefabAffinity("bonesoup", 1.1)
 	elseif inst.level == 1 then
 		inst.components.foodaffinity:AddPrefabAffinity("meatballs", 1.24)
 	elseif inst.level == 2 then
-		inst.components.foodaffinity:AddPrefabAffinity("voltgoatjelly", 1.4)
+		inst.components.foodaffinity:AddPrefabAffinity("shroomcake", TUNING.AFFINITY_15_CALORIES_MED)
+	elseif inst.level == 3 then
+		inst.components.foodaffinity:AddPrefabAffinity("voltgoatjelly", TUNING.AFFINITY_15_CALORIES_LARGE)
 	end
 end
 
+-- Steps for damage, speed, hunger rate, and buff duration: one per level up to Lv.2, then two more at Lv.3 (0, 1, 2, 4)
+local function get_boost_steps(level)
+	return math.floor(2 ^ (level - 1))
+end
+
 local function on_level_change(inst)
-	inst.level = math.min(2, inst.level)
+	inst.level = math.min(TUNING.CIVI_MAX_LEVEL, inst.level)
 	inst.level = math.max(0, inst.level)
 
 	update_food(inst)
@@ -41,7 +49,7 @@ local function on_level_change(inst)
 	if inst:HasTag("civi_candegrade") then
 		inst:RemoveTag("civi_candegrade")
 	end
-	if inst.level < 2 then
+	if inst.level < TUNING.CIVI_MAX_LEVEL then
 		inst:AddTag("civi_canupgrade")
 	end
 	if inst.level > 0 then
@@ -52,20 +60,23 @@ local function on_level_change(inst)
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
 
-	inst.components.hunger.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 75
-	inst.components.sanity.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 75
-	inst.components.health.maxhealth = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 75
+	local boost_steps = get_boost_steps(inst.level)
 
-	inst.components.locomotor.runspeed = (TUNING.WILSON_RUN_SPEED * (1 + 0.25 * inst.level)) -- max_level = 9
+	inst.components.hunger.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 25
+	inst.components.sanity.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 25
+	inst.components.health.maxhealth = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 25
 
-	inst.components.combat.damagemultiplier = (1 + inst.level * 0.25) -- max_level = 1.5
+	inst.components.locomotor.runspeed = (TUNING.WILSON_RUN_SPEED * (1 + 0.25 * boost_steps)) -- max_level = 12
+
+	inst.components.combat.damagemultiplier = (1 + boost_steps * 0.25) -- max_level = 2
+	inst.buff_duration_mult = 1 + boost_steps * 0.25 -- max_level = 2, read by postinit/prefabs/foodbuffs.lua
 	inst.components.sanity.night_drain_mult = (TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25)
 	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25, "civi")
 
 	if inst.components.eater ~= nil then
 		inst.components.eater:SetAbsorptionModifiers((1 - 0.25 * inst.level), (1 - 0.25 * inst.level), (1 - 0.25 * inst.level))
 	end
-	inst.components.hunger:SetRate((1 - inst.level * 0.1) * TUNING.WILSON_HUNGER_RATE)
+	inst.components.hunger:SetRate((1 - boost_steps * 0.1) * TUNING.WILSON_HUNGER_RATE)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.sanity:SetPercent(sanity_percent)

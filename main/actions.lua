@@ -112,7 +112,7 @@ NS_ACTIONS.NIGHTSWITCH.fn = function(act)
 		local item = doer.components.inventory:RemoveItem(act.invobject)
 		if item.prefab == "darkcrystal" then
 			doer.level = level + 1
-			if doer.level < 2 then
+			if doer.level < TUNING.CIVI_MAX_LEVEL then
 				doer.components.talker:Say(STRINGS.CIVI_LEVELS.FEEL_DARK, 3)
 			else
 				doer.components.talker:Say(STRINGS.CIVI_LEVELS.ALREADY_DARK, 3)
