@@ -12,10 +12,16 @@ name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- 完全腐化的国王魔杖物品栏图标显示暗影特效
+
+最近更新：
 - Civi 的等级上限提升至 3 级
 - Civi 2 级的喜爱食物改为蘑菇蛋糕
 ]],
 	[[
+- The fully corrupted King's Staff shows a shadow effect on its inventory icon
+
+Recent Changes:
 - Raise Civi's level cap to 3
 - Change Civi's level 2 favorite food to the Mushy Cake
 ]]

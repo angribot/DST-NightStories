@@ -1,4 +1,5 @@
 local UIAnim = require("widgets/uianim")
+local ItemTile = require("widgets/itemtile")
 local FX = {
 	LUNAR = "inventory_fx_lunar",
 	SHADOW = "inventory_fx_shadow",
@@ -65,6 +66,16 @@ local function upadte_lunarshadow(self)
 	update_meter(self)
 end
 
+-- Count full corruption as a vanilla shadow FX condition so it shares one layer with the equip FX.
+local function toggle_king_cane_shadow_fx(self)
+	local showequipshadowfx = self.showequipshadowfx
+	if self.item._corrupted:value() then
+		self.showequipshadowfx = true
+	end
+	ItemTile.ToggleShadowFX(self)
+	self.showequipshadowfx = showequipshadowfx
+end
+
 AddClassPostConstruct("widgets/itemtile", function(self)
 	if self.item.prefab == "lunarshadow" then
 		upadte_lunarshadow(self)
@@ -89,6 +100,12 @@ AddClassPostConstruct("widgets/itemtile", function(self)
 		update_fx(self, "toggled", FX.LUNAR)
 		self.inst:ListenForEvent("friendshiptotem.toggledirty", function()
 			update_fx(self, "toggled", FX.LUNAR)
+		end, self.item)
+	elseif self.item.prefab == "king_cane" then
+		self.ToggleShadowFX = toggle_king_cane_shadow_fx
+		self:ToggleShadowFX()
+		self.inst:ListenForEvent("king_cane.corrupteddirty", function()
+			self:ToggleShadowFX()
 		end, self.item)
 	end
 end)
