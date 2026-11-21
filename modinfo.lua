@@ -12,8 +12,12 @@ name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- Civi 的等级上限提升至 3 级
+- Civi 2 级的喜爱食物改为蘑菇蛋糕
 ]],
 	[[
+- Raise Civi's level cap to 3
+- Change Civi's level 2 favorite food to the Mushy Cake
 ]]
 )
 description = zheng("版本: ", "Version: ")

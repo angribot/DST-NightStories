@@ -1093,7 +1093,7 @@ msgstr ""
 
 #. STRINGS.CHARACTER_BIOS.civi.2.desc
 msgctxt "STRINGS.CHARACTER_BIOS.civi.2.desc"
-msgid "Lv.0 - Bone Bouillon\nLv.1 - Meatballs\nLv.2 - Volt Goat Chaud-Froid"
+msgid "Lv.0 - Bone Bouillon\nLv.1 - Meatballs\nLv.2 - Mushy Cake\nLv.3 - Volt Goat Chaud-Froid"
 msgstr ""
 
 #. STRINGS.CHARACTER_BIOS.civi.2.title
