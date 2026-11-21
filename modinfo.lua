@@ -13,6 +13,7 @@ author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
 - 完全腐化的国王魔杖物品栏图标显示暗影特效
+- 修复月影物品栏特效重叠或残留的问题
 
 最近更新：
 - Civi 的等级上限提升至 3 级
@@ -20,6 +21,7 @@ changelog = zheng(
 ]],
 	[[
 - The fully corrupted King's Staff shows a shadow effect on its inventory icon
+- Fix the Lunar Shadow's inventory effect stacking or lingering
 
 Recent Changes:
 - Raise Civi's level cap to 3

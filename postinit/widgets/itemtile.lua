@@ -5,8 +5,8 @@ local FX = {
 	SHADOW = "inventory_fx_shadow",
 }
 
-local function update_fx(self, var, bank_and_build)
-	if self.item[var]:value() then
+local function update_fx(self, show, bank_and_build)
+	if show then
 		if not self.itemtile_fx then
 			self.itemtile_fx = self.image:AddChild(UIAnim())
 			self.itemtile_fx:GetAnimState():SetBank(bank_and_build)
@@ -61,23 +61,39 @@ local function update_meter(self, force_show)
 	end
 end
 
-local function upadte_lunarshadow(self)
-	update_fx(self, "buffed", self.item.state:value() and FX.LUNAR or FX.SHADOW)
-	update_meter(self)
-end
-
--- Count full corruption as a vanilla shadow FX condition so it shares one layer with the equip FX.
-local function toggle_king_cane_shadow_fx(self)
+-- Feed `show` to vanilla ToggleShadowFX as its equip condition so shadow states share one FX layer.
+local function toggle_shadow_fx(self, show)
 	local showequipshadowfx = self.showequipshadowfx
-	if self.item._corrupted:value() then
-		self.showequipshadowfx = true
-	end
+	self.showequipshadowfx = show or nil
 	ItemTile.ToggleShadowFX(self)
 	self.showequipshadowfx = showequipshadowfx
 end
 
+local function toggle_king_cane_shadow_fx(self)
+	toggle_shadow_fx(self, self.showequipshadowfx or self.item._corrupted:value())
+end
+
+-- Vanilla checks the shadowlevel tag only on equip, and clients keep the equip tile when the form changes.
+local function toggle_lunarshadow_shadow_fx(self)
+	local item = self.item
+	toggle_shadow_fx(self, not item.state:value() and (item.buffed:value() or self.isequip and ThePlayer:HasTag("shadowmagic")))
+end
+
+local function set_lunarshadow_is_equip(self, isequip)
+	self.isequip = isequip
+	self:ToggleShadowFX()
+end
+
+local function upadte_lunarshadow(self)
+	update_fx(self, self.item.buffed:value() and self.item.state:value(), FX.LUNAR)
+	self:ToggleShadowFX()
+	update_meter(self)
+end
+
 AddClassPostConstruct("widgets/itemtile", function(self)
 	if self.item.prefab == "lunarshadow" then
+		self.ToggleShadowFX = toggle_lunarshadow_shadow_fx
+		self.SetIsEquip = set_lunarshadow_is_equip
 		upadte_lunarshadow(self)
 		self.inst:ListenForEvent("lunarshadow_buffdirty", function()
 			upadte_lunarshadow(self)
@@ -92,14 +108,14 @@ AddClassPostConstruct("widgets/itemtile", function(self)
 			update_meter(self, true)
 		end, self.item)
 	elseif self.item.prefab == "friendshiptotem_dark" then
-		update_fx(self, "toggled", FX.SHADOW)
+		update_fx(self, self.item.toggled:value(), FX.SHADOW)
 		self.inst:ListenForEvent("friendshiptotem.toggledirty", function()
-			update_fx(self, "toggled", FX.SHADOW)
+			update_fx(self, self.item.toggled:value(), FX.SHADOW)
 		end, self.item)
 	elseif self.item.prefab == "friendshiptotem_light" then
-		update_fx(self, "toggled", FX.LUNAR)
+		update_fx(self, self.item.toggled:value(), FX.LUNAR)
 		self.inst:ListenForEvent("friendshiptotem.toggledirty", function()
-			update_fx(self, "toggled", FX.LUNAR)
+			update_fx(self, self.item.toggled:value(), FX.LUNAR)
 		end, self.item)
 	elseif self.item.prefab == "king_cane" then
 		self.ToggleShadowFX = toggle_king_cane_shadow_fx
