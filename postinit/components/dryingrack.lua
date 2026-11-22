@@ -6,10 +6,23 @@ local on_done_drying, fn_i, scope_fn = UpvalueUtil.GetUpvalue(DryingRack.LongUpd
 
 local function OnDoneDrying(inst, self, item)
 	local stacksize = item and item.components.stackable and item.components.stackable.stacksize or 1
-	local product = on_done_drying(inst, self, item)
-	if product and product.components.stackable then
-		product.components.stackable:SetStackSize(stacksize)
+	if stacksize <= 1 then
+		return on_done_drying(inst, self, item)
 	end
+
+	-- Resize the product as vanilla hands it to the slot, so itemget listeners
+	-- (e.g. the Large Drying Rack's salt collector) see the whole dried stack.
+	local container = self.container
+	local give_item = rawget(container, "GiveItem")
+	container.GiveItem = function(_, product, ...)
+		container.GiveItem = give_item
+		if product.components.stackable then
+			product.components.stackable:SetStackSize(stacksize)
+		end
+		return container:GiveItem(product, ...)
+	end
+	local product = on_done_drying(inst, self, item)
+	container.GiveItem = give_item
 	return product
 end
 
