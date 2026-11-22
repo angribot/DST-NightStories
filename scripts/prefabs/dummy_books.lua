@@ -54,6 +54,7 @@ local book_defs = {
 		read_sanity = -TUNING.SANITY_LARGER,
 		peruse_sanity = -TUNING.SANITY_HUGE,
 		layer_sound = { frame = 30, sound = "wickerbottom_rework/book_spells/upgraded_horticulture" },
+		deps = { "saltrock" },
 		fn = function(inst, reader)
 			local success
 			local pos = Vector3(inst.Transform:GetWorldPosition())
@@ -67,6 +68,10 @@ local book_defs = {
 				"beebox",
 				"waterplant_baby",
 				"waterplant",
+			}
+			local DRYINGRACK_DEFS = {
+				"meatrack",
+				"meatrack_hermit_multi",
 			}
 			for k, v in pairs(ents) do
 				if v.components.pickable and not table.contains(NO_PICK_DEFS, v.prefab) then
@@ -87,16 +92,24 @@ local book_defs = {
 					end
 				end
 
-				if v.components.dryingrack and v.prefab == "meatrack" then
+				if v.components.dryingrack and table.contains(DRYINGRACK_DEFS, v.prefab) then
 					local container = v.components.dryingrack:GetContainer()
+					local saltcollector = v.components.dryingracksaltcollector
 					for slot = 1, container:GetNumSlots() do
 						local item = container:GetItemInSlot(slot)
 						if item and item.components.dryable == nil then
+							-- Take the slot's salt first, so the Large Drying Rack does not put it back into the emptied slot.
+							local saltcount = saltcollector and saltcollector:RemoveSalt(slot)
 							item = container:RemoveItemBySlot(slot)
 							-- Forget the slot like Container:MoveItemFromAllOfSlot, or the inventory puts the item back into a rack the reader has open.
 							item.prevcontainer = nil
 							item.prevslot = nil
 							reader.components.inventory:GiveItem(item, nil, v:GetPosition())
+							if saltcount then
+								local saltrock = SpawnPrefab("saltrock")
+								saltrock.components.stackable:SetStackSize(saltcount)
+								reader.components.inventory:GiveItem(saltrock, nil, v:GetPosition())
+							end
 							success = true
 						end
 					end

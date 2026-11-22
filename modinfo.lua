@@ -15,6 +15,7 @@ changelog = zheng(
 - 修复包锅与厨师礼物包锅做出的彩虹糖豆偏少的问题
 - 修复收获的季节消耗次数却没收到晾肉架物品的问题
 - 晾肉巨架格子接受堆叠
+- 收获的季节可以收获晾肉巨架
 
 最近更新：
 - 完全腐化的国王魔杖物品栏图标显示暗影特效
@@ -26,6 +27,7 @@ changelog = zheng(
 - Fix the Cooker's Bundling Wrap and Cooker's Gift Wrap making too few Jellybeans
 - Fix the Season of Harvest spending a use without collecting Drying Rack items
 - The Large Drying Rack accepts stacks
+- The Season of Harvest harvests Large Drying Racks
 
 Recent Changes:
 - The fully corrupted King's Staff shows a shadow effect on its inventory icon
