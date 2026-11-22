@@ -12,18 +12,20 @@ name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
-- 完全腐化的国王魔杖物品栏图标显示暗影特效
-- 修复月影物品栏特效重叠或残留的问题
+- 修复包锅与厨师礼物包锅做出的彩虹糖豆偏少的问题
 
 最近更新：
+- 完全腐化的国王魔杖物品栏图标显示暗影特效
+- 修复月影物品栏特效重叠或残留的问题
 - Civi 的等级上限提升至 3 级
 - Civi 2 级的喜爱食物改为蘑菇蛋糕
 ]],
 	[[
-- The fully corrupted King's Staff shows a shadow effect on its inventory icon
-- Fix the Lunar Shadow's inventory effect stacking or lingering
+- Fix the Cooker's Bundling Wrap and Cooker's Gift Wrap making too few Jellybeans
 
 Recent Changes:
+- The fully corrupted King's Staff shows a shadow effect on its inventory icon
+- Fix the Lunar Shadow's inventory effect stacking or lingering
 - Raise Civi's level cap to 3
 - Change Civi's level 2 favorite food to the Mushy Cake
 ]]
