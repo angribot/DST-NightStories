@@ -26,6 +26,7 @@ local postinit = {
 	"components/combat",
 	"components/corruption",
 	"components/dryingrack",
+	"components/dryingracksaltcollector",
 	"components/equippable",
 	"components/forgerepair",
 	-- "components/lptw",
