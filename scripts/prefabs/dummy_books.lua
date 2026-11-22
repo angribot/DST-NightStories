@@ -88,8 +88,14 @@ local book_defs = {
 				end
 
 				if v.components.dryingrack and v.prefab == "meatrack" then
-					for _, item in pairs(v.components.dryingrack.container.slots) do
+					local container = v.components.dryingrack:GetContainer()
+					for slot = 1, container:GetNumSlots() do
+						local item = container:GetItemInSlot(slot)
 						if item and item.components.dryable == nil then
+							item = container:RemoveItemBySlot(slot)
+							-- Forget the slot like Container:MoveItemFromAllOfSlot, or the inventory puts the item back into a rack the reader has open.
+							item.prevcontainer = nil
+							item.prevslot = nil
 							reader.components.inventory:GiveItem(item, nil, v:GetPosition())
 							success = true
 						end
