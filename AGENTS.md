@@ -26,6 +26,12 @@ Mirror the vanilla `scripts/` layout.
 - Reach for vanilla and GlassicAPI interfaces and existing files first; add a helper, wrapper, component, or file only when none of them can hold the code.
 - Guard only against states you can point to in the game source.
 
+## Comments
+
+- Write comments in the format `.lint/check-comments --help` describes. Head a copied upstream function with one that cites it and says what the copy changes.
+- Enable the pre-commit comment check once per clone: `git config core.hooksPath .githooks`.
+- After DST-scripts, GlassicAPI, or DST-Fixed updates, run `.lint/check-upstream`, recheck each reported fact against the new code, and update the version in its comment.
+
 ## Lua compatibility
 
 Target DST's Lua 5.1 runtime plus `bit`, not LuaJIT extensions.
