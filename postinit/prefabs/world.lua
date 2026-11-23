@@ -128,7 +128,7 @@ AddPrefabPostInit("world", function(inst)
 		end
 	end
 
-	-- Components have loaded and entities have not spawned, so saved skins see this progress.
+	-- Vanilla gamelogic.lua:PopulateWorld (762172): loads the world, components first, before it spawns saved entities
 	local onload = inst.OnLoad
 	inst.OnLoad = function(inst, data, ...)
 		local wagboss_tracker = inst.components.wagboss_tracker

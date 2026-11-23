@@ -29,7 +29,7 @@ AddPrefabPostInit("alterguardianhat", function(inst)
 			if spawn_gestalt == nil then
 				spawn_gestalt = inst.alterguardian_spawngestalt_fn
 				inst:RemoveEventCallback("onhitother", spawn_gestalt, _owner)
-				-- Vanilla reuses this callback on equip and removes it on unequip.
+				-- Vanilla prefabs/hats.lua:alterguardian_onequip (762172): reuses inst.alterguardian_spawngestalt_fn, which alterguardian_onunequip removes
 				inst.alterguardian_spawngestalt_fn = function(__owner, __data)
 					if not (__owner.components.debuffable and __owner.components.debuffable:HasDebuff("buff_glash"))
 						and not (__data and __data.weapon and __data.weapon:HasTag("glash")) then

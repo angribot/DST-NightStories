@@ -29,7 +29,7 @@ function DryingRackSaltCollector:RemoveSalt(slot)
 	return count
 end
 
--- Keep vanilla's slot list so the save still loads without this mod, one salt per slot.
+-- Vanilla components/dryingracksaltcollector.lua:DryingRackSaltCollector:OnLoad (762172): reads data.slots as one salt each when this mod is disabled
 local OnSave = DryingRackSaltCollector.OnSave
 function DryingRackSaltCollector:OnSave()
 	local data = OnSave(self)
@@ -45,7 +45,7 @@ end
 function DryingRackSaltCollector:OnLoad(data)
 	if data.slots and #data.slots > 0 then
 		for i, slot in ipairs(data.slots) do
-			-- The saved count also replaces the salt the container adds back if it loads its items first.
+			-- Vanilla prefabs/meatrack2.lua:hermit_OnItemGet (762172): already adds salt for items the container loads before this component
 			local count = data.counts and data.counts[i] or 1
 			self.numsalts = self.numsalts - (self.slots[slot] or 0) + count
 			self.slots[slot] = count

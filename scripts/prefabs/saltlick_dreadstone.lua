@@ -27,7 +27,7 @@ local function Repair(self, doer, item)
 		return false
 	end
 
-	-- Vanilla Repair tries work repair before finite uses and would reject dreadstone.
+	-- Vanilla components/repairable.lua:address_repair_amount (762172): stops at full work before finite uses, rejecting dreadstone
 	local depleted = uses:GetUses() == 0
 	uses:Repair(repairer.finiteusesrepairvalue)
 	item.components.stackable:Get():Remove()

@@ -57,7 +57,7 @@ local function OnHealthDelta(inst, data)
 	if self.capture ~= nil and self.capture.kind == "periodic" then
 		self.capture.amount = self.capture.amount + data.amount
 	elseif (self.capture ~= nil and self.capture.kind == "fire") or (data.overtime and data.cause ~= "lose_sanity") or lunarburn then
-		-- healthdelta amounts are before clamping.
+		-- Vanilla components/health.lua:Health:DoDelta (762172): reports amounts before clamping
 		self.samples[#self.samples + 1] = { time = GetTime(), amount = data.amount }
 	end
 end

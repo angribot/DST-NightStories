@@ -29,7 +29,7 @@ local function RefreshWillow(player, removed)
 	for _, bernie in ipairs(bernies) do
 		if bernie:IsValid() then
 			if removed.willow_burnignbernie then
-				-- onLeaderChanged would leave canlight and active flames; GoInactive clears both.
+				-- Vanilla prefabs/bernie_big.lua:onLeaderChanged (762172): only ever adds canlight and its listener; goinactive drops them with any flames
 				bernie:GoInactive()
 			else
 				bernie:onLeaderChanged(player)
@@ -129,8 +129,9 @@ local REFRESH = {
 	end,
 }
 
--- Their deactivation forgets learned recipes (Winona's blueprints, Walter's station ammo)
--- that a respec must keep. Derived recipes, like WX-78's shadow drones, stay removed.
+-- Vanilla prefabs/winona.lua:OnDeactivateSkill (762172): forgets recipes her Wagstaff skills taught, so a respec restores them
+-- Vanilla prefabs/walter.lua:OnDeactivateSkill (762172): forgets station recipes his slingshot skills unlocked, so a respec restores them
+-- Vanilla prefabs/wx78_common.lua:SetShadowHarvesterLimits_None (762172): removes drone recipes that follow socket contents, so they stay removed
 local KEEP_LEARNED_RECIPES = {
 	walter = true,
 	winona = true,

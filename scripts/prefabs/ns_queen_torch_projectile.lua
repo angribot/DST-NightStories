@@ -21,7 +21,7 @@ local function CanSplash(inst, target, attacker)
 		and target.entity:IsVisible()
 		and attacker.components.combat:CanTarget(target)
 		and not attacker.components.combat:IsAlly(target)
-		-- Match the staff's exclusion of new, immobile neutral targets.
+		-- Vanilla prefabs/brilliance_projectile_fx.lua:TryBounce (762172): skips new neutral targets without a locomotor after a hostile first target
 		and not (inst.initial_hostile and not target:HasTag("hostile") and target.components.locomotor == nil)
 end
 

@@ -18,7 +18,7 @@ AddComponentPostInit("charliecutscene", function(self)
 		update_progress()
 	end
 
-	-- Existing saves and interrupted cutscenes can load an already repaired gate.
+	-- Vanilla components/charliecutscene.lua:CharlieCutscene:OnLoad (762172): restores a repaired gate without RepairGate, also from a save taken mid-cutscene
 	local onload = self.OnLoad
 	self.OnLoad = function(self, ...)
 		onload(self, ...)

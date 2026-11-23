@@ -30,7 +30,7 @@ local function CanCorrupt(staff, target)
 		and not (target:HasTag("nightpack_blighted") and target:GetState() == state)
 end
 
--- Do not give packs nightmarecorruptable: the vanilla collector cannot filter same-colour packs.
+-- Vanilla componentactions.lua:corruption (762172): offers CORRUPTNIGHTMARE on every nightmarecorruptable target, same-colour packs included
 AddComponentAction("EQUIPPED", "corruption", function(inst, doer, target, actions, right)
 	if right and CanCorrupt(inst, target) then
 		table.insert(actions, ACTIONS.CORRUPTNIGHTMARE)

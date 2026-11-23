@@ -42,7 +42,7 @@ local function handle_cook_gift(self)
 		end
 	end
 
-	-- As in Stewer:Harvest.
+	-- Vanilla components/stewer.lua:Stewer:Harvest (762172): yields recipe.stacksize products per cook
 	local product_count = lowest_stack * (recipe.stacksize or 1)
 	local product = SpawnPrefab(product_prefab)
 	local product_maxsize = product.components.stackable.maxsize

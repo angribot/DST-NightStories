@@ -11,8 +11,7 @@ local function expire(inst)
 	inst:RemoveComponent("horrorchain")
 end
 
--- Chains are not saved: saved component data would break loading the world
--- once this mod is disabled, and a chain lasts only seconds.
+-- Vanilla entityscript.lua:EntityScript:SetPersistData (762172): re-adds a saved add_component_if_missing component, which fails once this mod is disabled
 local HorrorChain = Class(function(self, inst)
 	self.inst = inst
 	self.task = nil

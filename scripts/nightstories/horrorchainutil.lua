@@ -100,9 +100,7 @@ local function get_attack(attacker, weapon)
 	return attack
 end
 
--- Sources that deduct explosive resistance query it, report the resisted
--- damage, then hit with the same source. Recording that lets a spread hit
--- restore the base damage and deduct each member's own resistance instead.
+-- Vanilla components/explosive.lua:Explosive:OnBurnt (762172): deducts explosive resistance, reports it, then hits with the same source, as Wortox's soul spears and decoys do
 local queried_resistances = per_tick_table()
 local resisted_hits = per_tick_table()
 
@@ -129,7 +127,7 @@ local function take_resistance(target, attacker)
 	end
 end
 
--- As vanilla explosions do.
+-- Vanilla components/explosive.lua:Explosive:OnBurnt (762172): applies and accumulates explosive resistance the same way
 local function apply_explosive_resist(target, damage, source)
 	local explosiveresist = target.components.explosiveresist
 	if explosiveresist == nil then
@@ -192,8 +190,7 @@ function AttackAnchor:CanHit(member)
 		and (weapon == nil or (weapon:IsValid() and weapon.components.weapon ~= nil))
 end
 
--- Weremoose smash adds its planar bonus only against planar targets, and a
--- tackle multiplies damage only against the structure it collides with.
+-- Vanilla components/tackler.lua:Tackler:CheckCollision (762172): applies the tackler multiplier only to the DoAttack on the struck target
 local function adapt_to_member(anchor, member)
 	local attacker = anchor.combat.inst
 	local restores = {}
@@ -260,13 +257,12 @@ end
 local AreaAnchor = {}
 AreaAnchor.__index = AreaAnchor
 
--- DoAreaAttack checks the target and validfn itself, but only applies
--- excludetags when searching for targets.
+-- Vanilla components/combat.lua:Combat:DoAreaAttack (762172): checks the target and validfn itself, but applies excludetags only when searching
 function AreaAnchor:CanHit(member)
 	return self.combat.inst:IsValid() and member.components.combat ~= nil and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
 end
 
--- onlyontarget: hits only the member.
+-- Vanilla components/combat.lua:Combat:DoAreaAttack (762172): onlyontarget hits only the given target
 function AreaAnchor:Hit(member)
 	self.combat:DoAreaAttack(member, self.range, self.weapon, self.validfn, self.stimuli, self.excludetags, true)
 end

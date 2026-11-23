@@ -20,8 +20,8 @@ local function launchitem(item, angle)
 	item.Physics:SetVel(speed * math.cos(angle), math.random() * 2 + 8, speed * math.sin(angle))
 end
 
+-- Vanilla prefabs/pigking.lua:ontradeforgold (760944): copy that rewards each item of a stack, and Mio in Nightmare Fuel
 local function ontradeforitem(inst, item, giver, ...)
-	-- copied from pigking.lua (synced with game version 760944) --
 	AwardPlayerAchievement("pigking_trader", giver)
 
 	local x, y, z = inst.Transform:GetWorldPosition()

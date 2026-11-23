@@ -151,7 +151,7 @@ local DummyBadge = Class(Badge, function(self, owner)
 	self:StartUpdating()
 end)
 
--- No-ops: StatusDisplays sets the value; pulses come from dummyhealthfeedback.
+-- Vanilla widgets/statusdisplays.lua:StatusDisplays:HealthDelta (762172): sets the value, then leaves pulses to a badge that defines HealthDelta
 function DummyBadge:HealthDelta() end
 function DummyBadge:ForceHealthPulse() end
 

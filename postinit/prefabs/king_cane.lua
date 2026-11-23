@@ -1,7 +1,7 @@
 local AddPrefabPostInit = AddPrefabPostInit
 GLOBAL.setfenv(1, GLOBAL)
 
--- Clients get no event when the corrupted tag changes, so replicate it for item tiles.
+-- Vanilla entityscript.lua:EntityScript:AddTag (762172): replicates tags through the engine without a client event
 local function WrapCorruptionFn(fn, corrupted)
 	return function(inst)
 		inst._corrupted:set(corrupted)

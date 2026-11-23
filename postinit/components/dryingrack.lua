@@ -10,7 +10,7 @@ local function OnDoneDrying(inst, self, item)
 		return on_done_drying(inst, self, item)
 	end
 
-	-- Resize before GiveItem so itemget listeners see the whole stack.
+	-- Vanilla components/dryingrack.lua:OnDoneDrying (762172): gives one product per dried item, whatever its stack size
 	local container = self.container
 	local give_item = rawget(container, "GiveItem")
 	container.GiveItem = function(_, product, ...)

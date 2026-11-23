@@ -90,7 +90,7 @@ end
 
 AddPrefabPostInit("magician_chest", AccessorPostInit)
 AddPrefabPostInit("chester", AccessorPostInit)
--- Magician hats are converted from ordinary top hats after prefab initialization.
+-- Vanilla prefabs/hats.lua:top_convert_to_magician (762172): turns an ordinary top hat into a magician hat after it spawns
 AddPrefabPostInit("tophat", AccessorPostInit)
 
 AddPrefabPostInit("shadow_container", function(inst)

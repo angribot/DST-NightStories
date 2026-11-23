@@ -111,7 +111,7 @@ end
 --------------------------- RANGE FX ---------------------------
 ----------------------------------------------------------------
 
--- Mirrors alterguardian_phase3circle.
+-- Vanilla prefabs/alterguardian_phase3circle.lua:spawn_fx (762172): copy that rings the totem range in the totem's colour
 local RANGE_FX_PERIOD = 3 * FRAMES
 local RANGE_FX_POINT_COUNT = 36
 local RANGE_FX_ALPHA = 0.95

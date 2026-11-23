@@ -49,7 +49,7 @@ local function get_stack_size(item)
 	return item.components.stackable and item.components.stackable:StackSize() or 1
 end
 
--- Island Adventures' Inventory:Has counts the backpack twice.
+-- Island Adventures postinit/components/inventory.lua:Inventory:Has (1.0.81): counts the backpack twice
 local function count_fuel(inst, item)
 	local inventory = inst.components.inventory
 	local count = 0
@@ -69,7 +69,7 @@ local function count_fuel(inst, item)
 	return count
 end
 
--- Island Adventures' ConsumeByName skips an unopened boat container.
+-- Island Adventures postinit/components/inventory.lua:Inventory:ConsumeByName (1.0.81): skips the boat's cargo until its container is open
 local function consume_fuel(inst, item, amount)
 	amount = amount or 1
 	local boat_container = get_boat_container(inst)
@@ -86,7 +86,7 @@ local function can_shadowpoof(inst, staff)
 	return staff ~= nil and staff.prefab == "orangestaff" and inst:HasTag("mio_boosted_task") and staff.replica.inventoryitem ~= nil and staff.replica.inventoryitem:IsHeldBy(inst)
 end
 
--- Island Adventures' replica Has already includes the boat's cargo.
+-- Island Adventures postinit/prefabs/inventory_classified.lua:Has (1.0.81): adds the boat's cargo to the replica count
 local function count_blink_fuel(inst, item)
 	if inst.components.inventory ~= nil then
 		return count_fuel(inst, item)
@@ -99,7 +99,7 @@ local function count_blink_fuel(inst, item)
 	return found
 end
 
--- Map blink mods read this on clients and the server.
+-- DST Fixed main/modules/blink_map.lua:GetExtraBlinkUses (776a4fd): reads this on clients and the server
 local function get_extra_blink_uses(inst, staff)
 	if not can_shadowpoof(inst, staff) then
 		return 0

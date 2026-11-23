@@ -31,7 +31,7 @@ local function SpawnSalt(count)
 	return salt
 end
 
--- Vanilla hermit_DoItemTaken (762172), spawning the slot's whole salt count
+-- Vanilla prefabs/meatrack2.lua:hermit_DoItemTaken (762172): copy that spawns the slot's whole salt count
 local function DoItemTaken(inst, slot)
 	if inst.components.container and inst.components.dryingracksaltcollector then
 		local other = inst.components.container:GetItemInSlot(slot)
@@ -53,7 +53,7 @@ local function DoItemTaken(inst, slot)
 	end
 end
 
--- Vanilla hermit_OnLoadPostPass (762172), calling DoItemTaken on each salted slot
+-- Vanilla prefabs/meatrack2.lua:hermit_OnLoadPostPass (762172): copy that calls DoItemTaken on each salted slot
 local function OnLoadPostPass(inst)
 	if inst.components.container and inst.components.dryingracksaltcollector and inst.components.dryingracksaltcollector:HasSalt() then
 		for i = 1, inst.components.container:GetNumSlots() do
@@ -64,7 +64,7 @@ local function OnLoadPostPass(inst)
 	end
 end
 
--- Vanilla hermit_DumpAndRemoveSaltCollector (762172), splitting the salt into full stacks
+-- Vanilla prefabs/meatrack2.lua:hermit_DumpAndRemoveSaltCollector (762172): copy that splits the salt into full stacks
 local function DumpAndRemoveSaltCollector(inst)
 	if inst.components.dryingracksaltcollector then
 		local num = inst.components.dryingracksaltcollector:GetNumSalts()

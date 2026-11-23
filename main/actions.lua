@@ -310,7 +310,7 @@ NS_ACTIONS.FUELPOCKETWATCH.fn = function(act)
 	local caster = act.doer
 	local inventory = caster.components.inventory
 	local recallmark = act.invobject ~= nil and act.invobject.components.recallmark
-	-- Unmarked watches lack the warpback data pocketwatch_warpback needs.
+	-- Vanilla prefabs/pocketwatch.lua:Recall_DoCastSpell (762172): only marks an unmarked watch, without the warpback data pocketwatch_warpback needs
 	if recallmark and recallmark:IsMarked() and caster ~= nil and caster:HasTag("nightmare_twins") then
 		if fuel_pocket_watch(act.invobject, act.doer) then
 			if inventory:Has("horrorfuel", 1) then

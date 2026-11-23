@@ -63,7 +63,7 @@ local function target_testfn(target)
 end
 
 local function base_onhitother(owner, data, glash_prefab, enhanced)
-	-- Reflected hits also set from_doattack, but are emitted by the defender.
+	-- Vanilla components/combat.lua:Combat:DoAttack (762172): sends reflected damage as a from_doattack hit by the defender
 	if not (data and data.from_doattack) or data.redirected or not Utils.IsAttackSource(owner) then
 		return
 	end
@@ -204,7 +204,7 @@ end
 
 local function shadow_init(inst)
 	inst.enhanced = false
-	-- Debuffable saves its children explicitly, even though they are non-persistent entities.
+	-- Vanilla components/debuffable.lua:Debuffable:OnSave (762172): saves every debuff, even non-persistent ones
 	inst.OnSave = shadow_onsave
 	inst.OnLoad = shadow_onload
 end

@@ -61,7 +61,7 @@ local function update_meter(self, force_show)
 	end
 end
 
--- Feed `show` to vanilla ToggleShadowFX as its equip condition so shadow states share one FX layer.
+-- Vanilla widgets/itemtile.lua:ItemTile:ToggleShadowFX (762172): shows its one shadow FX layer while showequipshadowfx is set
 local function toggle_shadow_fx(self, show)
 	local showequipshadowfx = self.showequipshadowfx
 	self.showequipshadowfx = show or nil

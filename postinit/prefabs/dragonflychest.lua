@@ -20,8 +20,7 @@ AddPrefabPostInit("dragonflychest", function(inst)
 			return
 		end
 
-		-- Push from inside vanilla's delayed visuals task; a separate task
-		-- on the same tick may run first and be overwritten.
+		-- Vanilla prefabs/dragonfly_chest.lua:OnUpgrade (762172): delays the visuals with DoTaskInTime, and tasks due on one tick run in no fixed order
 		local instance_do_task_in_time = rawget(inst, "DoTaskInTime")
 		local do_task_in_time = inst.DoTaskInTime
 		inst.DoTaskInTime = function(self, time, fn, ...)

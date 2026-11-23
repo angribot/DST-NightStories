@@ -37,13 +37,13 @@ AddComponentPostInit("childspawner", function(self)
 	end
 end)
 
+-- Vanilla prefabs/statueruins.lua:OnWorkFinished (762172): copy that spawns ruinsnightmare instead
 local function on_work_finished(inst, worker)
 	inst.components.lootdropper:DropLoot(inst:GetPosition())
 
 	local fx = SpawnAt("collapse_small", inst)
 	fx:SetMaterial("rock")
 
-	-- Vanilla roll; only the species differs.
 	if TheWorld.state.isnightmarewild and TryLuckRoll(worker, TUNING.STATUERUINS_SPAWN_NIGHTMARE_CHANCE, LuckFormulas.StatueSpawnNightmare) then
 		SpawnAt("ruinsnightmare", inst)
 	end

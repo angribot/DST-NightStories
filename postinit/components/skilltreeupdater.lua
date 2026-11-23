@@ -4,7 +4,7 @@ GLOBAL.setfenv(1, GLOBAL)
 local SkillTreeData = require("skilltreedata")
 local deactivate_skill = SkillTreeData.DeactivateSkill
 function SkillTreeData:DeactivateSkill(...)
-	-- The updater passes skip_validation to ondeactivate as fromload, so restore it on return.
+	-- Vanilla components/skilltreeupdater.lua:SkillTreeUpdater:DeactivateSkill_Server (762172): passes skip_validation to ondeactivate as fromload
 	if not self.owner then
 		return deactivate_skill(self, ...)
 	end

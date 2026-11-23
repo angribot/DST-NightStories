@@ -101,7 +101,7 @@ local book_defs = {
 							-- Take the slot's salt first, so the Large Drying Rack does not put it back into the emptied slot.
 							local saltcount = saltcollector and saltcollector:RemoveSalt(slot)
 							item = container:RemoveItemBySlot(slot)
-							-- Forget the slot like Container:MoveItemFromAllOfSlot, or the inventory puts the item back into a rack the reader has open.
+							-- Vanilla components/inventory.lua:Inventory:GiveItem (762172): puts an item back into its open prevcontainer; Container:MoveItemFromAllOfSlot clears it first
 							item.prevcontainer = nil
 							item.prevslot = nil
 							reader.components.inventory:GiveItem(item, nil, v:GetPosition())

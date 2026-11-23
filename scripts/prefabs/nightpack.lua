@@ -92,11 +92,12 @@ local function OnMurdered(inst, data)
 end
 
 local function OnRedHaunt(inst, haunter)
-	-- Abigail can haunt too; only revive player ghosts. A repeat haunt is refused by the "haunted" tag.
+	-- Vanilla brains/abigailbrain.lua:HauntAction (762172): has Abigail haunt targets too
+	-- Vanilla actions.lua:ACTIONS.HAUNT.fn (762172): refuses targets tagged "haunted", which blocks repeat haunts
 	if not haunter:HasTag("playerghost") then
 		return false
 	end
-	-- Hauntable revives the ghost with this pack as the source after we return, so renew next frame.
+	-- Vanilla components/hauntable.lua:Hauntable:DoHaunt (762172): revives the ghost with this pack as the source after onhaunt returns
 	inst:DoTaskInTime(0, function()
 		inst:RenewState(nil, nil, nil, true)
 	end)

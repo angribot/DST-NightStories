@@ -17,7 +17,7 @@ AddPrefabPostInit("charlie_boss", function(inst)
 
 	local function OnBlocked(boss, data)
 		if data and data.weapon and data.weapon.prefab == "queen_torch" then
-			-- Vanilla OnBlocked without the projectile reflection.
+			-- Vanilla prefabs/charlie_boss.lua:OnBlocked (762172): copy of its aggro, without reflecting the projectile
 			local attacker = data.attacker
 			if attacker and attacker:IsValid() then
 				tryaggro(boss, attacker)
@@ -28,7 +28,7 @@ AddPrefabPostInit("charlie_boss", function(inst)
 	end
 
 	UpvalueUtil.SetUpvalue(inst.ToggleReflectingProjectiles, path, OnBlocked)
-	-- The upvalue is shared by all instances and by enable/disable paths.
+	-- Vanilla prefabs/charlie_boss.lua:SetReflectingProjectiles (762172): adds and removes the one file-level OnBlocked for every instance
 	if inst.isreflectingprojectiles then
 		inst:RemoveEventCallback("blocked", onblocked)
 		inst:ListenForEvent("blocked", OnBlocked)

@@ -28,13 +28,14 @@ end
 
 wrap_field(require("components/aura"), "OnTick", HorrorChainUtil.Suppress)
 
--- These hit on Wortox's behalf without a weapon.
+-- Vanilla prefabs/wortox_soul_spawn.lua:SoulSpearTick (762172): hits on Wortox's behalf without a weapon
 AddPrefabPostInit("wortox_soul_spawn", function(inst)
 	if TheWorld.ismastersim then
 		wrap_field(inst, "SoulSpearTick", HorrorChainUtil.RunBoundary)
 	end
 end)
 
+-- Vanilla prefabs/wortox.lua:DoThorns_decoy (762172): hits on Wortox's behalf without a weapon, also for DoExplosion_decoy
 AddPrefabPostInit("wortox_decoy", function(inst)
 	if TheWorld.ismastersim then
 		wrap_field(inst, "DoThorns", HorrorChainUtil.RunBoundary)
