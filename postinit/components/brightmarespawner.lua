@@ -1,4 +1,5 @@
 local AddComponentPostInit = AddComponentPostInit
+local devassert = devassert
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -24,5 +25,5 @@ AddComponentPostInit("brightmarespawner", function(self)
 			return
 		end
 	end
-	assert(false, "Could not find TrySpawnGestaltForPlayer")
+	devassert(false, "Could not find TrySpawnGestaltForPlayer")
 end)

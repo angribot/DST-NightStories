@@ -1,4 +1,5 @@
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -10,10 +11,12 @@ AddPrefabPostInit("charlie_boss", function(inst)
 	end
 
 	local path = "SetReflectingProjectiles.OnBlocked"
-	local onblocked = UpvalueUtil.GetUpvalue(inst.ToggleReflectingProjectiles, path)
-	assert(onblocked, "Could not find Charlie's projectile reflection callback")
-	local tryaggro = UpvalueUtil.GetUpvalue(onblocked, "TryAggro")
-	assert(tryaggro, "Could not find Charlie's reflection aggro callback")
+	local onblocked = devassert(UpvalueUtil.GetUpvalue(inst.ToggleReflectingProjectiles, path), "Could not find Charlie's projectile reflection callback")
+	local tryaggro = onblocked and devassert(UpvalueUtil.GetUpvalue(onblocked, "TryAggro"), "Could not find Charlie's reflection aggro callback")
+	if not tryaggro then
+		patched = true
+		return
+	end
 
 	local function OnBlocked(boss, data)
 		if data and data.weapon and data.weapon.prefab == "queen_torch" then

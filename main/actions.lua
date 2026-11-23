@@ -3,6 +3,7 @@ local AddComponentAction = AddComponentAction
 local AddStategraphState = AddStategraphState
 local AddStategraphActionHandler = AddStategraphActionHandler
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 GLOBAL.setfenv(1, GLOBAL)
 
 local UpvalueUtil = GlassicAPI.UpvalueUtil
@@ -472,19 +473,19 @@ AddComponentAction("INVENTORY", "friendshiptotem", function(inst, doer, actions,
 	end
 end)
 
-local COMPONENT_ACTIONS = UpvalueUtil.GetUpvalue(EntityScript.CollectActions, "COMPONENT_ACTIONS")
-local SCENE = COMPONENT_ACTIONS.SCENE
-local scene_hauntable = SCENE.hauntable
-
--- Hauntable for Dummy: only Dummy can haunt Mio and Dummy to revive herself
 local DUMMY_NOT_HAUNTABLE_TAGS = { "playerghost", "reviving", "haunted", "catchable" }
-function SCENE.hauntable(inst, doer, actions, ...)
-	if inst:HasTag("nightmare_twins") then
-		if doer.prefab == "dummy" and not inst:HasAnyTag(DUMMY_NOT_HAUNTABLE_TAGS) then
-			table.insert(actions, ACTIONS.HAUNT)
+local COMPONENT_ACTIONS = devassert(UpvalueUtil.GetUpvalue(EntityScript.CollectActions, "COMPONENT_ACTIONS"), "Could not find COMPONENT_ACTIONS")
+if COMPONENT_ACTIONS then
+	local SCENE = COMPONENT_ACTIONS.SCENE
+	local scene_hauntable = SCENE.hauntable
+	function SCENE.hauntable(inst, doer, actions, ...)
+		if inst:HasTag("nightmare_twins") then
+			if doer.prefab == "dummy" and not inst:HasAnyTag(DUMMY_NOT_HAUNTABLE_TAGS) then
+				table.insert(actions, ACTIONS.HAUNT)
+			end
+		else
+			scene_hauntable(inst, doer, actions, ...)
 		end
-	else
-		scene_hauntable(inst, doer, actions, ...)
 	end
 end
 

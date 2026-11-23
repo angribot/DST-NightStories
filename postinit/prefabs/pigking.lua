@@ -1,4 +1,5 @@
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -104,5 +105,8 @@ AddPrefabPostInit("pigking", function(inst)
 	if not TheWorld.ismastersim then
 		return
 	end
-	UpvalueUtil.SetUpvalue(inst.components.trader.onaccept, "ontradeforgold", ontradeforitem)
+	local onaccept = inst.components.trader.onaccept
+	if devassert(UpvalueUtil.GetUpvalue(onaccept, "ontradeforgold"), "Could not find ontradeforgold") then
+		UpvalueUtil.SetUpvalue(onaccept, "ontradeforgold", ontradeforitem)
+	end
 end)

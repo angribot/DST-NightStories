@@ -1,4 +1,5 @@
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 GLOBAL.setfenv(1, GLOBAL)
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 
@@ -77,6 +78,11 @@ local function DumpAndRemoveSaltCollector(inst)
 	end
 end
 
+local HERMIT_UPVALUES = {
+	["master_postinit.hermit_OnItemLose.hermit_DoItemTaken"] = DoItemTaken,
+	["master_postinit.hermit_OnHammered.hermit_DumpAndRemoveSaltCollector"] = DumpAndRemoveSaltCollector,
+}
+
 AddPrefabPostInit("meatrack_hermit_multi", function(inst)
 	AcceptStacks(inst)
 	if not TheWorld.ismastersim then
@@ -84,7 +90,10 @@ AddPrefabPostInit("meatrack_hermit_multi", function(inst)
 	end
 
 	local fn = Prefabs.meatrack_hermit_multi.fn
-	UpvalueUtil.SetUpvalue(fn, "master_postinit.hermit_OnItemLose.hermit_DoItemTaken", DoItemTaken)
-	UpvalueUtil.SetUpvalue(fn, "master_postinit.hermit_OnHammered.hermit_DumpAndRemoveSaltCollector", DumpAndRemoveSaltCollector)
+	for path, replacement in pairs(HERMIT_UPVALUES) do
+		if devassert(UpvalueUtil.GetUpvalue(fn, path), "Could not find " .. path) then
+			UpvalueUtil.SetUpvalue(fn, path, replacement)
+		end
+	end
 	inst.OnLoadPostPass = OnLoadPostPass
 end)

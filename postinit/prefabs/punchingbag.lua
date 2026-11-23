@@ -1,4 +1,5 @@
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -46,12 +47,15 @@ for _, prefab in ipairs(PUNCHINGBAGS) do
 		if not TheWorld.ismastersim then
 			return
 		end
+		local replaced = false
 		for _, fn in ipairs(inst.event_listeners["healthdelta"][inst]) do
-			local prev_do_digits = UpvalueUtil.GetUpvalue(fn, "do_digits")
-			if prev_do_digits then
+			if UpvalueUtil.GetUpvalue(fn, "do_digits") then
 				inst:RemoveEventCallback("healthdelta", fn)
+				replaced = true
 			end
 		end
-		inst:ListenForEvent("healthdelta", new_health_delta)
+		if devassert(replaced, "Could not find the punching bag healthdelta listener") then
+			inst:ListenForEvent("healthdelta", new_health_delta)
+		end
 	end)
 end

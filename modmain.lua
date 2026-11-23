@@ -1,3 +1,15 @@
+local is_dev = not modname:find("workshop-")
+
+function devassert(value, message)
+	if not value then
+		if is_dev then
+			GLOBAL.error(message, 2)
+		end
+		print(modname .. ": " .. message)
+	end
+	return value
+end
+
 local main = {
 	-- high priority
 	"assets",

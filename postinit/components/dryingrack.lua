@@ -1,3 +1,4 @@
+local devassert = devassert
 GLOBAL.setfenv(1, GLOBAL)
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 
@@ -25,7 +26,9 @@ local function OnDoneDrying(inst, self, item)
 	return product
 end
 
-debug.setupvalue(scope_fn, fn_i, OnDoneDrying)
+if devassert(on_done_drying, "Could not find OnDoneDrying") then
+	debug.setupvalue(scope_fn, fn_i, OnDoneDrying)
+end
 
 local function InstantDry(item, container)
 	local slot = container:GetItemSlot(item)

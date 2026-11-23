@@ -1,3 +1,4 @@
+local devassert = devassert
 GLOBAL.setfenv(1, GLOBAL)
 
 local NS_SPICES = {
@@ -13,11 +14,10 @@ require("cooking")
 local spicedfoods = require("spicedfoods")
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 
-local SPICES = UpvalueUtil.GetUpvalue(GenerateSpicedFoods, "SPICES")
+local SPICES = devassert(UpvalueUtil.GetUpvalue(GenerateSpicedFoods, "SPICES"), "Could not find SPICES")
 if not SPICES then
-	print("U GOT NOPED SO HARD GAGAGA")
 	return
-end -- :angri:
+end
 shallowcopy(NS_SPICES, SPICES)
 
 GenerateSpicedFoods(require("preparedfoods"))

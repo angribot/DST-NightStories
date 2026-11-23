@@ -1,6 +1,7 @@
 local UpvalueUtil = GlassicAPI.UpvalueUtil
 local AddComponentPostInit = AddComponentPostInit
 local AddPrefabPostInit = AddPrefabPostInit
+local devassert = devassert
 GLOBAL.setfenv(1, GLOBAL)
 
 local DUMMY_TAG = "ns_builder_dummy"
@@ -8,8 +9,10 @@ local SPAWNER_RADIUS = 120
 local STATUE_RADIUS = 30
 
 AddComponentPostInit("shadowcreaturespawner", function(self)
-	local spawn_land = UpvalueUtil.GetUpvalue(self.SpawnShadowCreature, "SpawnLandShadowCreature")
-	assert(spawn_land, "Could not find SpawnLandShadowCreature")
+	local spawn_land = devassert(UpvalueUtil.GetUpvalue(self.SpawnShadowCreature, "SpawnLandShadowCreature"), "Could not find SpawnLandShadowCreature")
+	if not spawn_land then
+		return
+	end
 	UpvalueUtil.SetUpvalue(self.SpawnShadowCreature, "SpawnLandShadowCreature", function(player, ...)
 		if player:HasTag(DUMMY_TAG) then
 			return SpawnPrefab("terrorbeak")
