@@ -2,7 +2,6 @@ local HorrorChainUtil = require("nightstories/horrorchainutil")
 
 local function setup_fx(attacker, target, is_shadow)
 	if is_shadow then
-		-- Only coalesce presentation; every hit still deals damage and refreshes its chain.
 		local tick = GetTick()
 		if target._ns_shadowglash_fx_tick == tick then
 			return

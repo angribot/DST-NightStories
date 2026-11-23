@@ -3071,7 +3071,6 @@ return {
 		-- SALSA = "So... hot...!",
 		-- SALTBOX = "Just the cure for spoiling food!",
 		-- SALTLICK = "How many licks does it take to get to the center?",
-		-- SALTLICK_DREADSTONE uses the generic line.
 		-- SALTROCK = "Science compels me to lick it.",
 		SALTSTACK = {
 			-- GENERIC = "Are those natural formations?",

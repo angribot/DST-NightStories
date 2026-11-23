@@ -24,7 +24,6 @@ end
 local function with_attack_source(source, fn, ...)
 	local previous = attack_source
 	attack_source = source
-	-- Restore the outer attack even when a nested attack fails.
 	return restore_attack_source(previous, pcall(fn, ...))
 end
 

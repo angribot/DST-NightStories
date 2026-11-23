@@ -3,7 +3,6 @@ local AddShardModRPCHandler = AddShardModRPCHandler
 GLOBAL.setfenv(1, GLOBAL)
 
 local function SyncAtriumGateProgress(inst, shardid)
-	-- False requests progress from peers; true permanently unlocks it.
 	SendModRPCToShard(GetShardModRPC("nightstories", "atriumgateprogress"), shardid, inst._atriumgate_repaired)
 end
 
@@ -36,9 +35,7 @@ AddShardModRPCHandler("nightstories", "atriumgateprogress", function(shardid, re
 	end
 end)
 
--- Celestial Scion progress is per save but shared by every shard, because only the forest tracks the boss.
 local function SyncCelestialScionProgress(inst, shardid)
-	-- False requests progress from peers; true permanently unlocks it.
 	SendModRPCToShard(GetShardModRPC("nightstories", "celestialscionprogress"), shardid, inst._celestialscion_defeated)
 end
 
@@ -131,10 +128,9 @@ AddPrefabPostInit("world", function(inst)
 		end
 	end
 
-	-- Entities spawn after this, so saved skins can validate against the loaded progress.
+	-- Components have loaded and entities have not spawned, so saved skins see this progress.
 	local onload = inst.OnLoad
 	inst.OnLoad = function(inst, data, ...)
-		-- Components load first, so the forest's tracker already holds its saved state.
 		local wagboss_tracker = inst.components.wagboss_tracker
 		if (data ~= nil and data.celestialscion_defeated) or (wagboss_tracker ~= nil and wagboss_tracker:IsWagbossDefeated()) then
 			inst:SetCelestialScionDefeated()
@@ -148,7 +144,6 @@ AddPrefabPostInit("world", function(inst)
 	inst:DoTaskInTime(0, SyncCelestialScionProgress)
 end)
 
--- Clients read the progress from the world network entity.
 local function AddCelestialScionNetvar(inst)
 	inst._celestialscion_defeated = net_bool(inst.GUID, "world_network.celestialscion_defeated")
 	if TheWorld.ismastersim then

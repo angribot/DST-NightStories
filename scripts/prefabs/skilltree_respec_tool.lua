@@ -1,8 +1,6 @@
 local SKILLTREE_DEFS = require("prefabs/skilltree_defs").SKILLTREE_DEFS
 
--- DST 760178: these effects lack a complete in-place deactivation path.
--- Keep this list limited to effects of skills removed by this respec, not
--- historical save repair. Other skills use the vanilla callbacks and events.
+-- Clean up only what this respec removes; old saves are out of scope.
 local function RefreshWillow(player, removed)
 	if removed.willow_controlled_burn_1 then
 		player:RemoveTag("controlled_burner")
@@ -31,9 +29,7 @@ local function RefreshWillow(player, removed)
 	for _, bernie in ipairs(bernies) do
 		if bernie:IsValid() then
 			if removed.willow_burnignbernie then
-				-- onLeaderChanged only adds canlight and its private listener;
-				-- ending a burning task also re-adds canlight. Use the vanilla
-				-- inactive transition to discard both, including active flames.
+				-- onLeaderChanged would leave canlight and active flames; GoInactive clears both.
 				bernie:GoInactive()
 			else
 				bernie:onLeaderChanged(player)
@@ -133,12 +129,8 @@ local REFRESH = {
 	end,
 }
 
--- A character swap carries every learned recipe over through SaveForReroll and
--- LoadForReroll; builder_skill keeps them locked until the skill is chosen
--- again. These characters' deactivation callbacks forget learned recipes, such
--- as Winona's scanned blueprints and Walter's station ammo. Other recipes that
--- deactivation removes are derived state and must stay removed, e.g. WX-78's
--- shadow drones, which follow socket contents.
+-- Their deactivation forgets learned recipes (Winona's blueprints, Walter's station ammo)
+-- that a respec must keep. Derived recipes, like WX-78's shadow drones, stay removed.
 local KEEP_LEARNED_RECIPES = {
 	walter = true,
 	winona = true,
@@ -160,8 +152,7 @@ local function ResetSkillTree(player)
 	end
 	local builder = player.components.builder
 
-	-- Snapshot before callbacks mutate the selection; never pass locks or
-	-- infographic nodes to DeactivateSkill. Preserve accumulated insight XP.
+	-- Insight XP is kept.
 	local skills, removed = {}, {}
 	for skill in pairs(updater:GetActivatedSkills() or {}) do
 		skills[#skills + 1] = skill
@@ -192,7 +183,6 @@ local function fn()
 	inst.entity:AddTransform()
 	inst:AddTag("CLASSIFIED")
 
-	-- Non-networked crafting action, not a persistent inventory item.
 	inst.persists = false
 	inst:DoTaskInTime(0, inst.Remove)
 

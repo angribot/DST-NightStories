@@ -32,10 +32,7 @@ local function update_food(inst)
 	end
 end
 
--- Steps for damage, speed, hunger rate, and buff duration: one per level up to Lv.2, then two more at Lv.3 (0, 1, 2, 4)
-local function get_boost_steps(level)
-	return math.floor(2 ^ (level - 1))
-end
+local BOOST_STEPS = { [0] = 0, 1, 2, 4 }
 
 local function on_level_change(inst)
 	inst.level = math.min(TUNING.CIVI_MAX_LEVEL, inst.level)
@@ -60,7 +57,7 @@ local function on_level_change(inst)
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
 
-	local boost_steps = get_boost_steps(inst.level)
+	local boost_steps = BOOST_STEPS[inst.level]
 
 	inst.components.hunger.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 25
 	inst.components.sanity.max = (TUNING.CIVI_BASE_STATUS - inst.level * 50) -- max_level = 25
@@ -69,7 +66,7 @@ local function on_level_change(inst)
 	inst.components.locomotor.runspeed = (TUNING.WILSON_RUN_SPEED * (1 + 0.25 * boost_steps)) -- max_level = 12
 
 	inst.components.combat.damagemultiplier = (1 + boost_steps * 0.25) -- max_level = 2
-	inst.buff_duration_mult = 1 + boost_steps * 0.25 -- max_level = 2, read by postinit/prefabs/foodbuffs.lua
+	inst.buff_duration_mult = 1 + boost_steps * 0.25 -- max_level = 2
 	inst.components.sanity.night_drain_mult = (TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25)
 	inst.components.sanity.neg_aura_modifiers:SetModifier(inst, TUNING.CIVI_BASE_SANITY_MULT + inst.level * 0.25, "civi")
 

@@ -9,7 +9,6 @@ AddClassPostConstruct("widgets/redux/craftingmenu_hud", function(self)
 		rebuild_recipes(self, ...)
 		local data = self.valid_recipes[SHADOWGLASH]
 		if data ~= nil then
-			-- Show the fuel this player would pay; see main/recipes.lua.
 			data.recipe = AllRecipes[SHADOWGLASH].ForInventory(self.owner.replica.inventory)
 		end
 	end

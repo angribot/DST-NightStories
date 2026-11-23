@@ -73,7 +73,6 @@ local function toggle_king_cane_shadow_fx(self)
 	toggle_shadow_fx(self, self.showequipshadowfx or self.item._corrupted:value())
 end
 
--- Vanilla checks the shadowlevel tag only on equip, and clients keep the equip tile when the form changes.
 local function toggle_lunarshadow_shadow_fx(self)
 	local item = self.item
 	toggle_shadow_fx(self, not item.state:value() and (item.buffed:value() or self.isequip and ThePlayer:HasTag("shadowmagic")))

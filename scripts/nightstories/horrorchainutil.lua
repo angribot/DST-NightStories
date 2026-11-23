@@ -2,11 +2,9 @@ local Utils = require("nightstories/utils")
 local SpDamageUtil = require("components/spdamageutil")
 
 local CHAIN_TAG = "horrorchain"
--- The Horror Chain weapon prefab also carries this tag, so require combat.
 local MEMBER_MUST_TAGS = { CHAIN_TAG, "_combat" }
 
--- Follow-up damage triggered by hits. Its own hits never spread, but a spread
--- hit triggers it on every member like a direct hit would.
+-- Follow-up damage from other hits; it never spreads itself.
 local DISABLED_WEAPONS = {
 	glash = true,
 	shadowglash = true,
@@ -23,7 +21,6 @@ local function weak_table()
 	return setmetatable({}, WEAK_KEYS)
 end
 
--- Returns a getter for a weak table that starts empty every tick.
 local function per_tick_table()
 	local tick, t
 	return function()
@@ -35,10 +32,6 @@ local function per_tick_table()
 		return t
 	end
 end
-
--------------------------------------------------------------------------
--- Membership
--------------------------------------------------------------------------
 
 local function is_member(target)
 	return target ~= nil and target.components.horrorchain ~= nil
@@ -52,7 +45,6 @@ local function add_member(target, duration)
 	chain:SetMinDuration(duration)
 end
 
--- Members within range of a member, excluding the member itself.
 local function get_nearby_members(member)
 	local members = {}
 	if not is_member(member) then
@@ -71,14 +63,6 @@ local function is_alive(target)
 	return target:IsValid() and not target:IsInLimbo() and not (target.components.health ~= nil and target.components.health:IsDead())
 end
 
--------------------------------------------------------------------------
--- Scoped state
--------------------------------------------------------------------------
-
--- spreading: the anchor whose hit is being replayed and the member it targets
--- suppressed: hits never spread, e.g. periodic aura ticks
--- boundary: attacks owned by the innermost attack boundary
--- moose_smasher: the Weremoose whose smash is resolving
 local state = {}
 
 local function restore_state(key, previous, ok, ...)
@@ -95,19 +79,11 @@ local function with_state(key, value, fn, ...)
 	return restore_state(key, previous, pcall(fn, ...))
 end
 
--------------------------------------------------------------------------
--- Attack identity
---
--- An attack is the damage one attacker deals with one weapon in one tick, so
--- a vanilla area attack that hits each target through its own call is still
--- one attack. Each target takes at most one hit from it, directly or spread.
--- Boundaries separate attacks that deal damage on an owner's behalf and would
--- otherwise share that identity.
--------------------------------------------------------------------------
-
 local NO_WEAPON = {}
 local tick_attacks = per_tick_table()
 
+-- An attack is one attacker's damage with one weapon in one tick, or within a boundary.
+-- Each target takes at most one hit from it, directly or spread.
 local function get_attack(attacker, weapon)
 	local attacks = state.boundary or tick_attacks()
 	local by_weapon = attacks[attacker]
@@ -118,21 +94,15 @@ local function get_attack(attacker, weapon)
 	weapon = weapon or NO_WEAPON
 	local attack = by_weapon[weapon]
 	if attack == nil then
-		-- hits: every target hit; spread: targets hit by spreading
 		attack = { hits = weak_table(), spread = weak_table() }
 		by_weapon[weapon] = attack
 	end
 	return attack
 end
 
--------------------------------------------------------------------------
--- Explosive resistance
---
 -- Sources that deduct explosive resistance query it, report the resisted
 -- damage, then hit with the same source. Recording that lets a spread hit
 -- restore the base damage and deduct each member's own resistance instead.
--------------------------------------------------------------------------
-
 local queried_resistances = per_tick_table()
 local resisted_hits = per_tick_table()
 
@@ -147,7 +117,6 @@ local function note_explosive_damage(target, source)
 	end
 end
 
--- Returns the resistance deducted from this hit, or nil if none was.
 local function take_resistance(target, attacker)
 	local records = resisted_hits()
 	local record = records[target]
@@ -160,7 +129,7 @@ local function take_resistance(target, attacker)
 	end
 end
 
--- Applies and accumulates a target's explosive resistance, as vanilla explosions do.
+-- As vanilla explosions do.
 local function apply_explosive_resist(target, damage, source)
 	local explosiveresist = target.components.explosiveresist
 	if explosiveresist == nil then
@@ -170,13 +139,6 @@ local function apply_explosive_resist(target, damage, source)
 	explosiveresist:OnExplosiveDamage(damage, source)
 	return damage
 end
-
--------------------------------------------------------------------------
--- Call frames
---
--- Combat calls push frames so a hit knows which call produced it, and so
--- damage dealt back to an attacker mid-hit is recognized as retaliation.
--------------------------------------------------------------------------
 
 local frames = {}
 
@@ -192,7 +154,6 @@ local function pop_frame(ok, ...)
 	return ...
 end
 
--- Synchronous retaliation: the victim is hitting back at whoever is hitting it.
 local function is_retaliation(victim, attacker)
 	for i = #frames, 1, -1 do
 		local frame = frames[i]
@@ -203,7 +164,7 @@ local function is_retaliation(victim, attacker)
 	return false
 end
 
--- The combat call that produced this hit, or nil for redirected damage.
+-- nil for redirected damage.
 local function get_producing_frame(combat, attacker)
 	local frame = frames[#frames]
 	if frame == nil or frame.attacker ~= attacker then
@@ -215,14 +176,9 @@ local function get_producing_frame(combat, attacker)
 	end
 end
 
--------------------------------------------------------------------------
--- Anchors
---
 -- An anchor is a chain member hit directly. Spreading replays the hit that
 -- produced it on each nearby member through the same kind of call, so the hit
 -- keeps its special effects and computes damage for each member.
--------------------------------------------------------------------------
-
 local AttackAnchor = {}
 AttackAnchor.__index = AttackAnchor
 
@@ -310,8 +266,7 @@ function AreaAnchor:CanHit(member)
 	return self.combat.inst:IsValid() and member.components.combat ~= nil and not (self.excludetags ~= nil and member:HasAnyTag(self.excludetags))
 end
 
--- Hits only the member. The call goes through the DoAreaAttack hook, which
--- sets the attack source; hits nested in a spread hit never anchor.
+-- onlyontarget: hits only the member.
 function AreaAnchor:Hit(member)
 	self.combat:DoAreaAttack(member, self.range, self.weapon, self.validfn, self.stimuli, self.excludetags, true)
 end
@@ -349,7 +304,6 @@ end
 function ExplosionAnchor:Hit(member)
 	local bomb = self.bomb
 	local explosive = bomb.components.explosive
-	-- Calculate fresh damage for each target's alignment bonus and defenses.
 	local stacksize = bomb.components.stackable ~= nil and bomb.components.stackable:StackSize() or 1
 	local mult = bomb.components.damagetypebonus ~= nil and bomb.components.damagetypebonus:GetBonus(member) or 1
 	local damage = apply_explosive_resist(member, explosive.explosivedamage * stacksize * mult, bomb)
@@ -408,8 +362,6 @@ local function create_anchor(frame, attack, target, attacker, damage, weapon, st
 	elseif attacker.components.explosive ~= nil then
 		anchor = setmetatable({ bomb = attacker }, ExplosionAnchor)
 	else
-		-- A fully resisted anchor took no damage, so its base damage is
-		-- unknown and the hit does not spread.
 		if resistance ~= nil and resistance >= 1 then
 			return
 		end
@@ -427,12 +379,10 @@ local function create_anchor(frame, attack, target, attacker, damage, weapon, st
 	return anchor
 end
 
--- Replays the anchor's hit on each nearby member not hit by this attack yet.
 local function spread_members(anchor)
 	local attack = anchor.attack
 	for _, member in ipairs(anchor.members) do
-		-- The replayed hit marks the member when it lands; a replay the game
-		-- refuses, such as a failed area target check, leaves it unmarked.
+		-- Hits are marked when they land, so refused replays stay unmarked.
 		if not attack.hits[member] and member:IsValid() and anchor:CanHit(member) then
 			with_state("spreading", { attack = attack, target = member }, anchor.Hit, anchor, member)
 		end
@@ -444,10 +394,6 @@ local function spread(anchors)
 		spread_members(anchor)
 	end
 end
-
--------------------------------------------------------------------------
--- Combat entry points, called by the Combat hooks
--------------------------------------------------------------------------
 
 -- Anchors from a call spread once the call has resolved its own hits, so a
 -- weapon cannot break between dealing damage and its OnAttack.
@@ -462,8 +408,6 @@ local function run_call(frame, fn, ...)
 	return finish_call(frame, pop_frame(pcall(fn, ...)))
 end
 
--- Whether the target already took this attack through spreading. The member
--- a spread hit is aimed at still takes the replayed call.
 local function was_spread_to(attack, target)
 	local spreading = state.spreading
 	return attack.spread[target] and not (spreading ~= nil and spreading.target == target)
@@ -519,7 +463,6 @@ local function finish_hit(frame, anchor, ...)
 end
 
 local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, spdamage, fn, ...)
-	-- Damage without an attacker, such as darkness, never spreads.
 	if attacker == nil then
 		return fn(...)
 	end
@@ -533,11 +476,8 @@ local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, 
 	end
 	local attack = get_attack(attacker, weapon)
 
-	-- Hits nested in a spread hit never anchor.
 	local spreading = state.spreading
 	if spreading ~= nil then
-		-- The spread attack itself may only reach the member it is aimed at
-		-- among the targets it already hit.
 		if attack == spreading.attack then
 			if target ~= spreading.target and attack.hits[target] then
 				return false
@@ -565,10 +505,6 @@ local function get_attacked_internal(combat, attacker, damage, weapon, stimuli, 
 	push_frame(hit_frame)
 	return finish_hit(frame, anchor, pop_frame(pcall(fn, ...)))
 end
-
--------------------------------------------------------------------------
--- Scopes, called by source hooks
--------------------------------------------------------------------------
 
 local function suppress(fn, ...)
 	return with_state("suppressed", true, fn, ...)

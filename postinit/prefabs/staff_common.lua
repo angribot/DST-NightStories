@@ -10,7 +10,7 @@ stafffns.orange = function(inst, ...)
 	local onblink = blinkstaff.onblinkfn
 	-- Prefab names are assigned after construction, so check them when blinking.
 	blinkstaff.onblinkfn = function(staff, pos, caster)
-		-- DST 760178: the vanilla callback uses caster only for sanity costs, so clearing it skips them.
+		-- Vanilla onblink uses caster only for the sanity cost.
 		if caster ~= nil then
 			if caster.CanShadowpoof ~= nil and caster:CanShadowpoof(staff) then
 				if caster:PayShadowpoof(staff) then

@@ -151,8 +151,7 @@ local DummyBadge = Class(Badge, function(self, owner)
 	self:StartUpdating()
 end)
 
--- StatusDisplays updates values and warnings before calling HealthDelta.
--- Only server-classified events may pulse; ignore the legacy pulse stream.
+-- No-ops: StatusDisplays sets the value; pulses come from dummyhealthfeedback.
 function DummyBadge:HealthDelta() end
 function DummyBadge:ForceHealthPulse() end
 

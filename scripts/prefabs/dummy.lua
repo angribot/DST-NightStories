@@ -146,7 +146,6 @@ local function on_health_sanity_change(inst)
 end
 
 local function redirect_to_health(inst, amount, overtime, ...)
-	-- Ghosts hold a placeholder health value and ignore sanity like vanilla ghosts.
 	if inst:HasTag("playerghost") then
 		return
 	end
@@ -161,8 +160,6 @@ local function on_haunt(inst, doer)
 	return doer.prefab == "dummy" and inst.components.sanity and inst.components.sanity.current >= MIN_REVIVE_HEALTH
 end
 
--- Returns whoever pays for the revive: the giver of a reviver item, the
--- holder of a Second Chance Watch, or the haunted twin.
 local function get_reviver(data)
 	local source = data.source
 	if source:HasTag("reviver") then
@@ -178,7 +175,6 @@ local function on_respawn_from_ghost(inst, data)
 		local reviver = get_reviver(data)
 		local reviver_sanity = reviver and reviver.components.sanity
 		if reviver_sanity then
-			-- The reviver gives up sanity only up to what Dummy can hold.
 			local given = math.min(reviver_sanity.current, inst.components.health:GetMaxWithPenalty())
 			inst.components.health:SetCurrentHealth(math.max(given, MIN_REVIVE_HEALTH))
 			on_health_sanity_change(inst)

@@ -1,6 +1,5 @@
 GLOBAL.setfenv(1, GLOBAL)
 
--- Count salt per slot instead of flagging it, so a dried stack of Kelp Fronds yields as many Salt Crystals as it holds.
 local DryingRackSaltCollector = require("components/dryingracksaltcollector")
 
 function DryingRackSaltCollector:AddSalt(slot)
@@ -17,7 +16,6 @@ function DryingRackSaltCollector:AddSalt(slot)
 	return true
 end
 
--- Returns the number of salts removed, or false.
 function DryingRackSaltCollector:RemoveSalt(slot)
 	local count = self.slots[slot]
 	if not count then

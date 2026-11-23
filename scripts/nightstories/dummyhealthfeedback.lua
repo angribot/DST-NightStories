@@ -1,5 +1,4 @@
--- Independent flags preserve feedback priority across a replication batch.
--- Overtime updates must not erase an earlier hit or audible heal.
+-- Separate flags, so an overtime pulse in the same batch cannot overwrite a hit or an audible heal.
 local PULSES = {
 	{ field = "_dummyhealquiet", event = "dummyhealthpulseup", silent = true },
 	{ field = "_dummyheal", event = "dummyhealthpulseup", silent = false },
@@ -47,14 +46,13 @@ local function RegisterListener(inst)
 end
 
 local function InitializeClassified(inst)
-	-- The owner may not be attached yet. Declare the same fields everywhere.
 	for _, pulse in ipairs(PULSES) do
 		inst[pulse.field] = net_bool(inst.GUID, "dummy." .. pulse.field, "healthdirty")
 	end
 	if not TheWorld.ismastersim then
 		inst:DoStaticTaskInTime(0, RegisterListener)
 	end
-	-- Hosts already play synchronously and must never relay network echoes.
+	-- The host plays pulses in Push, so it does not listen.
 end
 
 return { Push = Push, InitializeClassified = InitializeClassified }

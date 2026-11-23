@@ -157,8 +157,6 @@ local shadowglash = AddCharacterRecipe(
 	{ builder_tag = "ns_builder_dummy", no_deconstruction = true, sg_state = "domediumaction" }
 )
 
--- Builders pay with Pure Horror when they carry any, otherwise with Nightmare Fuel.
--- The Builder and crafting menu hooks in postinit/ call these.
 local SHADOWGLASH_INGREDIENTS = {
 	nightmarefuel = { Ingredient("nightmarefuel", 1) },
 	horrorfuel = { Ingredient("horrorfuel", 1) },
@@ -212,7 +210,6 @@ AddRecipe2(
 	TECH.WAGPUNK_WORKSTATION_TWO,
 	{
 		nounlock = true,
-		-- `buffed` is a net_bool, so this check works on both master and clients.
 		no_deconstruction = function(inst)
 			return inst.buffed ~= nil and inst.buffed:value()
 		end,

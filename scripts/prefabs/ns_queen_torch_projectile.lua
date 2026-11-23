@@ -83,8 +83,7 @@ local function ProjectileFn()
 	projectile.Hit = function(self, target)
 		local attacker = inst.attacker
 		local weapon = inst.weapon
-		-- Validate before native Hit deals damage, and retain the impact position
-		-- even if the primary hit removes the target. Never credit a new owner.
+		-- Set impactpos first: hit() may remove the target.
 		if
 			not IsAlive(attacker)
 			or attacker.components.combat == nil

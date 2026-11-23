@@ -111,8 +111,7 @@ end
 --------------------------- RANGE FX ---------------------------
 ----------------------------------------------------------------
 
--- Mirrors alterguardian_phase3circle: smoke puffs flash at shuffled points
--- on the range edge, one every 3 frames, every 10 degrees.
+-- Mirrors alterguardian_phase3circle.
 local RANGE_FX_PERIOD = 3 * FRAMES
 local RANGE_FX_POINT_COUNT = 36
 local RANGE_FX_ALPHA = 0.95
@@ -140,7 +139,6 @@ local function CreateRangeSmokeFX(color)
 	inst.AnimState:SetAddColour(r, g, b, 0)
 	inst.AnimState:SetMultColour(r, g, b, RANGE_FX_ALPHA)
 	if color == "light" then
-		-- Keep the white ring visible at night.
 		inst.AnimState:SetLightOverride(1)
 	end
 
@@ -157,7 +155,6 @@ local function SpawnRangeSmokeFX(inst)
 		shuffleArray(inst.rangefx_angles)
 	end
 
-	-- Read the position on every spawn so the ring follows a carried totem.
 	local angle = table.remove(inst.rangefx_angles)
 	local x, _, z = inst.Transform:GetWorldPosition()
 	local radius = TUNING.TOTEM_BUFF_RANGE
@@ -477,7 +474,6 @@ local function MakeFxProxy(color)
 		if not TheWorld.ismastersim then
 			inst:DoTaskInTime(0, inst.ListenForEvent, "friendshiptotem.triggerfx", CLIENT_TriggerFX)
 			inst:ListenForEvent("friendshiptotem.rangefxdirty", CLIENT_OnRangeFxDirty)
-			-- Catch a ring that was already active when this proxy replicated.
 			inst:DoTaskInTime(0, CLIENT_OnRangeFxDirty)
 			return inst
 		end

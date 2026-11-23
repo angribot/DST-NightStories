@@ -10,7 +10,6 @@ local function owner_testfn(owner)
 	return owner ~= nil and (owner.components.health == nil or not owner.components.health:IsDead())
 end
 
--- Targets whose IsRangedWeapon() checks should treat glash as melee.
 local GLASH_MELEE_TARGETS = {
 	charlie_boss = true,
 }
@@ -29,6 +28,7 @@ local function get_glash(attacker, glash_prefab, enhanced)
 	end
 	local key = enhanced == true and "enhanced" or "normal"
 	local cached = weapons[key]
+	-- Never reuse a glash mid-attack, e.g. from nested damage callbacks.
 	if cached ~= nil and cached:IsValid() and not cached._ns_in_attack then
 		return cached
 	end
@@ -38,15 +38,12 @@ local function get_glash(attacker, glash_prefab, enhanced)
 		glash:SetEnhanced(enhanced)
 	end
 	glash.entity:SetParent(attacker.entity)
-	-- Keep the prefab's next-update removal. Never mutate an in-flight weapon's
-	-- enhancement, or share it between attackers or nested damage callbacks.
 	weapons[key] = glash
 	return glash
 end
 
 local function do_glash_attack(attacker, target, glash_prefab, enhanced)
 	local glash = get_glash(attacker, glash_prefab, enhanced)
-	-- Glash is reused within a tick, so decide per hit instead of at spawn.
 	glash:AddOrRemoveTag("pseudorangedweapon", not GLASH_MELEE_TARGETS[target.prefab])
 
 	local combat = attacker.components.combat

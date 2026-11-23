@@ -11,7 +11,6 @@ local function expire(inst)
 	inst:RemoveComponent("horrorchain")
 end
 
--- Marks a chain member. Server only; removing the component ends the chain.
 -- Chains are not saved: saved component data would break loading the world
 -- once this mod is disabled, and a chain lasts only seconds.
 local HorrorChain = Class(function(self, inst)
@@ -32,7 +31,6 @@ function HorrorChain:OnRemoveFromEntity()
 	end
 end
 
--- Only lengthens the chain; a shorter duration never cuts it.
 function HorrorChain:SetMinDuration(duration)
 	if self.task == nil or GetTaskRemaining(self.task) < duration then
 		if self.task ~= nil then

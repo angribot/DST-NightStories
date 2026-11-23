@@ -2894,7 +2894,6 @@ return {
 		-- SALSA = "A spicy treat for mortals to eat.",
 		-- SALTBOX = "You needn't worry about protecting your food from me.",
 		-- SALTLICK = "I've been told I don't make a lick of sense.",
-		-- SALTLICK_DREADSTONE uses the generic line.
 		-- SALTROCK = "Hissss!",
 		SALTSTACK = {
 			-- GENERIC = "Interesting.",

@@ -10,8 +10,7 @@ local function OnDoneDrying(inst, self, item)
 		return on_done_drying(inst, self, item)
 	end
 
-	-- Resize the product as vanilla hands it to the slot, so itemget listeners
-	-- (e.g. the Large Drying Rack's salt collector) see the whole dried stack.
+	-- Resize before GiveItem so itemget listeners see the whole stack.
 	local container = self.container
 	local give_item = rawget(container, "GiveItem")
 	container.GiveItem = function(_, product, ...)

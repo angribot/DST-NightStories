@@ -4,9 +4,7 @@ GLOBAL.setfenv(1, GLOBAL)
 local SkillTreeData = require("skilltreedata")
 local deactivate_skill = SkillTreeData.DeactivateSkill
 function SkillTreeData:DeactivateSkill(...)
-	-- Only bypass validation in the live data layer, including client RPC updates.
-	-- In DST 760178, the updater also uses skip_validation as the callback's
-	-- fromload argument. Restore it before running any gameplay callbacks.
+	-- The updater passes skip_validation to ondeactivate as fromload, so restore it on return.
 	if not self.owner then
 		return deactivate_skill(self, ...)
 	end
@@ -26,7 +24,6 @@ AddPlayerPostInit(function(inst)
 		inst:AddTag("skilltree_characters")
 	end
 	if inst.prefab == "wathgrithr" then
-		-- DST 760178 only refreshes riding music on mounting or activation.
 		inst:ListenForEvent("ondeactivateskill_client", function(player)
 			if not player.components.skilltreeupdater:HasSkillTag("beefalo") and player._play_riding_music_task then
 				player._play_riding_music_task:Cancel()

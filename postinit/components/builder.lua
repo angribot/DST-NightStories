@@ -2,8 +2,7 @@ GLOBAL.setfenv(1, GLOBAL)
 
 local SHADOWGLASH = "shadowglash_builder"
 
--- Dummy pays sanity costs from her shared health pool, so sanity costs
--- follow the health rule that crafting must never kill her.
+-- Dummy's sanity is her health, so check sanity costs as health costs.
 local function resolve_character_ingredient(ingredient, inst)
 	if ingredient.type == CHARACTER_INGREDIENT.SANITY and inst.prefab == "dummy" then
 		return setmetatable({ type = CHARACTER_INGREDIENT.HEALTH }, { __index = ingredient })
@@ -11,7 +10,6 @@ local function resolve_character_ingredient(ingredient, inst)
 	return ingredient
 end
 
--- Shadowglash's fuel depends on the builder's inventory; see main/recipes.lua.
 local function resolve_recipe(recipe, inventory)
 	local name = type(recipe) == "string" and recipe or recipe and recipe.name
 	if name ~= SHADOWGLASH then
@@ -20,7 +18,6 @@ local function resolve_recipe(recipe, inventory)
 	return AllRecipes[SHADOWGLASH].ForInventory(inventory)
 end
 
--- Builder --
 local Builder = require("components/builder")
 
 local has_character_ingredient = Builder.HasCharacterIngredient
@@ -53,7 +50,6 @@ function Builder:DoBuild(recname, ...)
 		return do_build(self, recname, ...)
 	end
 
-	-- Scope the material to this build, so failed or nested builds cannot leak a tier.
 	local previous_build = self.shadowglash_build
 	self.shadowglash_build = {}
 	local success, reason = do_build(self, recname, ...)
@@ -61,7 +57,6 @@ function Builder:DoBuild(recname, ...)
 	return success, reason
 end
 
--- Builder Replica --
 local BuilderReplica = require("components/builder_replica")
 
 local replica_has_character_ingredient = BuilderReplica.HasCharacterIngredient

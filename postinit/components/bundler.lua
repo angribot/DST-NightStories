@@ -31,7 +31,6 @@ local function handle_cook_gift(self)
 		product_spoilage = (spoilage_n <= 0 and 1) or (keepspoilage and spoilage_total / spoilage_n) or 1 - (1 - spoilage_total / spoilage_n) * 0.5
 	end
 
-	-- The slots holding exactly lowest_stack empty out and take the products
 	local lowest_stack, emptied_slots
 	for slot, item in pairs(self.bundlinginst.components.container.slots) do
 		local stack = item.components.stackable and item.components.stackable:StackSize() or 1
@@ -43,11 +42,10 @@ local function handle_cook_gift(self)
 		end
 	end
 
-	-- Each cook yields recipe.stacksize products, as in Stewer:Harvest
+	-- As in Stewer:Harvest.
 	local product_count = lowest_stack * (recipe.stacksize or 1)
 	local product = SpawnPrefab(product_prefab)
 	local product_maxsize = product.components.stackable.maxsize
-	-- Wrap the ingredients untouched when the products and the leftovers cannot share the bundle
 	if math.ceil(product_count / product_maxsize) > emptied_slots then
 		product:Remove()
 		return

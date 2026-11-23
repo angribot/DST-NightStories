@@ -1,4 +1,3 @@
--- local AddPrefabPostInit = AddPrefabPostInit
 local AddComponentPostInit = AddComponentPostInit
 ---@diagnostic disable-next-line
 GLOBAL.setfenv(1, GLOBAL)

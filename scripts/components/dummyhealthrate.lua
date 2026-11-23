@@ -19,8 +19,6 @@ local function CapturePeriodic(self, source, period, fn, ...)
 	local previous = self.capture
 	local capture = { kind = "periodic", source = source, period = period, amount = 0 }
 	self.capture = capture
-	-- Periodic callbacks are synchronous. Restore observation state on errors
-	-- without changing the callback's arguments, results, or damage handling.
 	return FinishPeriodicCapture(self, previous, capture, pcall(fn, ...))
 end
 
@@ -45,8 +43,6 @@ local function OnHealthDelta(inst, data)
 	end
 	local health = inst.components.health
 	local lunarburn = data.afflicter ~= nil and health.lunarburns ~= nil and health.lunarburns[data.afflicter] ~= nil
-	-- Rate capture describes scheduling, not feedback intent. Preserve the
-	-- source's overtime contract except for natural sanity drift.
 	local sanitydrift = data.cause == "lose_sanity" and data.overtime
 	if not sanitydrift then
 		if data.newpercent > data.oldpercent then
@@ -61,8 +57,7 @@ local function OnHealthDelta(inst, data)
 	if self.capture ~= nil and self.capture.kind == "periodic" then
 		self.capture.amount = self.capture.amount + data.amount
 	elseif (self.capture ~= nil and self.capture.kind == "fire") or (data.overtime and data.cause ~= "lose_sanity") or lunarburn then
-		-- Fire and externally scheduled effects use a one-second window of
-		-- post-modifier amounts before health clamping, not realized gains.
+		-- healthdelta amounts are before clamping.
 		self.samples[#self.samples + 1] = { time = GetTime(), amount = data.amount }
 	end
 end

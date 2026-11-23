@@ -49,8 +49,7 @@ local function get_stack_size(item)
 	return item.components.stackable and item.components.stackable:StackSize() or 1
 end
 
--- Counts a fuel in Mio's pockets, cursor, and backpack and in her boat's cargo. Island Adventures' Inventory:Has counts
--- the backpack twice, so count the places Inventory:ConsumeByName takes from directly.
+-- Island Adventures' Inventory:Has counts the backpack twice.
 local function count_fuel(inst, item)
 	local inventory = inst.components.inventory
 	local count = 0
@@ -70,8 +69,7 @@ local function count_fuel(inst, item)
 	return count
 end
 
--- Spends a fuel from the boat's cargo first, the order Island Adventures' Inventory:ConsumeByName already uses, then
--- from Mio's inventory. The cargo is taken directly because Island Adventures skips a boat container not yet opened.
+-- Island Adventures' ConsumeByName skips an unopened boat container.
 local function consume_fuel(inst, item, amount)
 	amount = amount or 1
 	local boat_container = get_boat_container(inst)
@@ -84,12 +82,11 @@ local function consume_fuel(inst, item, amount)
 	inst.components.inventory:ConsumeByName(item, amount)
 end
 
--- Shadowpoof: a fuel-boosted Mio's own Lazy Explorer casts, which never cost sanity and spend fuel instead of uses.
 local function can_shadowpoof(inst, staff)
 	return staff ~= nil and staff.prefab == "orangestaff" and inst:HasTag("mio_boosted_task") and staff.replica.inventoryitem ~= nil and staff.replica.inventoryitem:IsHeldBy(inst)
 end
 
--- Counts a fuel on either side: clients only have the replica, whose Has already adds an Island Adventures boat's cargo.
+-- Island Adventures' replica Has already includes the boat's cargo.
 local function count_blink_fuel(inst, item)
 	if inst.components.inventory ~= nil then
 		return count_fuel(inst, item)
@@ -102,7 +99,7 @@ local function count_blink_fuel(inst, item)
 	return found
 end
 
--- Uses the carried fuel can pay beyond the staff's own; map blink mods read this on clients and the server.
+-- Map blink mods read this on clients and the server.
 local function get_extra_blink_uses(inst, staff)
 	if not can_shadowpoof(inst, staff) then
 		return 0
@@ -111,13 +108,11 @@ local function get_extra_blink_uses(inst, staff)
 	return count_blink_fuel(inst, "nightmarefuel") * FUELMULT.nightmarefuel + count_blink_fuel(inst, "horrorfuel") * FUELMULT.horrorfuel
 end
 
--- Pays one Shadowpoof use with fuel; returns false when the staff's own use should pay instead.
 local function pay_shadowpoof(inst, staff)
 	if count_fuel(inst, "nightmarefuel") > 0 then
 		consume_fuel(inst, "nightmarefuel", 1)
 		return true
 	end
-	-- Pure Horror's spare uses repair the staff. A staff without room spends its own use now and takes the spare later.
 	local spare = FUELMULT.horrorfuel - 1
 	local finiteuses = staff.components.finiteuses
 	if count_fuel(inst, "horrorfuel") > 0 and finiteuses:GetUses() + spare <= finiteuses.total then
@@ -171,8 +166,7 @@ local function check_fuel(inst, data)
 	end
 end
 
--- Cooldown seconds removed per Nightmare Fuel; Pure Horror removes FUELMULT.horrorfuel times as much.
-local KING_CANE_FUEL_TIME = 10
+local KING_CANE_SECONDS_PER_FUEL = 10
 
 local function recharge_king_cane(inst, staff)
 	if not staff or staff.prefab ~= "king_cane" or not staff.components.corruption or not staff.components.corruption:IsCorrupted() then
@@ -185,9 +179,8 @@ local function recharge_king_cane(inst, staff)
 		return false
 	end
 
-	-- Settle the whole cooldown at once, counted in Nightmare Fuel units: Pure Horror covers only what Nightmare Fuel cannot,
-	-- so no Nightmare Fuel is spent where Pure Horror already covers it.
-	local units_needed = math.ceil(remaining / KING_CANE_FUEL_TIME)
+	-- Pure Horror covers only what Nightmare Fuel cannot.
+	local units_needed = math.ceil(remaining / KING_CANE_SECONDS_PER_FUEL)
 	local nightmare_owned = count_fuel(inst, "nightmarefuel")
 	local horror_spent = math.max(0, math.min(count_fuel(inst, "horrorfuel"), math.ceil((units_needed - nightmare_owned) / FUELMULT.horrorfuel)))
 	local nightmare_spent = math.max(0, math.min(nightmare_owned, units_needed - horror_spent * FUELMULT.horrorfuel))
@@ -197,7 +190,7 @@ local function recharge_king_cane(inst, staff)
 
 	consume_fuel(inst, "horrorfuel", horror_spent)
 	consume_fuel(inst, "nightmarefuel", nightmare_spent)
-	rechargeable:SetPercent(rechargeable:GetPercent() + (nightmare_spent + horror_spent * FUELMULT.horrorfuel) * KING_CANE_FUEL_TIME / rechargeable:GetRechargeTime())
+	rechargeable:SetPercent(rechargeable:GetPercent() + (nightmare_spent + horror_spent * FUELMULT.horrorfuel) * KING_CANE_SECONDS_PER_FUEL / rechargeable:GetRechargeTime())
 	return true
 end
 
@@ -281,7 +274,6 @@ local function set_sanity_dapperness(inst)
 	end
 end
 
--- Equipment cannot lower Mio's sanity while she is fuel-boosted.
 local function get_equippable_dapperness(owner, equippable)
 	local dapperness = equippable:GetDapperness(owner, owner.components.sanity.no_moisture_penalty)
 	if dapperness < 0 and owner:HasTag("mio_boosted_task") then

@@ -27,8 +27,7 @@ local function Repair(self, doer, item)
 		return false
 	end
 
-	-- Dreadstone can repair work, but this structure only accepts durability repairs.
-	-- The standard Repair checks work before finite uses and would reject the action.
+	-- Vanilla Repair tries work repair before finite uses and would reject dreadstone.
 	local depleted = uses:GetUses() == 0
 	uses:Repair(repairer.finiteusesrepairvalue)
 	item.components.stackable:Get():Remove()

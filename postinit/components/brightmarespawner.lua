@@ -5,7 +5,6 @@ GLOBAL.setfenv(1, GLOBAL)
 local AMBIENT_GESTALT_SUPPRESSION_SEEDS = 100
 
 AddComponentPostInit("brightmarespawner", function(self)
-	-- The spawn loop is private; reach it through the component's world join listener.
 	local spawn_path = "OnSanityModeChanged.Start.UpdatePopulation.TrySpawnGestaltForPlayer"
 	local events = self.inst.event_listeners
 	local listeners = events and events.ms_playerjoined and events.ms_playerjoined[self.inst]
@@ -19,7 +18,6 @@ AddComponentPostInit("brightmarespawner", function(self)
 				if hat and hat.prefab == "alterguardianhat" and hat.components.container and hat.components.container:Has("lunar_seed", AMBIENT_GESTALT_SUPPRESSION_SEEDS) then
 					return
 				end
-				-- Leave existing gestalts, other players, and attack/planting summons unchanged.
 				return spawn_gestalt(player, ...)
 			end)
 			return

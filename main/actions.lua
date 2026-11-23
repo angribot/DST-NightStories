@@ -310,8 +310,7 @@ NS_ACTIONS.FUELPOCKETWATCH.fn = function(act)
 	local caster = act.doer
 	local inventory = caster.components.inventory
 	local recallmark = act.invobject ~= nil and act.invobject.components.recallmark
-	-- Only marked watches can be hacked; casting an unmarked one would just mark it
-	-- without setting the warpback data that pocketwatch_warpback requires.
+	-- Unmarked watches lack the warpback data pocketwatch_warpback needs.
 	if recallmark and recallmark:IsMarked() and caster ~= nil and caster:HasTag("nightmare_twins") then
 		if fuel_pocket_watch(act.invobject, act.doer) then
 			if inventory:Has("horrorfuel", 1) then

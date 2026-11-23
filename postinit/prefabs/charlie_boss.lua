@@ -17,8 +17,7 @@ AddPrefabPostInit("charlie_boss", function(inst)
 
 	local function OnBlocked(boss, data)
 		if data and data.weapon and data.weapon.prefab == "queen_torch" then
-			-- Keep aggro and ranged resistance, but do not register the callback
-			-- that destroys the incoming projectile and spawns a countershot.
+			-- Vanilla OnBlocked without the projectile reflection.
 			local attacker = data.attacker
 			if attacker and attacker:IsValid() then
 				tryaggro(boss, attacker)

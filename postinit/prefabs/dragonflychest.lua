@@ -20,10 +20,8 @@ AddPrefabPostInit("dragonflychest", function(inst)
 			return
 		end
 
-		-- An item upgrade delays the official visuals with DoTaskInTime. Tasks due on
-		-- the same tick run in no fixed order, so a separate task could run before
-		-- the official one and have its visuals overwritten. Push the event from
-		-- inside the official task instead.
+		-- Push from inside vanilla's delayed visuals task; a separate task
+		-- on the same tick may run first and be overwritten.
 		local instance_do_task_in_time = rawget(inst, "DoTaskInTime")
 		local do_task_in_time = inst.DoTaskInTime
 		inst.DoTaskInTime = function(self, time, fn, ...)

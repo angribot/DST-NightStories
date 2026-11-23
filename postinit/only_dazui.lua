@@ -30,7 +30,6 @@ end
 AddComponentPostInit("childspawner", function(self)
 	local get_child_prefab = self.GetChildPrefab
 	function self:GetChildPrefab(...)
-		-- Choose before the rare-child roll, without changing the spawning lifecycle.
 		if self.childname == "crawlingnightmare" and has_nearby_dummy(self.inst, SPAWNER_RADIUS) then
 			return "ruinsnightmare"
 		end
@@ -44,7 +43,7 @@ local function on_work_finished(inst, worker)
 	local fx = SpawnAt("collapse_small", inst)
 	fx:SetMaterial("rock")
 
-	-- Keep the upstream spawn chance and worker luck; only upgrade the species.
+	-- Vanilla roll; only the species differs.
 	if TheWorld.state.isnightmarewild and TryLuckRoll(worker, TUNING.STATUERUINS_SPAWN_NIGHTMARE_CHANCE, LuckFormulas.StatueSpawnNightmare) then
 		SpawnAt("ruinsnightmare", inst)
 	end

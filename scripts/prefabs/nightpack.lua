@@ -97,7 +97,6 @@ local function OnRedHaunt(inst, haunter)
 		return false
 	end
 	-- Hauntable revives the ghost with this pack as the source after we return, so renew next frame.
-	-- Force it so that a blighted pack turns plain as well.
 	inst:DoTaskInTime(0, function()
 		inst:RenewState(nil, nil, nil, true)
 	end)
@@ -216,10 +215,8 @@ end
 local StateFns = {
 
 	red = function(inst, owner)
-		-- Like the Life Giving Amulet, a ghost can haunt the pack on the ground to revive.
 		inst.components.hauntable:SetOnHauntFn(OnRedHaunt)
 		inst.components.hauntable:SetHauntValue(TUNING.HAUNT_INSTANT_REZ)
-		-- Like the Life Giving Amulet, skip healing when worn by an equipment model such as a mannequin.
 		if owner and not owner:HasTag("equipmentmodel") then
 			ActivateListen(inst, owner)
 		end
@@ -369,7 +366,6 @@ local function ImmortalDisplayNameFn(inst)
 	end)
 end
 
--- force: renew even a blighted pack. The new pack is blighted only when blighted is set.
 local function RenewState(inst, gemtype, isdummy, blighted, force)
 	if inst:HasTag("nightpack_blighted") and not (blighted or force) then
 		return
@@ -502,7 +498,6 @@ local function OnGemTrade(inst, gemtype, isdummy, from_renew)
 end
 
 local function onequip(inst, owner)
-	-- Vanilla backpacks close their container on equipment models such as mannequins; never open it for them.
 	if inst.components.container ~= nil and not owner:HasTag("equipmentmodel") then
 		inst.components.container:Open(owner)
 	end
