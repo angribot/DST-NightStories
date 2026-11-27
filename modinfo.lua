@@ -12,24 +12,26 @@ name = zheng("暗夜故事集", "Night Stories")
 author = zheng("鸭子乐园", "Ducklantis")
 changelog = zheng(
 	[[
+- 修复女王火炬的攻击有时不造成伤害的问题
+
+最近更新：
 - 修复包锅与厨师礼物包锅做出的彩虹糖豆偏少的问题
 - 修复收获的季节消耗次数却没收到晾肉架物品的问题
 - 晾肉巨架格子接受堆叠
 - 收获的季节可以收获晾肉巨架
-
-最近更新：
 - 完全腐化的国王魔杖物品栏图标显示暗影特效
 - 修复月影物品栏特效重叠或残留的问题
 - Civi 的等级上限提升至 3 级
 - Civi 2 级的喜爱食物改为蘑菇蛋糕
 ]],
 	[[
+- Fix the Queen's Torch's attacks sometimes dealing no damage
+
+Recent Changes:
 - Fix the Cooker's Bundling Wrap and Cooker's Gift Wrap making too few Jellybeans
 - Fix the Season of Harvest spending a use without collecting Drying Rack items
 - The Large Drying Rack accepts stacks
 - The Season of Harvest harvests Large Drying Racks
-
-Recent Changes:
 - The fully corrupted King's Staff shows a shadow effect on its inventory icon
 - Fix the Lunar Shadow's inventory effect stacking or lingering
 - Raise Civi's level cap to 3

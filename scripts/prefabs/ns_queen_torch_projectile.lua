@@ -25,16 +25,37 @@ local function CanSplash(inst, target, attacker)
 		and not (inst.initial_hostile and not target:HasTag("hostile") and target.components.locomotor == nil)
 end
 
-local function OnHit(inst, attacker, target)
-	local pos = inst.impactpos
-	local fx = SpawnPrefab("ns_queen_torch_burst")
-	fx.Transform:SetPosition(pos:Get())
-
+-- Vanilla components/projectile.lua:Projectile:Hit (763928): copied, crediting the thrower instead of the torch's direct holder and adding the splash
+local function Hit(self, target)
+	local inst = self.inst
+	local attacker = inst.attacker
 	local weapon = inst.weapon
-	if IsAlive(attacker) and attacker.components.combat ~= nil and weapon:IsValid() and weapon.components.weapon ~= nil then
-		local combat = attacker.components.combat
-		local ignorehitrange = combat.ignorehitrange
-		combat.ignorehitrange = true
+	if
+		not IsAlive(attacker)
+		or attacker.components.combat == nil
+		or weapon == nil
+		or not weapon:IsValid()
+		or weapon.components.weapon == nil
+		or weapon.components.inventoryitem == nil
+		or weapon.components.inventoryitem:GetGrandOwner() ~= attacker
+		or not IsAlive(target)
+		or not target.entity:IsVisible()
+		or not attacker.components.combat:CanTarget(target)
+	then
+		self:Miss(target)
+		return
+	end
+
+	local pos = target:GetPosition()
+	self:Stop()
+	inst.Physics:Stop()
+	local combat = attacker.components.combat
+	local ignorehitrange = combat.ignorehitrange
+	combat.ignorehitrange = true
+	combat:DoAttack(target, weapon, inst, self.stimuli)
+	if inst:IsValid() then
+		local fx = SpawnPrefab("ns_queen_torch_burst")
+		fx.Transform:SetPosition(pos:Get())
 		for _, ent in ipairs(TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.QUEEN_TORCH_AOE_RADIUS + TUNING.QUEEN_TORCH_AOE_RANGE_PADDING, MUST_TAGS, NO_TAGS)) do
 			if not IsAlive(attacker) or not weapon:IsValid() or weapon.components.weapon == nil then
 				break
@@ -46,9 +67,9 @@ local function OnHit(inst, attacker, target)
 				end
 			end
 		end
-		combat.ignorehitrange = ignorehitrange
+		inst:Remove()
 	end
-	inst:Remove()
+	combat.ignorehitrange = ignorehitrange
 end
 
 local function ProjectileFn()
@@ -76,32 +97,9 @@ local function ProjectileFn()
 	local projectile = inst.components.projectile
 	projectile:SetSpeed(50)
 	projectile:SetOnThrownFn(OnThrown)
-	projectile:SetOnHitFn(OnHit)
 	projectile:SetOnMissFn(inst.Remove)
 
-	local hit = projectile.Hit
-	projectile.Hit = function(self, target)
-		local attacker = inst.attacker
-		local weapon = inst.weapon
-		-- Set impactpos first: hit() may remove the target.
-		if
-			not IsAlive(attacker)
-			or attacker.components.combat == nil
-			or weapon == nil
-			or not weapon:IsValid()
-			or weapon.components.weapon == nil
-			or weapon.components.inventoryitem == nil
-			or weapon.components.inventoryitem.owner ~= attacker
-			or not IsAlive(target)
-			or not target.entity:IsVisible()
-			or not attacker.components.combat:CanTarget(target)
-		then
-			self:Miss(target)
-			return
-		end
-		inst.impactpos = target:GetPosition()
-		return hit(self, target)
-	end
+	projectile.Hit = Hit
 
 	return inst
 end
