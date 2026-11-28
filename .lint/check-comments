@@ -18,7 +18,7 @@ Allowed comments:
   Source             Version
   Vanilla            game build, as in DST-scripts commit subjects
   Glassic API        commit in its local checkout
-  DST Fixed          commit in its local checkout
+  Too Strong Fixed   commit in its local checkout
   Island Adventures  modinfo version of Island Adventures - Core
 
 Write one line per comment. Reshape our own code instead of explaining it.

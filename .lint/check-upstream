@@ -15,7 +15,8 @@ Each source is found among the .luarc.json workspace.library entries by its
 content, whatever the directory is called: Vanilla is the entry with
 mainfunctions.lua, and a mod is the entry whose modinfo.lua name starts with
 the source name. Comments whose source is not listed there are reported as
-unchecked without failing the run.
+unchecked without failing the run, unless an entry matches no source, which
+usually means a mod was renamed.
 EOF
 }
 
@@ -112,7 +113,8 @@ changes_since() {
     git -C "$dir" log -s --format="$format" -L "$range:$path" "${base}..HEAD"
 }
 
-readonly COMMENT_RE='-- (Vanilla|Glassic API|DST Fixed|Island Adventures) ([^ ]+\.lua):([^ ]+) \(([^)]+)\): '
+readonly SOURCES=(Vanilla "Glassic API" "Too Strong Fixed" "Island Adventures")
+readonly COMMENT_RE='-- (Vanilla|Glassic API|Too Strong Fixed|Island Adventures) ([^ ]+\.lua):([^ ]+) \(([^)]+)\): '
 
 TOTAL=0
 REPORTS=()
@@ -164,13 +166,27 @@ while IFS= read -r match; do
     if [[ -n "$changed" ]]; then
         REPORTS+=("$location: $cited: changed in $changed")
     fi
-done < <(git grep -n -E -e '-- (Vanilla|Glassic API|DST Fixed|Island Adventures) [^ ]+\.lua:[^ ]+ \([^)]+\): ' -- '*.lua')
+done < <(git grep -n -E -e '-- (Vanilla|Glassic API|Too Strong Fixed|Island Adventures) [^ ]+\.lua:[^ ]+ \([^)]+\): ' -- '*.lua')
 
 CHECKED=$((TOTAL - ${#UNCHECKED[@]}))
 if ((${#UNCHECKED[@]} > 0)); then
     printf 'Unchecked:\n'
     printf '%s\n' "${UNCHECKED[@]}"
     printf '\n'
+
+    for dir in "${LIBRARIES[@]}"; do
+        matched=false
+        for source in "${SOURCES[@]}"; do
+            if is_source "$source" "$dir"; then
+                matched=true
+                break
+            fi
+        done
+        if [[ "$matched" == false ]]; then
+            name="$(sed -n 's/^name[[:space:]]*=[[:space:]]*//p' "$dir/modinfo.lua" 2>/dev/null | head -n 1)"
+            REPORTS+=("$dir: workspace.library entry matches no source${name:+ (name = $name)}; rename the source if the mod was renamed")
+        fi
+    done
 fi
 
 if ((${#REPORTS[@]} == 0)); then
@@ -179,5 +195,5 @@ if ((${#REPORTS[@]} == 0)); then
 fi
 
 printf '%s\n' "${REPORTS[@]}"
-printf '\n%d of %d checked upstream comments need a recheck.\n' "${#REPORTS[@]}" "$CHECKED"
+printf '\n%d reports need a recheck; %d upstream comments checked.\n' "${#REPORTS[@]}" "$CHECKED"
 exit 1

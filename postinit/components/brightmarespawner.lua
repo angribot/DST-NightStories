@@ -15,7 +15,7 @@ AddComponentPostInit("brightmarespawner", function(self)
 			UpvalueUtil.SetUpvalue(listener, spawn_path, function(player, ...)
 				local inventory = player.components.inventory
 				local hat = inventory and inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
-				-- DST Fixed main/modules/enhanced_alterguardianhat.lua:OnEntityReplicated (776a4fd): lets the crown's slots hold stacks of seeds
+				-- Too Strong Fixed main/modules/enhanced_alterguardianhat.lua:OnEntityReplicated (d55d013): lets the crown's slots hold stacks of seeds
 				-- Vanilla prefabs/hats.lua:alterguardianhat_updatelight (762172): sets lunarseedsmaxed by occupied slots, not seed count
 				if hat and hat.prefab == "alterguardianhat" and hat.components.container and hat.components.container:Has("lunar_seed", AMBIENT_GESTALT_SUPPRESSION_SEEDS) then
 					return

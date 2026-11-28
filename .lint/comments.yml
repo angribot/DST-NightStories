@@ -7,4 +7,4 @@ rule:
   not:
     any:
       - regex: '^---@'
-      - regex: '^-- (Vanilla|Glassic API|DST Fixed|Island Adventures) [\w./-]+\.lua:[\w.:]+ \([\w.]+\): \S'
+      - regex: '^-- (Vanilla|Glassic API|Too Strong Fixed|Island Adventures) [\w./-]+\.lua:[\w.:]+ \([\w.]+\): \S'

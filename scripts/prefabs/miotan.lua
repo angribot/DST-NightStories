@@ -99,7 +99,7 @@ local function count_blink_fuel(inst, item)
 	return found
 end
 
--- DST Fixed main/modules/blink_map.lua:GetExtraBlinkUses (776a4fd): reads this on clients and the server
+-- Too Strong Fixed main/modules/blink_map.lua:GetExtraBlinkUses (776a4fd): reads this on clients and the server
 local function get_extra_blink_uses(inst, staff)
 	if not can_shadowpoof(inst, staff) then
 		return 0
