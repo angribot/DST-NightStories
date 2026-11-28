@@ -56,7 +56,7 @@ Release notes live in the `changelog` variable of `modinfo.lua`; there is no CHA
 - After a blank line, `最近更新：` / `Recent Changes:` lists earlier entries of the current minor series, newest first.
 - Publish with `.workshop/publish.sh`, after a `--dry-run`.
 - Bump the version when `.workshop/publish.sh --published-version` prints the `version` in `modinfo.lua`. The user picks Y (minor) or Z (patch); propose one if they did not.
-- No bump: add the entries to the current release, leave Recent Changes as is, and commit them with the change they describe.
+- No bump, while the published version is below `version`: add the entries to the current release in a commit of their own, leaving Recent Changes as is.
 - Z bump (e.g. `1.60.3` → `1.60.4`): write the new entries at the top and move the previous release's entries to the top of Recent Changes. The first patch of a series creates that section. Recent Changes accumulates every entry since the minor release.
 - Y bump (e.g. `1.59.3` → `1.60.0`): replace the whole changelog with this release's entries and drop Recent Changes.
 - Commit a bump as `chore: bump version to X.Y.Z`, title only, carrying the release's changelog: its entries and the move into Recent Changes. The commits it releases leave the changelog alone.
