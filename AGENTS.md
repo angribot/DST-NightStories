@@ -59,7 +59,7 @@ Release notes live in the `changelog` variable of `modinfo.lua`; there is no CHA
 - No bump: add the entries to the current release, leave Recent Changes as is, and commit them with the change they describe.
 - Z bump (e.g. `1.60.3` → `1.60.4`): write the new entries at the top and move the previous release's entries to the top of Recent Changes. The first patch of a series creates that section. Recent Changes accumulates every entry since the minor release.
 - Y bump (e.g. `1.59.3` → `1.60.0`): replace the whole changelog with this release's entries and drop Recent Changes.
-- Commit a bump on its own as `chore: bump version to X.Y.Z`, title only, changing only `version`. The commit that adds the release's first entry also rearranges the changelog.
+- Commit a bump as `chore: bump version to X.Y.Z`, title only, carrying the release's changelog: its entries and the move into Recent Changes. The commits it releases leave the changelog alone.
 - Keep Chinese and English in lockstep: same entries, same order, moved and dropped together.
 - Write each entry as a player-facing headline: one clause naming what changed, leaving out conditions, mechanics, and causes.
 - Write both languages in the simple present, describing the game after the update: `橙影背包拾取更快` / `The Orange Night Pack picks up items faster`. Chinese entries drop 了 (`修复…的问题`); English entries without a subject start with the base verb (`Fix the Queen's Torch AOE hit range`).
