@@ -21,7 +21,8 @@ Allowed comments:
   Too Strong Fixed   commit in its local checkout
   Island Adventures  modinfo version of Island Adventures - Core
 
-Write one line per comment. Reshape our own code instead of explaining it.
+Write one line of at most 160 characters per comment. Reshape our own code
+instead of explaining it.
 EOF
 }
 

@@ -100,7 +100,7 @@ local function get_attack(attacker, weapon)
 	return attack
 end
 
--- Vanilla components/explosive.lua:Explosive:OnBurnt (762172): deducts explosive resistance, reports it, then hits with the same source, as Wortox's soul spears and decoys do
+-- Vanilla components/explosive.lua:Explosive:OnBurnt (762172): deducts explosive resistance and reports it before hitting with the same source
 local queried_resistances = per_tick_table()
 local resisted_hits = per_tick_table()
 

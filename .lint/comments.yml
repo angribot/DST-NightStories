@@ -1,10 +1,12 @@
 id: comment-format
 language: lua
 severity: warning
-message: 'Comment only on behavior forced by code we cannot change, as "-- <Source> <path>:<symbol> (<version>): <fact>".'
+message: 'Comment only on behavior forced by code we cannot change, as "-- <Source> <path>:<symbol> (<version>): <fact>" in at most 160 characters.'
 rule:
   kind: comment
   not:
     any:
       - regex: '^---@'
-      - regex: '^-- (Vanilla|Glassic API|Too Strong Fixed|Island Adventures) [\w./-]+\.lua:[\w.:]+ \([\w.]+\): \S'
+      - all:
+          - regex: '^-- (Vanilla|Glassic API|Too Strong Fixed|Island Adventures) [\w./-]+\.lua:[\w.:]+ \([\w.]+\): \S'
+          - regex: '^.{1,160}$'
