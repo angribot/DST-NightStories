@@ -1,10 +1,10 @@
 ## Related repositories
 
-Find local checkouts in the `workspace.library` entries of `.luarc.json` (machine-local, gitignored); ask if one is missing.
+Find local checkouts in the `workspace.library` entries of `.luarc.json` (machine-local, gitignored; `jq '."workspace.library"' .luarc.json`); ask if one is missing.
 
-- DST-scripts: the game's scripts ("游戏源码", "原版", "上游"). Each commit is one game build, so its history shows upstream updates.
+- DST-scripts: the game's scripts ("游戏源码", "原版", "上游"), with the contents of `scripts/` at its root. Each commit is one game build, so its history shows upstream updates.
 - GlassicAPI: the API mod this mod builds on.
-- DST-Fixed: 纯净辅助, a companion mod. Cross-check it whenever a change touches a mechanic it also modifies.
+- DST-Fixed: Too Strong Fixed (纯净辅助), a companion mod. Cross-check it whenever a change touches a mechanic it also modifies.
 
 Target the latest game build. Add compatibility code for older builds or third-party mods only when asked.
 
@@ -28,8 +28,7 @@ Mirror the vanilla `scripts/` layout.
 
 ## Comments
 
-- Write comments in the format `.lint/check-comments --help` describes. Head a copied upstream function with one that cites it and says what the copy changes.
-- Enable the pre-commit comment check once per clone: `git config core.hooksPath .githooks`.
+- Write comments in the format `.lint/check-comments --help` describes. Head a copied upstream function with one that cites it and names the change that made the copy necessary.
 - After DST-scripts, GlassicAPI, or DST-Fixed updates, run `.lint/check-upstream`, recheck each reported fact against the new code, and update the version in its comment.
 
 ## Lua compatibility
@@ -42,11 +41,12 @@ Target DST's Lua 5.1 runtime plus `bit`, not LuaJIT extensions.
 - Access standard globals missing from the mod environment through `GLOBAL`, including `unpack`, `coroutine`, and `loadstring`.
 - Keep coroutine yields outside C-call boundaries, including `pcall`/`xpcall`, metamethods, `table.sort` comparators, and `gsub` callbacks.
 - Avoid relying on cross-runtime `math.random` sequences or out-of-range `%d` formatting.
-- Check syntax with `stylua --syntax Lua51 - < file > /dev/null`. It accepts `\x` escapes, so search for those separately.
+
+`.lint/check-lua` checks the first rule, `table.unpack`, and stylua formatting (fix with `stylua <file>`). The pre-commit hook runs it and `.lint/check-comments`; enable the hook once per clone with `git config core.hooksPath .githooks`.
 
 ## Testing
 
-Verify changed behavior with a simulation in a temporary directory outside the repository (e.g. `mktemp -d`); the repository keeps no test files. Simulations run on LuaJIT and only approximate DST, so list the runtime-sensitive behavior left to check in-game.
+Verify changed behavior with a simulation in a temporary directory outside the repository (e.g. `mktemp -d`); the repository keeps no test cases. Simulations run on LuaJIT and only approximate DST, so list the runtime-sensitive behavior left to check in-game.
 
 ## Release notes
 
@@ -54,11 +54,12 @@ Release notes live in the `changelog` variable of `modinfo.lua`; there is no CHA
 
 - Each language block opens with the current release's entries and no heading, since `description` already prepends "本次更新:" / "Changes:".
 - After a blank line, `最近更新：` / `Recent Changes:` lists earlier entries of the current minor series, newest first.
-- Bump the version once the current one is published to the Workshop; ask if you cannot tell. The user picks Y (minor) or Z (patch); propose one if they did not.
+- Publish with `.workshop/publish.sh`, after a `--dry-run`.
+- Bump the version when `.workshop/publish.sh --published-version` prints the `version` in `modinfo.lua`. The user picks Y (minor) or Z (patch); propose one if they did not.
 - No bump: add the entries to the current release, leave Recent Changes as is, and commit them with the change they describe.
 - Z bump (e.g. `1.60.3` → `1.60.4`): write the new entries at the top and move the previous release's entries to the top of Recent Changes. The first patch of a series creates that section. Recent Changes accumulates every entry since the minor release.
 - Y bump (e.g. `1.59.3` → `1.60.0`): replace the whole changelog with this release's entries and drop Recent Changes.
-- Commit a bump on its own as `chore: bump version to X.Y.Z`, title only.
+- Commit a bump on its own as `chore: bump version to X.Y.Z`, title only, changing only `version`. The commit that adds the release's first entry also rearranges the changelog.
 - Keep Chinese and English in lockstep: same entries, same order, moved and dropped together.
 - Write each entry as a player-facing headline: one clause naming what changed, leaving out conditions, mechanics, and causes.
 - Write both languages in the simple present, describing the game after the update: `橙影背包拾取更快` / `The Orange Night Pack picks up items faster`. Chinese entries drop 了 (`修复…的问题`); English entries without a subject start with the base verb (`Fix the Queen's Torch AOE hit range`).
