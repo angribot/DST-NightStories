@@ -113,7 +113,12 @@ AddRecipe2("nightpack", { Ingredient("darkcrystal", 1), Ingredient("lightcrystal
 SortAfter("nightpack", "civi_bluegem")
 
 -- 友爱戒指
-AddRecipe2("friendshipring", { Ingredient("moonrocknugget", 4), Ingredient("moonglass", 4), Ingredient("nightmarefuel", 4) }, CIVITECH_TWO, { nounlock = true, builder_tag = "ns_builder_civi" })
+AddRecipe2(
+	"friendshipring",
+	{ Ingredient("moonrocknugget", 4), Ingredient("moonglass", 4), Ingredient("nightmarefuel", 4) },
+	CIVITECH_TWO,
+	{ nounlock = true, builder_tag = "ns_builder_civi" }
+)
 SortAfter("friendshipring", "nightpack")
 
 -- 注能图腾
@@ -204,17 +209,12 @@ AddCharacterRecipe("skilltree_respec_tool", { Ingredient("moonglass", 1), Ingred
 SortBefore("skilltree_respec_tool", "transmute_log")
 
 -- 月影 --
-AddRecipe2(
-	"lunarshadow",
-	{ Ingredient("lunar_seed", 5), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1) },
-	TECH.WAGPUNK_WORKSTATION_TWO,
-	{
-		nounlock = true,
-		no_deconstruction = function(inst)
-			return inst.buffed ~= nil and inst.buffed:value()
-		end,
-	}
-)
+AddRecipe2("lunarshadow", { Ingredient("lunar_seed", 5), Ingredient("sword_lunarplant", 1), Ingredient("voidcloth_scythe", 1) }, TECH.WAGPUNK_WORKSTATION_TWO, {
+	nounlock = true,
+	no_deconstruction = function(inst)
+		return inst.buffed ~= nil and inst.buffed:value()
+	end,
+})
 SortAfter("lunarshadow", "wagpunk_workstation_security_pulse_cage")
 
 -- 恐惧锁链 --

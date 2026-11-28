@@ -1,4 +1,4 @@
-require "prefabutil"
+require("prefabutil")
 
 local BUILD = "salt_lick_dreadstone_build"
 
@@ -58,5 +58,4 @@ local function fn()
 	return inst
 end
 
-return Prefab("saltlick_dreadstone", fn, assets, prefabs),
-	MakePlacer("saltlick_dreadstone_placer", "salt_lick", BUILD, "idle1")
+return Prefab("saltlick_dreadstone", fn, assets, prefabs), MakePlacer("saltlick_dreadstone_placer", "salt_lick", BUILD, "idle1")

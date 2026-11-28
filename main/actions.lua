@@ -407,12 +407,7 @@ AddComponentAction("USEITEM", "nightfuel", function(inst, doer, target, actions)
 end)
 
 AddComponentAction("INVENTORY", "fuelpocketwatch", function(inst, doer, actions)
-	if
-		inst:HasTag("pocketwatch_inactive")
-		and not inst:HasTag("recall_unmarked")
-		and doer:HasTag("nightmare_twins")
-		and inst:HasTag("pocketwatch_castfrominventory")
-	then
+	if inst:HasTag("pocketwatch_inactive") and not inst:HasTag("recall_unmarked") and doer:HasTag("nightmare_twins") and inst:HasTag("pocketwatch_castfrominventory") then
 		if doer.prefab == "dummy" or (doer.replica.inventory and doer.replica.inventory:HasItemWithTag("fuelpocketwatch_fuel", 1)) then
 			table.insert(actions, NS_ACTIONS.FUELPOCKETWATCH)
 		end
